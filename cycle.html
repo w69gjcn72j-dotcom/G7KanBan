@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The KOGCycle — G7 Projects — St Paul's Kogarah</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#123A63">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<style>
+:root{
+  color-scheme: light;
+  --cream:#FCF4E1; --cream-deep:#F6E9CC;
+  --gold:#C9A227; --gold-soft:#E3C15C;
+  --navy:#123A63; --navy-soft:#2C5583;
+  --teal:#1E6E68; --green:#5BA85A;
+  --orange:#E4573D;
+  --ink:#2B2B2B; --muted:#8A7A5E;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,'Times New Roman',serif;background:var(--cream);color:var(--ink);
+     padding:14px;min-height:100vh;}
+.frame{border:2.5px solid var(--gold);border-radius:3px;padding:26px 30px 20px;max-width:1500px;margin:0 auto;
+       background:var(--cream);box-shadow:0 2px 18px rgba(120,90,30,.08);}
+
+/* ── header ── */
+.hd{text-align:center;margin-bottom:6px;}
+.hd h1{font-size:2.15rem;letter-spacing:.09em;color:var(--navy);font-weight:bold;}
+.hd .sub{font-size:.95rem;color:var(--teal);font-style:italic;margin-top:4px;}
+.hd .asof{font-size:.72rem;color:var(--muted);font-style:italic;margin-top:6px;}
+
+/* ── layout ── */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:24px;align-items:start;margin-top:10px;}
+@media (max-width:1080px){ .main{grid-template-columns:1fr;} }
+
+/* ── the ring ── */
+.ring{position:relative;width:100%;aspect-ratio:1000/720;}
+.ring svg{position:absolute;inset:0;width:100%;height:100%;}
+.node{position:absolute;transform:translate(-50%,-50%);width:15.6%;aspect-ratio:1;border-radius:50%;
+      background:#fff;border:2.2px solid var(--teal);cursor:pointer;font-family:Georgia,serif;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px;
+      transition:.18s all;box-shadow:0 2px 8px rgba(30,110,104,.10);}
+.node:hover{border-color:var(--gold);box-shadow:0 4px 16px rgba(201,162,39,.28);transform:translate(-50%,-50%) scale(1.045);}
+.node.on{border-color:var(--gold);border-width:3px;background:#FFFDF6;}
+.node-num{position:absolute;top:-11%;left:50%;transform:translateX(-50%);width:26px;height:26px;border-radius:50%;
+          background:var(--gold);color:#fff;font-size:.76rem;font-weight:bold;display:flex;align-items:center;justify-content:center;
+          border:2px solid var(--cream);}
+.node-name{font-size:.79rem;font-weight:bold;color:var(--navy);line-height:1.18;text-align:center;}
+.node-count{font-size:.68rem;color:var(--teal);font-style:italic;}
+.node-count b{font-size:1.02rem;font-style:normal;color:var(--navy);}
+.node.empty{opacity:.62;}
+
+/* ── centre ── */
+.hub{position:absolute;left:50%;top:51.7%;transform:translate(-50%,-50%);width:34%;text-align:center;}
+.hub-cross{width:58px;height:58px;border-radius:50%;background:var(--orange);color:#fff;font-size:30px;
+           display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+.hub h2{font-size:1.24rem;color:var(--navy);letter-spacing:.045em;line-height:1.22;}
+.hub .anglican{font-size:.66rem;color:var(--orange);letter-spacing:.24em;margin-top:3px;}
+.hub .verse{font-size:.71rem;color:var(--muted);font-style:italic;margin-top:12px;line-height:1.5;}
+.hub .ref{font-size:.71rem;color:var(--gold);font-weight:bold;margin-top:4px;}
+.hub .mission{font-size:.74rem;color:var(--navy-soft);margin-top:9px;line-height:1.5;}
+
+/* ── quadrant labels ── */
+.quad{position:absolute;text-align:center;}
+.quad b{display:block;font-size:1.02rem;letter-spacing:.10em;}
+.quad i{font-size:.73rem;}
+.q-see{top:5%;right:1%;}      .q-see b{color:var(--gold);}      .q-see i{color:var(--gold);}
+.q-hear{bottom:5%;right:1%;}  .q-hear b{color:var(--teal);}     .q-hear i{color:var(--teal);}
+.q-bel{bottom:5%;left:1%;}    .q-bel b{color:var(--orange);}    .q-bel i{color:var(--orange);}
+.q-tell{top:5%;left:1%;}      .q-tell b{color:var(--navy);}     .q-tell i{color:var(--navy);}
+
+/* ── side panel ── */
+.side{border:1.5px solid var(--gold-soft);border-radius:8px;background:#FFFDF6;padding:13px 14px;}
+.side h3{font-size:.86rem;color:var(--navy);letter-spacing:.03em;padding-bottom:7px;border-bottom:1.5px solid var(--cream-deep);margin-bottom:9px;}
+.side h3 span{float:right;color:var(--green);font-size:.8rem;}
+.side + .side{margin-top:14px;}
+.side.unmapped h3 span{color:var(--muted);}
+
+/* ── items ── */
+.item{border-left:3px solid #ccc;background:#fff;border-radius:0 5px 5px 0;padding:6px 8px;margin-bottom:6px;
+      box-shadow:0 1px 3px rgba(0,0,0,.045);}
+.item-t{font-size:.74rem;color:var(--ink);line-height:1.32;}
+.item-m{margin-top:3px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+.chip{font-size:.6rem;padding:1px 6px;border-radius:8px;white-space:nowrap;}
+.tag{font-size:.6rem;color:var(--muted);font-style:italic;}
+.item.done .item-t{color:#6C7A6C;}
+
+/* ── stage sections ── */
+.stages{margin-top:26px;border-top:1.5px solid var(--cream-deep);padding-top:18px;}
+.stages h2{font-size:.94rem;color:var(--navy);letter-spacing:.05em;margin-bottom:12px;text-align:center;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:14px;}
+.card{border:1.5px solid var(--cream-deep);border-radius:8px;background:#FFFDF7;padding:12px 13px;scroll-margin-top:14px;}
+.card.on{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,39,.18);}
+.card h4{font-size:.82rem;color:var(--navy);display:flex;align-items:center;gap:7px;padding-bottom:7px;
+         border-bottom:1.5px solid var(--cream-deep);margin-bottom:9px;}
+.card h4 .n{width:21px;height:21px;border-radius:50%;background:var(--gold);color:#fff;font-size:.66rem;
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card h4 .c{margin-left:auto;font-size:.72rem;color:var(--teal);font-style:italic;}
+.none{font-size:.7rem;color:var(--muted);font-style:italic;}
+
+/* ── footer ── */
+.ft{margin-top:20px;border-top:1.5px solid var(--gold-soft);padding-top:9px;text-align:center;
+    font-size:.72rem;color:var(--navy-soft);}
+
+/* ── gate ── */
+#g7gate{position:fixed;inset:0;z-index:2000;background:var(--cream);display:flex;align-items:center;justify-content:center;padding:20px;}
+#g7gate.hidden{display:none;}
+.gate-card{background:#fff;border:1px solid var(--gold-soft);border-top:5px solid var(--gold);border-radius:14px;
+           box-shadow:0 8px 30px rgba(120,90,30,.14);padding:30px 34px;max-width:370px;width:100%;text-align:center;}
+.gate-cross{width:52px;height:52px;background:var(--orange);border-radius:50%;display:flex;align-items:center;
+            justify-content:center;font-size:26px;color:#fff;margin:0 auto 14px;}
+.gate-card h2{font-size:1.05rem;color:var(--navy);}
+.gate-sub{font-size:.76rem;color:var(--muted);font-style:italic;margin:3px 0 18px;line-height:1.5;}
+.gate-card input[type=password]{width:100%;border:1.5px solid var(--gold-soft);border-radius:8px;padding:9px 12px;
+     font-family:Georgia,serif;font-size:.88rem;text-align:center;color:var(--ink);}
+.gate-remember{display:flex;align-items:center;justify-content:center;gap:7px;font-size:.75rem;color:var(--muted);margin:10px 0 12px;cursor:pointer;}
+.gate-remember input{transform:scale(1.15);accent-color:var(--gold);}
+.gate-card button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--navy);color:#fff;
+     font-family:Georgia,serif;font-size:.88rem;font-weight:bold;cursor:pointer;}
+.gate-card button:hover{background:var(--navy-soft);}
+.gate-err{color:#C0392B;font-size:.75rem;margin-top:10px;min-height:1.1em;}
+body.locked > *:not(#g7gate){display:none !important;}
+
+.topbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:-6px;}
+.tb{padding:4px 12px;border-radius:8px;border:1.5px solid var(--gold-soft);background:#fff;color:var(--navy);
+    cursor:pointer;font-size:.72rem;font-family:Georgia,serif;text-decoration:none;}
+.tb:hover{border-color:var(--gold);}
+
+@media (hover:none),(pointer:coarse){
+  .node-name{font-size:.62rem;} .node-count{font-size:.58rem;} .node-num{width:21px;height:21px;font-size:.64rem;}
+  .hub{width:40%;} .hub h2{font-size:.95rem;} .hub .verse,.hub .mission{display:none;}
+  .hub-cross{width:42px;height:42px;font-size:22px;}
+}
+@media print{
+  body{padding:0;background:#fff;} .topbar,#g7gate{display:none !important;}
+  .frame{border:none;box-shadow:none;max-width:none;}
+  .card,.side{break-inside:avoid;}
+  @page{size:A3 portrait;margin:10mm;}
+}
+</style>
+</head>
+<body class="locked">
+
+<div id="g7gate">
+  <div class="gate-card">
+    <div class="gate-cross">&#10013;</div>
+    <h2>The KOGCycle</h2>
+    <div class="gate-sub">St Paul's Anglican Church Kogarah<br>G7 projects along the New People Pathway</div>
+    <input type="password" id="gatePw" placeholder="Passcode" autocomplete="current-password">
+    <label class="gate-remember"><input type="checkbox" id="gateRemember"> Remember me on this device</label>
+    <button id="gateBtn">View the cycle</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+
+<div class="frame">
+  <div class="topbar">
+    <a class="tb" href="index.html">&#8592; Kanban board</a>
+    <button class="tb" onclick="window.print()">&#128424; Print</button>
+    <button class="tb" onclick="lockBoard()">&#128274; Lock</button>
+  </div>
+
+  <div class="hd">
+    <h1>THE KOGCYCLE</h1>
+    <div class="sub">From First Contact to Sent — G7 projects along the New People Pathway</div>
+    <div class="asof" id="asof">loading…</div>
+  </div>
+
+  <div class="main">
+    <div class="ring">
+      <svg viewBox="0 0 1000 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <marker id="arw" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#5BA85A"/>
+          </marker>
+        </defs>
+    <path d="M 591.5,80.3 L 595.1,81.0 L 598.7,81.7 L 602.3,82.4 L 605.9,83.1 L 609.4,83.9 L 613.0,84.7 L 616.5,85.6 L 620.0,86.4 L 623.6,87.3 L 627.1,88.2 L 630.6,89.1 L 634.1,90.1 L 637.5,91.1 L 641.0,92.1 L 644.5,93.1 L 647.9,94.2 L 651.3,95.3 L 654.7,96.4 L 658.1,97.5 L 661.5,98.7 L 664.9,99.8 L 668.2,101.0 L 671.6,102.3 L 674.9,103.5" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+    <path d="M 815.1,193.6 L 817.3,195.8 L 819.5,198.1 L 821.6,200.5 L 823.7,202.8 L 825.8,205.1 L 827.8,207.5 L 829.8,209.9 L 831.8,212.3 L 833.8,214.7 L 835.7,217.1 L 837.6,219.6 L 839.5,222.0 L 841.3,224.5 L 843.1,226.9 L 844.9,229.4 L 846.6,231.9 L 848.4,234.4 L 850.0,237.0 L 851.7,239.5 L 853.3,242.1 L 854.9,244.6 L 856.5,247.2 L 858.0,249.8 L 859.5,252.4" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+    <path d="M 891.3,390.3 L 891.0,393.1 L 890.7,396.0 L 890.4,398.8 L 890.1,401.6 L 889.7,404.4 L 889.3,407.3 L 888.8,410.1 L 888.3,412.9 L 887.8,415.7 L 887.3,418.5 L 886.7,421.3 L 886.0,424.1 L 885.4,426.9 L 884.7,429.7 L 884.0,432.5 L 883.2,435.2 L 882.4,438.0 L 881.6,440.8 L 880.7,443.5 L 879.8,446.3 L 878.9,449.0 L 877.9,451.8 L 876.9,454.5 L 875.9,457.2" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+    <path d="M 784.3,578.5 L 781.8,580.6 L 779.2,582.6 L 776.6,584.6 L 773.9,586.6 L 771.3,588.6 L 768.6,590.5 L 765.9,592.4 L 763.1,594.4 L 760.4,596.3 L 757.6,598.1 L 754.8,600.0 L 752.0,601.8 L 749.1,603.6 L 746.3,605.4 L 743.4,607.2 L 740.4,608.9 L 737.5,610.7 L 734.5,612.4 L 731.6,614.1 L 728.6,615.7 L 725.5,617.4 L 722.5,619.0 L 719.4,620.6 L 716.4,622.2" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+    <path d="M 544.4,670.1 L 540.7,670.4 L 537.0,670.7 L 533.3,670.9 L 529.6,671.1 L 525.9,671.3 L 522.2,671.5 L 518.5,671.7 L 514.8,671.8 L 511.1,671.9 L 507.4,671.9 L 503.7,672.0 L 500.0,672.0 L 496.3,672.0 L 492.6,671.9 L 488.9,671.9 L 485.2,671.8 L 481.5,671.7 L 477.8,671.5 L 474.1,671.3 L 470.4,671.1 L 466.7,670.9 L 463.0,670.7 L 459.3,670.4 L 455.6,670.1" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+    <path d="M 283.6,622.2 L 280.6,620.6 L 277.5,619.0 L 274.5,617.4 L 271.4,615.7 L 268.4,614.1 L 265.5,612.4 L 262.5,610.7 L 259.6,608.9 L 256.6,607.2 L 253.7,605.4 L 250.9,603.6 L 248.0,601.8 L 245.2,600.0 L 242.4,598.1 L 239.6,596.3 L 236.9,594.4 L 234.1,592.4 L 231.4,590.5 L 228.7,588.6 L 226.1,586.6 L 223.4,584.6 L 220.8,582.6 L 218.2,580.6 L 215.7,578.5" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+    <path d="M 124.1,457.2 L 123.1,454.5 L 122.1,451.8 L 121.1,449.0 L 120.2,446.3 L 119.3,443.5 L 118.4,440.8 L 117.6,438.0 L 116.8,435.2 L 116.0,432.5 L 115.3,429.7 L 114.6,426.9 L 114.0,424.1 L 113.3,421.3 L 112.7,418.5 L 112.2,415.7 L 111.7,412.9 L 111.2,410.1 L 110.7,407.3 L 110.3,404.4 L 109.9,401.6 L 109.6,398.8 L 109.3,396.0 L 109.0,393.1 L 108.7,390.3" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+    <path d="M 140.5,252.4 L 142.0,249.8 L 143.5,247.2 L 145.1,244.6 L 146.7,242.1 L 148.3,239.5 L 150.0,237.0 L 151.6,234.4 L 153.4,231.9 L 155.1,229.4 L 156.9,226.9 L 158.7,224.5 L 160.5,222.0 L 162.4,219.6 L 164.3,217.1 L 166.2,214.7 L 168.2,212.3 L 170.2,209.9 L 172.2,207.5 L 174.2,205.1 L 176.3,202.8 L 178.4,200.5 L 180.5,198.1 L 182.7,195.8 L 184.9,193.6" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+    <path d="M 325.1,103.5 L 328.4,102.3 L 331.8,101.0 L 335.1,99.8 L 338.5,98.7 L 341.9,97.5 L 345.3,96.4 L 348.7,95.3 L 352.1,94.2 L 355.5,93.1 L 359.0,92.1 L 362.5,91.1 L 365.9,90.1 L 369.4,89.1 L 372.9,88.2 L 376.4,87.3 L 380.0,86.4 L 383.5,85.6 L 387.0,84.7 L 390.6,83.9 L 394.1,83.1 L 397.7,82.4 L 401.3,81.7 L 404.9,81.0 L 408.5,80.3" fill="none" stroke="#5BA85A" stroke-width="2.6" marker-end="url(#arw)" opacity=".85"/>
+      </svg>
+
+      <div class="quad q-tell"><b>TELL</b><i>the Gospel</i></div>
+      <div class="quad q-see"><b>SEE</b><i>the Gospel</i></div>
+      <div class="quad q-bel"><b>BELIEVE</b><i>the Gospel</i></div>
+      <div class="quad q-hear"><b>HEAR</b><i>the Gospel</i></div>
+
+      <div class="hub">
+        <div class="hub-cross">&#10013;</div>
+        <h2>ST PAUL'S<br>KOGARAH</h2>
+        <div class="anglican">ANGLICAN CHURCH</div>
+        <div class="verse">&ldquo;Go, for this man is my chosen instrument to take my name
+          to Gentiles, kings, and Israelites.&rdquo;</div>
+        <div class="ref">Acts 9:15 (CSB)</div>
+        <div class="mission">God gathers us at St Paul's Kogarah to build and to cultivate
+          his house of prayer which lives and breathes the gospel of Jesus Christ</div>
+      </div>
+
+  <button class="node" id="node0" data-stage="First Contact"
+          style="left:50.000%; top:10.000%;">
+      <span class="node-num">1</span>
+      <span class="node-name">First Contact</span>
+      <span class="node-count" id="cnt0">–</span>
+    </button>
+  <button class="node" id="node1" data-stage="Face to Face"
+          style="left:75.197%; top:19.748%;">
+      <span class="node-num">2</span>
+      <span class="node-name">Face to Face</span>
+      <span class="node-count" id="cnt1">–</span>
+    </button>
+  <button class="node" id="node2" data-stage="Follow Up"
+          style="left:88.604%; top:44.431%;">
+      <span class="node-num">3</span>
+      <span class="node-name">Follow-up</span>
+      <span class="node-count" id="cnt2">–</span>
+    </button>
+  <button class="node" id="node3" data-stage="Meet the Minister"
+          style="left:83.948%; top:72.500%;">
+      <span class="node-num">4</span>
+      <span class="node-name">Meet the Minister</span>
+      <span class="node-count" id="cnt3">–</span>
+    </button>
+  <button class="node" id="node4" data-stage="Conversion/Baptism"
+          style="left:63.407%; top:90.821%;">
+      <span class="node-num">5</span>
+      <span class="node-name">Conversion, Baptism &amp; Confirmation</span>
+      <span class="node-count" id="cnt4">–</span>
+    </button>
+  <button class="node" id="node5" data-stage="Integration"
+          style="left:36.593%; top:90.821%;">
+      <span class="node-num">6</span>
+      <span class="node-name">Integration</span>
+      <span class="node-count" id="cnt5">–</span>
+    </button>
+  <button class="node" id="node6" data-stage="Church Life"
+          style="left:16.052%; top:72.500%;">
+      <span class="node-num">7</span>
+      <span class="node-name">Church Life</span>
+      <span class="node-count" id="cnt6">–</span>
+    </button>
+  <button class="node" id="node7" data-stage="Grow & Serve"
+          style="left:11.396%; top:44.431%;">
+      <span class="node-num">8</span>
+      <span class="node-name">Grow &amp; Serve</span>
+      <span class="node-count" id="cnt7">–</span>
+    </button>
+  <button class="node" id="node8" data-stage="Send"
+          style="left:24.803%; top:19.748%;">
+      <span class="node-num">9</span>
+      <span class="node-name">Send</span>
+      <span class="node-count" id="cnt8">–</span>
+    </button>
+    </div>
+
+    <div>
+      <div class="side" id="doneBox">
+        <h3>&#10003; Completed <span id="doneCount">0</span></h3>
+        <div id="doneList"></div>
+      </div>
+      <div class="side unmapped" id="unmappedBox">
+        <h3>Not on the cycle <span id="unmapCount">0</span></h3>
+        <div id="unmapList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stages">
+    <h2>ACTIVE PROJECTS BY STAGE</h2>
+    <div class="grid" id="stageGrid"></div>
+  </div>
+
+  <div class="ft">
+    KOG 3&middot;2&middot;1&middot;0 &nbsp;&middot;&nbsp; Pray for new people to come &nbsp;&middot;&nbsp;
+    Pray for new people to stay &nbsp;&middot;&nbsp; Every stage owned, every handover named
+  </div>
+</div>
+
+<script>
+const G7_CFG = { url: "https://oqohvmvzudpxhviukfhz.supabase.co", key: "sb_publishable_L4z47rq55RTZSWbF6sU0IA_XvlfSAST" };
+const STAGES = ["First Contact", "Face to Face", "Follow Up", "Meet the Minister", "Conversion/Baptism", "Integration", "Church Life", "Grow & Serve", "Send"];
+const LABELS = ["First Contact", "Face to Face", "Follow-up", "Meet the Minister", "Conversion, Baptism &amp; Confirmation", "Integration", "Church Life", "Grow &amp; Serve", "Send"];
+
+const TEAM = {
+  Glorify:"#C0392B", Go:"#1E8449", Gregarious:"#CA6F1E", Grow:"#1A5276",
+  Giftedness:"#6C3483", Governance:"#B8860B", Glue:"#7D6608"
+};
+const COLS = {
+  prayer:{n:"Prayer",   c:"#9B59B6"}, backlog:{n:"Backlog",     c:"#3A8FD0"},
+  awaiting:{n:"Waiting", c:"#D9551A"}, progress:{n:"In Progress", c:"#E8A020"},
+  done:{n:"Completed", c:"#27AE60"}
+};
+const ACTIVE = ["prayer","backlog","awaiting","progress"];
+
+let g7pass = null;
+
+async function rpc(fn, body) {
+  const h = { "apikey": G7_CFG.key, "Content-Type": "application/json" };
+  if (/^eyJ/.test(G7_CFG.key)) h["Authorization"] = "Bearer " + G7_CFG.key;
+  const r = await fetch(G7_CFG.url + "/rest/v1/rpc/" + fn, { method:"POST", headers:h, body:JSON.stringify(body) });
+  const t = await r.text();
+  if (!r.ok) { const e = new Error(t); e.status = r.status; e.body = t; throw e; }
+  return t ? JSON.parse(t) : null;
+}
+
+const esc = s => String(s == null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+function itemHTML(c, done) {
+  const col = COLS[c.col] || { n:c.col, c:"#888" };
+  const teamC = TEAM[c.team] || "#888";
+  return `<div class="item${done ? " done" : ""}" style="border-left-color:${teamC}">
+    <div class="item-t">${esc(c.title)}</div>
+    <div class="item-m">
+      <span class="chip" style="background:${col.c}22;color:${col.c}">${col.n}</span>
+      <span class="tag">#${esc(String(c.team||"").toLowerCase())}</span>
+    </div>
+  </div>`;
+}
+
+function draw(cards) {
+  const active = cards.filter(c => ACTIVE.includes(c.col));
+  const done   = cards.filter(c => c.col === "done");
+
+  // ── ring nodes + per-stage cards ──
+  let grid = "";
+  STAGES.forEach((stage, i) => {
+    const items = active.filter(c => (c.kog || "") === stage);
+    const cnt = document.getElementById("cnt" + i);
+    cnt.innerHTML = items.length ? `<b>${items.length}</b> active` : "clear";
+    document.getElementById("node" + i).classList.toggle("empty", items.length === 0);
+    grid += `<div class="card" id="stage${i}">
+        <h4><span class="n">${i+1}</span> ${LABELS[i]} <span class="c">${items.length}</span></h4>
+        ${items.length ? items.map(c => itemHTML(c,false)).join("")
+                       : '<div class="none">Nothing active at this stage.</div>'}
+      </div>`;
+  });
+  document.getElementById("stageGrid").innerHTML = grid;
+
+  // ── completed, on the side ──
+  document.getElementById("doneCount").textContent = done.length;
+  document.getElementById("doneList").innerHTML =
+    done.length ? done.map(c => itemHTML(c,true)).join("") : '<div class="none">None yet.</div>';
+
+  // ── active work with no KOG stage ──
+  const un = active.filter(c => !c.kog || !STAGES.includes(c.kog));
+  document.getElementById("unmapCount").textContent = un.length;
+  document.getElementById("unmapList").innerHTML =
+    un.length ? un.map(c => itemHTML(c,false)).join("") : '<div class="none">None.</div>';
+
+  document.getElementById("asof").textContent =
+    `${active.length} active projects · ${done.length} completed · as at ` +
+    new Date().toLocaleDateString("en-AU", { day:"numeric", month:"long", year:"numeric" });
+
+  // clicking a circle jumps to that stage's list
+  document.querySelectorAll(".node").forEach((n, i) => {
+    n.onclick = () => {
+      document.querySelectorAll(".node,.card").forEach(e => e.classList.remove("on"));
+      n.classList.add("on");
+      const card = document.getElementById("stage" + i);
+      card.classList.add("on");
+      card.scrollIntoView({ behavior:"smooth", block:"center" });
+    };
+  });
+}
+
+async function gateUnlock() {
+  const err = document.getElementById("gateErr");
+  const pw = document.getElementById("gatePw").value;
+  if (!pw) { err.textContent = "Enter the passcode."; return; }
+  err.textContent = "";
+  document.getElementById("gateBtn").textContent = "Checking…";
+  try {
+    const res = await rpc("get_board", { pass: pw });
+    g7pass = pw;
+    if (document.getElementById("gateRemember").checked) localStorage.setItem("g7_pass", pw);
+    else sessionStorage.setItem("g7_pass", pw);
+    draw((res && res.data && res.data.cards) ? res.data.cards : []);
+    document.body.classList.remove("locked");
+    document.getElementById("g7gate").classList.add("hidden");
+  } catch (e) {
+    err.textContent = /unauthorized/i.test(e.body || "")
+      ? "Incorrect passcode — please try again."
+      : "Could not reach the board.";
+    document.getElementById("gateBtn").textContent = "View the cycle";
+  }
+}
+
+function lockBoard() {
+  localStorage.removeItem("g7_pass");
+  sessionStorage.removeItem("g7_pass");
+  location.reload();
+}
+
+(function init() {
+  document.getElementById("gateBtn").addEventListener("click", gateUnlock);
+  document.getElementById("gatePw").addEventListener("keydown", e => { if (e.key === "Enter") gateUnlock(); });
+  const remembered = localStorage.getItem("g7_pass");
+  const saved = remembered || sessionStorage.getItem("g7_pass");
+  if (remembered) document.getElementById("gateRemember").checked = true;
+  if (saved) { document.getElementById("gatePw").value = saved; gateUnlock(); }
+  else document.getElementById("gatePw").focus();
+})();
+
+/* refresh when the page regains focus, so it matches the board */
+window.addEventListener("focus", async () => {
+  if (!g7pass) return;
+  try { const r = await rpc("get_board", { pass:g7pass }); if (r && r.data && r.data.cards) draw(r.data.cards); } catch (e) {}
+});
+</script>
+</body>
+</html>

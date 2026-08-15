@@ -1,0 +1,1328 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G7 — Kanban Board — St Paul's Kogarah</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#D9551A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="G7 Kanban">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root {
+  color-scheme: light;
+  --orange: #D9551A;
+  --orange-mid: #E8712A;
+  --orange-light: #F4A06A;
+  --orange-pale: #FFF2EA;
+  --cream: #FFFAF6;
+  --dark: #2C1508;
+  --mid: #5C2F10;
+  --muted: #9B7050;
+  --border: #F0D5BC;
+  --shadow: rgba(180,80,20,0.10);
+  --go-bg: #DDEEFF; --go-text: #0A4070;
+  --glorify-bg: #FFECDB; --glorify-text: #7A2C00;
+  --grow-bg: #D6F5E0; --grow-text: #1A6B35;
+  --giftedness-bg: #EDE0FF; --giftedness-text: #5B2D8E;
+  --governance-bg: #D8E4F0; --governance-text: #1A3A5C;
+  --glue-bg: #D0F5F5; --glue-text: #0A5A5A;
+  --gregarious-bg: #FFE0EE; --gregarious-text: #8B1A4A;
+  --kog-bg: #FFF0E4; --kog-text: #C04010;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,'Times New Roman',serif;background:var(--cream);color:var(--dark);min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── HEADER ── */
+header{background:var(--orange);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.logo-wrap{flex-shrink:0;width:50px;height:50px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.logo-cross{font-size:24px;color:var(--orange);}
+header h1{font-size:1.05rem;font-weight:bold;letter-spacing:.02em;line-height:1.3;}
+header .subtitle{font-size:.76rem;opacity:.9;margin-top:2px;font-style:italic;}
+header .motto{font-size:.68rem;opacity:.82;margin-top:4px;line-height:1.4;}
+
+/* ── INFO BAR ── */
+.info-bar{background:var(--orange-pale);border-bottom:2px solid var(--border);padding:7px 14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;flex-shrink:0;}
+.info-field{display:flex;align-items:center;gap:5px;font-size:.77rem;color:var(--mid);}
+.info-field label{font-weight:bold;color:var(--orange);white-space:nowrap;}
+.info-field input{border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-family:Georgia,serif;font-size:.77rem;background:white;color:var(--dark);min-width:140px;}
+.save-indicator{font-size:.68rem;color:var(--muted);font-style:italic;opacity:0;transition:opacity .4s;}
+.save-indicator.show{opacity:1;}
+.save-btn{margin-left:auto;padding:4px 14px;border-radius:8px;border:1.5px solid var(--orange);background:white;color:var(--orange);cursor:pointer;font-size:.75rem;font-family:Georgia,serif;font-weight:bold;transition:.2s all;white-space:nowrap;}
+.save-btn:hover{background:var(--orange-pale);}
+.save-btn.saved{background:#27AE60;border-color:#27AE60;color:white;}
+
+/* ── GOAL BAR ── */
+.goal-bar{background:linear-gradient(135deg,#fff7f0,#fff2e8);border-bottom:2px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:20px;flex-shrink:0;flex-wrap:wrap;}
+.goal-circle-wrap{flex-shrink:0;}
+.goal-circle-wrap svg{display:block;}
+.goal-info{display:flex;flex-direction:column;gap:3px;}
+.goal-label{font-size:.68rem;font-weight:bold;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;}
+.goal-numbers{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.families-input-wrap{display:flex;align-items:center;gap:4px;font-size:.82rem;color:var(--mid);}
+.families-input-wrap input[type=number]{width:54px;border:1.5px solid var(--orange-light);border-radius:5px;padding:2px 5px;font-family:Georgia,serif;font-size:.82rem;font-weight:bold;color:var(--dark);text-align:center;background:white;}
+.families-input-wrap input[type=number]:focus{outline:none;border-color:var(--orange);}
+.goal-slash{font-size:.95rem;color:var(--muted);}
+.goal-target{font-size:.82rem;color:var(--mid);}
+.goal-target strong{color:var(--dark);}
+.goal-pct-text{font-size:.90rem;font-weight:bold;color:var(--orange);}
+.goal-pct-fraction{font-size:.75rem;color:var(--muted);font-style:italic;}
+.goal-divider{width:1px;height:60px;background:var(--border);flex-shrink:0;}
+.goal-tagline{font-size:.72rem;color:var(--muted);font-style:italic;max-width:200px;line-height:1.5;}
+
+/* ── FILTER BAR ── */
+.filter-bar{background:white;border-bottom:1px solid var(--border);padding:7px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex-shrink:0;}
+.filter-label{font-size:.72rem;color:var(--muted);font-style:italic;white-space:nowrap;}
+.fbtn{padding:3px 10px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--mid);cursor:pointer;font-size:.72rem;font-family:Georgia,serif;transition:.15s all;}
+.fbtn.active,.fbtn:hover{background:var(--orange);border-color:var(--orange);color:white;}
+.sep{width:1px;height:18px;background:var(--border);margin:0 2px;}
+.add-btn{margin-left:auto;padding:4px 14px;border-radius:12px;border:none;background:var(--orange);color:white;cursor:pointer;font-size:.78rem;font-family:Georgia,serif;font-weight:bold;white-space:nowrap;}
+.add-btn:hover{background:var(--orange-mid);}
+
+/* ── ARCHIVE ── */
+.archive-toggle{padding:4px 13px;border-radius:12px;border:1.5px solid var(--muted);background:white;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:Georgia,serif;transition:.15s all;white-space:nowrap;}
+.archive-toggle:hover{background:#EFE8DF;}
+.archive-toggle.active{background:var(--muted);border-color:var(--muted);color:white;}
+.col-hdr.archive-hdr{border-top:3px solid var(--muted);background:#FAF7F3;}
+.archive-badge{background:#EFE8DF !important;color:var(--muted) !important;}
+.archive-column{opacity:.9;}
+.archive-column .card{background:#FAF7F3;}
+
+/* ── BOARD ── */
+.board{flex:1;display:flex;gap:0;padding:10px 8px;overflow-x:auto;overflow-y:hidden;min-height:0;}
+
+/* ── COLUMN ── */
+.column{flex:0 0 210px;background:white;border-radius:10px;margin:0 4px;display:flex;flex-direction:column;border:1px solid var(--border);box-shadow:0 2px 8px var(--shadow);}
+.col-hdr{padding:9px 11px 7px;display:flex;align-items:center;justify-content:space-between;border-radius:10px 10px 0 0;}
+.col-hdr.prayer{border-top:3px solid #9B59B6;}
+.col-hdr.backlog{border-top:3px solid #3A8FD0;}
+.col-hdr.awaiting{border-top:3px solid var(--orange);}
+.col-hdr.progress{border-top:3px solid #E8A020;}
+.col-hdr.done{border-top:3px solid #27AE60;}
+.col-title{font-size:.80rem;font-weight:bold;color:var(--dark);}
+.col-count{background:var(--orange-pale);color:var(--orange);border-radius:9px;padding:1px 7px;font-size:.70rem;font-weight:bold;}
+.cards-area{flex:1;overflow-y:auto;padding:7px;display:flex;flex-direction:column;gap:5px;}
+.cards-area.drag-over{background:var(--orange-pale);}
+
+/* ── CARD ── */
+.card{background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:8px 10px;cursor:grab;position:relative;transition:box-shadow .15s,border-color .15s;}
+.card:hover{box-shadow:0 3px 10px var(--shadow);border-color:var(--orange-light);}
+.card.dragging{opacity:.45;cursor:grabbing;}
+.card-title{font-size:.80rem;font-weight:bold;color:var(--dark);margin-bottom:5px;line-height:1.35;padding-right:42px;}
+.card-badges{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;}
+.badge{font-size:.65rem;padding:1px 6px;border-radius:8px;}
+.badge-go{background:var(--go-bg);color:var(--go-text);}
+.badge-glorify{background:var(--glorify-bg);color:var(--glorify-text);}
+.badge-grow{background:var(--grow-bg);color:var(--grow-text);}
+.badge-giftedness{background:var(--giftedness-bg);color:var(--giftedness-text);}
+.badge-governance{background:var(--governance-bg);color:var(--governance-text);}
+.badge-glue{background:var(--glue-bg);color:var(--glue-text);}
+.badge-gregarious{background:var(--gregarious-bg);color:var(--gregarious-text);}
+.badge-kog{background:var(--kog-bg);color:var(--kog-text);border:1px solid #F0C0A0;}
+.badge-tag{background:#F5EFE8;color:#9B7050;border:1px dashed #D9C4AC;font-style:italic;}
+.card-owner{font-size:.68rem;color:var(--muted);margin-top:3px;}
+.card-owner b{color:var(--mid);}
+.card-notes{font-size:.66rem;color:var(--muted);margin-top:2px;font-style:italic;line-height:1.3;}
+.card-actions{position:absolute;top:6px;right:5px;display:none;gap:2px;}
+.card:hover .card-actions{display:flex;}
+.cab{background:none;border:none;cursor:pointer;font-size:.68rem;color:var(--muted);padding:2px 5px;border-radius:3px;}
+.cab:hover{background:var(--border);color:var(--orange);}
+.col-foot{padding:5px 7px;border-top:1px solid var(--border);}
+.add-card-btn{width:100%;background:none;border:1.5px dashed var(--border);border-radius:6px;padding:5px;font-size:.72rem;color:var(--muted);cursor:pointer;font-family:Georgia,serif;}
+.add-card-btn:hover{border-color:var(--orange);color:var(--orange);}
+
+/* ── KOG LEGEND ── */
+.kog-legend{background:white;border-top:2px solid var(--border);padding:8px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.68rem;color:var(--muted);flex-shrink:0;}
+.kog-legend b{color:var(--orange);margin-right:4px;}
+.kbadge{background:var(--kog-bg);color:var(--kog-text);border:1px solid #F0C0A0;border-radius:8px;padding:1px 7px;font-size:.65rem;}
+
+/* ── FOOTER ── */
+footer{text-align:center;font-size:.67rem;color:var(--muted);padding:6px;border-top:1px solid var(--border);font-style:italic;flex-shrink:0;}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;align-items:center;justify-content:center;}
+.overlay.show{display:flex;}
+.modal{background:white;border-radius:12px;padding:20px;width:370px;max-width:95vw;box-shadow:0 12px 40px rgba(0,0,0,.25);border-top:4px solid var(--orange);}
+.modal h3{font-size:.95rem;color:var(--orange);margin-bottom:14px;}
+.fg{margin-bottom:10px;}
+.fg label{display:block;font-size:.75rem;font-weight:bold;color:var(--mid);margin-bottom:3px;}
+.fg input,.fg select,.fg textarea{width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-family:Georgia,serif;font-size:.78rem;color:var(--dark);}
+.fg textarea{height:55px;resize:vertical;}
+.m-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+.btn-cancel{padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:white;color:var(--mid);cursor:pointer;font-family:Georgia,serif;}
+.btn-save{padding:6px 16px;border:none;border-radius:6px;background:var(--orange);color:white;cursor:pointer;font-family:Georgia,serif;font-weight:bold;}
+.btn-save:hover{background:var(--orange-mid);}
+
+/* ── VIEW PDF BUTTON ── */
+.print-btn{padding:4px 14px;border-radius:8px;border:1.5px solid #3A8FD0;background:white;color:#3A8FD0;cursor:pointer;font-size:.75rem;font-family:Georgia,serif;font-weight:bold;transition:.2s all;white-space:nowrap;}
+.print-btn:hover{background:#EEF5FD;}
+
+/* ── PDF COLUMN PICKER ── */
+.pdfcol{padding:3px 10px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:Georgia,serif;transition:.15s all;white-space:nowrap;}
+.pdfcol.active{background:#3A8FD0;border-color:#3A8FD0;color:white;}
+.pdfcol:hover{border-color:#3A8FD0;}
+
+/* ── PRINT LAYOUT — scoped to #print-view, matches uploaded template ── */
+#print-view{display:none;font-family:Georgia,'Times New Roman',serif;}
+#preview-overlay.show #print-view{display:block;}
+
+/* Header */
+#print-view .p-hdr{background:#D9551A;color:#fff;padding:8px 12px;display:flex;align-items:center;gap:10px;}
+#print-view .p-cross{width:34px;height:34px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#D9551A;flex-shrink:0;font-weight:bold;}
+#print-view .p-hdr-text{flex:1;}
+#print-view .p-hdr-text h1{font-size:10pt;font-weight:bold;letter-spacing:.02em;line-height:1.3;margin:0;}
+#print-view .p-hdr-text p{font-size:6.5pt;opacity:.9;margin-top:1px;font-style:italic;line-height:1.35;}
+#print-view .p-hdr-right{text-align:right;font-size:6.5pt;opacity:.85;line-height:1.6;white-space:nowrap;}
+
+/* Goal & KOG bars */
+#print-view .p-goal{background:#FFF2EA;border-bottom:1.5px solid #F0D5BC;padding:4px 12px;display:flex;align-items:center;gap:8px;font-size:6.5pt;flex-wrap:wrap;}
+#print-view .p-goal b{color:#D9551A;}
+#print-view .p-goal .pct{font-weight:bold;color:#D9551A;}
+#print-view .p-kog-bar{background:#FFF0E4;border-bottom:1.5px solid #F0D5BC;padding:3px 12px;font-size:5.5pt;color:#9B7050;text-align:center;letter-spacing:.01em;}
+
+/* Table */
+#print-view table{width:100%;border-collapse:collapse;font-size:6.5pt;}
+#print-view thead th{background:#F0D5BC;color:#9B7050;font-size:6pt;font-weight:bold;padding:3px 4px;border:.5px solid #E0C5A8;text-align:left;letter-spacing:.04em;text-transform:uppercase;}
+#print-view thead th:nth-child(1){width:20px;text-align:center;}
+#print-view thead th:nth-child(2){width:30%;}
+#print-view thead th:nth-child(3){width:9%;text-align:center;}
+#print-view thead th:nth-child(4){width:11%;text-align:center;}
+#print-view thead th:nth-child(5){width:11%;}
+#print-view tr.sec-hdr td{font-size:7.5pt;font-weight:bold;color:#fff;padding:4px 7px;letter-spacing:.03em;}
+#print-view tr.data-row td{padding:2px 4px;border:.4px solid #EDD8C0;vertical-align:top;line-height:1.25;}
+#print-view td.pn{text-align:center;color:#9B7050;font-size:6pt;}
+#print-view td.pt{font-weight:bold;color:#2C1508;font-size:6.5pt;}
+#print-view td.pte{text-align:center;padding:2px 3px!important;}
+#print-view td.pk{font-size:5.5pt;color:#5C2F10;text-align:center;}
+#print-view td.po{color:#5C2F10;font-size:6pt;}
+#print-view td.pno{color:#9B7050;font-style:italic;font-size:5.5pt;}
+#print-view .p-footer{background:#FFF2EA;border-top:1.5px solid #F0D5BC;padding:3px 12px;font-size:5.5pt;color:#9B7050;font-style:italic;text-align:center;margin-top:1px;}
+#print-view .badge{font-size:6pt;font-weight:bold;padding:1px 6px;border-radius:5px;display:inline-block;white-space:nowrap;}
+
+/* ── PDF PREVIEW OVERLAY (screen only) ── */
+#preview-overlay{display:none;position:fixed;inset:0;z-index:1000;flex-direction:column;}
+#preview-overlay.show{display:flex;}
+.pv-bar{background:#2C1508;color:#fff;padding:9px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap;}
+.pv-bar-title{font-size:.85rem;font-weight:bold;}
+.pv-bar-sub{font-size:.72rem;opacity:.65;font-style:italic;}
+.pv-btn-print{padding:5px 16px;border-radius:7px;border:none;background:#D9551A;color:#fff;cursor:pointer;font-family:Georgia,serif;font-size:.78rem;font-weight:bold;}
+.pv-btn-print:hover{background:#B8401A;}
+.pv-btn-save{padding:5px 16px;border-radius:7px;border:none;background:#1E8449;color:#fff;cursor:pointer;font-family:Georgia,serif;font-size:.78rem;font-weight:bold;}
+.pv-btn-save:hover{background:#166638;}
+.pv-btn-close{padding:5px 14px;border-radius:7px;border:1.5px solid rgba(255,255,255,.4);background:transparent;color:#fff;cursor:pointer;font-family:Georgia,serif;font-size:.78rem;}
+.pv-btn-close:hover{background:rgba(255,255,255,.12);}
+.pv-hint{background:#FFF2EA;color:#5C2F10;font-size:.72rem;padding:5px 16px;text-align:center;font-style:italic;flex-shrink:0;display:none;}
+.pv-hint.show{display:block;}
+.pv-scroll{flex:1;overflow-y:auto;background:#f0f0f0;padding:12px;}
+.pv-page{background:white;max-width:1060px;margin:0 auto;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+
+@page{size:A4 landscape;margin:12mm 14mm;}
+
+@media print{
+  header,.info-bar,.goal-bar,.filter-bar,.board,.kog-legend,footer,.overlay,.pv-bar,.pv-hint{display:none!important;}
+  #preview-overlay{position:static!important;display:block!important;}
+  .pv-scroll{overflow:visible!important;background:transparent!important;padding:0!important;}
+  .pv-page{max-width:none!important;box-shadow:none!important;margin:0!important;}
+  #print-view{display:block!important;}
+  #print-view table{page-break-inside:auto;}
+  #print-view tr.data-row{page-break-inside:avoid;}
+  #print-view tr.sec-hdr{page-break-after:avoid;}
+}
+
+/* ── ACCESS GATE & SYNC ── */
+#g7gate{position:fixed;inset:0;z-index:2000;background:var(--cream);display:flex;align-items:center;justify-content:center;padding:20px;}
+#g7gate.hidden{display:none;}
+.gate-card{background:white;border:1px solid var(--border);border-top:5px solid var(--orange);border-radius:14px;box-shadow:0 8px 30px rgba(180,80,20,.12);padding:30px 34px;max-width:380px;width:100%;text-align:center;}
+.gate-cross{width:52px;height:52px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;color:white;margin:0 auto 14px;}
+.gate-card h2{font-size:1.05rem;margin-bottom:3px;color:var(--dark);}
+.gate-sub{font-size:.76rem;color:var(--muted);font-style:italic;margin-bottom:18px;line-height:1.5;}
+.gate-card input{width:100%;box-sizing:border-box;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:Georgia,serif;font-size:.88rem;text-align:center;color:var(--dark);margin-bottom:8px;}
+.gate-card input:focus{outline:none;border-color:var(--orange);}
+.gate-card button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--orange);color:white;font-family:Georgia,serif;font-size:.88rem;font-weight:bold;cursor:pointer;}
+.gate-card button:hover{background:var(--orange-mid);}
+.gate-err{color:#C0392B;font-size:.75rem;margin-top:10px;min-height:1.1em;}
+.gate-remember{display:flex;align-items:center;justify-content:center;gap:7px;font-size:.75rem;color:var(--muted);margin:2px 0 12px;cursor:pointer;}
+.gate-remember input{width:auto;margin:0;transform:scale(1.15);accent-color:var(--orange);}
+.lock-btn{padding:4px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);cursor:pointer;font-size:.75rem;font-family:Georgia,serif;white-space:nowrap;text-decoration:none;display:inline-block;}
+.lock-btn:hover{border-color:var(--orange);color:var(--orange);}
+.gate-note{font-size:.68rem;color:var(--muted);margin-top:14px;font-style:italic;line-height:1.5;}
+.gate-setup{display:none;}
+.gate-setup.show{display:block;}
+.sync-pill{font-size:.68rem;font-style:italic;padding:2px 9px;border-radius:10px;white-space:nowrap;}
+.sync-ok{background:#E8F6EC;color:#1E8449;}
+.sync-busy{background:var(--orange-pale);color:var(--orange);}
+.sync-off{background:#FBEAEA;color:#C0392B;}
+body.locked > *:not(#g7gate){display:none !important;}
+@media print{#g7gate{display:none !important;}}
+
+/* ── TOUCH DEVICES ──
+   Hover never fires on a touchscreen, so the per-card action buttons would
+   stay hidden and cards could not be moved. Show them permanently and give
+   them finger-sized targets. HTML5 drag-and-drop is mouse-only; the arrows
+   are the way a card moves columns on a phone. */
+@media (hover: none), (pointer: coarse) {
+  .card-actions{display:flex !important;position:static;justify-content:flex-end;gap:2px;margin:-2px -2px 4px 0;}
+  .card:hover .card-actions{display:flex;}
+  .card-title{padding-right:0;}
+  .cab{font-size:.92rem;padding:5px 9px;line-height:1;border:1px solid var(--border);background:white;border-radius:6px;min-width:32px;text-align:center;}
+  .cab:active{background:var(--orange-pale);border-color:var(--orange);color:var(--orange);}
+  .card{padding:9px 10px;}
+  .column{flex:0 0 84vw;max-width:340px;}
+  .board{scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+  .column{scroll-snap-align:center;}
+  .info-bar,.filter-bar{gap:8px;}
+  .fbtn,.pdfcol,.save-btn,.print-btn,.archive-toggle{padding:6px 12px;}
+  .add-card-btn{padding:9px;}
+}
+</style>
+</head>
+<body class="locked">
+
+<div id="g7gate">
+  <div class="gate-card">
+    <div class="gate-cross">&#10013;</div>
+    <h2>G7 &mdash; Kanban Board</h2>
+    <div class="gate-sub">St Paul's Anglican Church Kogarah<br>Leadership team access</div>
+
+    <div id="gateSetup" class="gate-setup">
+      <input type="text" id="cfgUrl" placeholder="Supabase project URL">
+      <input type="text" id="cfgKey" placeholder="Supabase anon key">
+    </div>
+
+    <input type="password" id="gatePw" placeholder="Passcode" autocomplete="current-password">
+    <label class="gate-remember"><input type="checkbox" id="gateRemember"> Remember me on this device</label>
+    <button id="gateBtn">Open the board</button>
+    <div class="gate-err" id="gateErr"></div>
+    <div class="gate-note" id="gateNote">Your board syncs across every device you open it on.</div>
+  </div>
+</div>
+
+
+<header>
+  <div class="logo-wrap"><span class="logo-cross">✝</span></div>
+  <div>
+    <h1>G7 — Kanban Board</h1>
+    <p class="subtitle">St Paul's Anglican Church Kogarah &nbsp;|&nbsp; G7 Ministry Teams</p>
+    <p class="motto">"We gather to build and to nurture a nation which lives and breathes the Gospel of Jesus Christ"</p>
+  </div>
+</header>
+
+<div class="info-bar">
+  <div class="info-field"><label>Updated:</label><input type="text" id="iUpdated" placeholder="DD MMM YYYY"></div>
+  <div class="info-field"><label>Next Review:</label><input type="text" id="iNextReview" placeholder="DD MMM YYYY"></div>
+  <span class="save-indicator" id="saveIndicator">✓ Saved</span>
+  <span class="sync-pill sync-busy" id="syncPill">connecting…</span>
+  <a class="lock-btn" href="cycle.html" title="See these projects along the KOGCycle">◎ KOGCycle</a>
+  <button class="lock-btn" onclick="lockBoard()" title="Lock the board and forget the passcode on this device">🔒 Lock</button>
+  <button class="save-btn" id="saveBtn2">💾 Save</button>
+  <span class="filter-label" style="font-size:.72rem;color:var(--muted);font-style:italic;">PDF columns:</span>
+  <button class="pdfcol active" data-pdfcol="prayer">🙏 Prayer</button>
+  <button class="pdfcol active" data-pdfcol="backlog">📋 Backlog</button>
+  <button class="pdfcol active" data-pdfcol="awaiting">⏳ Waiting</button>
+  <button class="pdfcol active" data-pdfcol="progress">⚡ In Progress</button>
+  <button class="pdfcol active" data-pdfcol="done">✅ Completed</button>
+  <button class="print-btn" id="viewPdfBtn" onclick="viewPdf()">📄 View PDF</button>
+</div>
+
+<div class="goal-bar">
+  <div class="goal-circle-wrap">
+    <svg viewBox="0 0 80 80" width="80" height="80">
+      <circle cx="40" cy="40" r="32" fill="none" stroke="#F0D5BC" stroke-width="8"/>
+      <circle id="goalArc" cx="40" cy="40" r="32" fill="none"
+              stroke="#D9551A" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="201.06" stroke-dashoffset="67.02"
+              transform="rotate(-90 40 40)"/>
+      <text x="40" y="37" text-anchor="middle" font-size="13" font-weight="bold"
+            fill="#2C1508" font-family="Georgia,serif" id="goalPctSvg">67%</text>
+      <text x="40" y="51" text-anchor="middle" font-size="9"
+            fill="#9B7050" font-family="Georgia,serif">of goal</text>
+    </svg>
+  </div>
+  <div class="goal-info">
+    <div class="goal-label">🏠 Household Goal</div>
+    <div class="goal-numbers">
+      <div class="families-input-wrap">
+        <input type="number" id="familiesInput" value="50" min="0" max="9999">
+        <span>families</span>
+      </div>
+      <span class="goal-slash">/</span>
+      <span class="goal-target"><strong>75</strong> households</span>
+    </div>
+    <div class="goal-pct-text" id="goalPctText">66.67%</div>
+    <div class="goal-pct-fraction" id="goalPctFraction">50 ÷ 75 = 66.67%</div>
+  </div>
+  <div class="goal-divider"></div>
+  <div class="goal-tagline">Reaching every household with the Gospel of Jesus Christ in our parish</div>
+</div>
+
+<div class="filter-bar">
+  <button class="archive-toggle" id="archiveToggle">📦 Archive</button>
+  <div class="sep"></div>
+  <span class="filter-label">Team:</span>
+  <button class="fbtn active" data-ftype="team" data-fval="all">All</button>
+  <button class="fbtn" data-ftype="team" data-fval="Go">🌍 Go</button>
+  <button class="fbtn" data-ftype="team" data-fval="Glorify">🎵 Glorify</button>
+  <button class="fbtn" data-ftype="team" data-fval="Grow">🌱 Grow</button>
+  <button class="fbtn" data-ftype="team" data-fval="Giftedness">🎁 Giftedness</button>
+  <button class="fbtn" data-ftype="team" data-fval="Governance">⚖️ Governance</button>
+  <button class="fbtn" data-ftype="team" data-fval="Glue">🤝 Glue</button>
+  <button class="fbtn" data-ftype="team" data-fval="Gregarious">🎉 Gregarious</button>
+  <div class="sep"></div>
+  <span class="filter-label">KOG Stage:</span>
+  <button class="fbtn active" data-ftype="kog" data-fval="all">All</button>
+  <button class="fbtn" data-ftype="kog" data-fval="First Contact">👋 First Contact</button>
+  <button class="fbtn" data-ftype="kog" data-fval="Face to Face">😊 Face to Face</button>
+  <button class="fbtn" data-ftype="kog" data-fval="Integration">🔗 Integration</button>
+  <button class="fbtn" data-ftype="kog" data-fval="Church Life">📖 Church Life</button>
+  <button class="fbtn" data-ftype="kog" data-fval="Grow &amp; Serve">🌟 Grow &amp; Serve</button>
+  <button class="fbtn" data-ftype="kog" data-fval="Send">✈️ Send</button>
+  <button class="add-btn" id="globalAddBtn">+ Add Task</button>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="kog-legend">
+  <b>KOG Cycle:</b>
+  <span class="kbadge">👋 First Contact</span><span style="color:var(--border)">→</span>
+  <span class="kbadge">😊 Face to Face</span><span style="color:var(--border)">→</span>
+  <span class="kbadge">🙏 Meet the Minister</span><span style="color:var(--border)">→</span>
+  <span class="kbadge">📞 Follow Up</span><span style="color:var(--border)">→</span>
+  <span class="kbadge">💧 Conversion / Baptism</span><span style="color:var(--border)">→</span>
+  <span class="kbadge">🔗 Integration</span><span style="color:var(--border)">→</span>
+  <span class="kbadge">📖 Church Life</span><span style="color:var(--border)">→</span>
+  <span class="kbadge">🌟 Grow &amp; Serve</span><span style="color:var(--border)">→</span>
+  <span class="kbadge">✈️ Send</span>
+</div>
+
+<footer>St Paul's Anglican Church Kogarah · www.stpaulskogarah.com.au · G7 Kanban Board — See the Gospel · Hear the Gospel · Believe the Gospel · Tell the Gospel</footer>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add New Task</h3>
+    <div class="fg"><label>Task Title *</label><input type="text" id="mTitle" placeholder="e.g. Prepare SRE Sunday materials"></div>
+    <div class="fg"><label>Team *</label>
+      <select id="mTeam">
+        <option value="Go">🌍 Go (Outreach &amp; Mission)</option>
+        <option value="Glorify">🎵 Glorify (Worship &amp; Service)</option>
+        <option value="Grow">🌱 Grow (Discipleship)</option>
+        <option value="Giftedness">🎁 Giftedness (Gifts &amp; Calling)</option>
+        <option value="Governance">⚖️ Governance (Leadership &amp; Admin)</option>
+        <option value="Glue">🤝 Glue (Community &amp; Belonging)</option>
+        <option value="Gregarious">🎉 Gregarious (Hospitality &amp; Friendship)</option>
+      </select>
+    </div>
+    <div class="fg"><label>KOG Cycle Stage</label>
+      <select id="mKog">
+        <option value="">— Not mapped to KOG stage —</option>
+        <option value="First Contact">👋 First Contact</option>
+        <option value="Face to Face">😊 Face to Face</option>
+        <option value="Meet the Minister">🙏 Meet the Minister</option>
+        <option value="Follow Up">📞 Follow Up</option>
+        <option value="Conversion/Baptism">💧 Conversion / Baptism / Confirmation</option>
+        <option value="Integration">🔗 Integration</option>
+        <option value="Church Life">📖 Church Life</option>
+        <option value="Grow &amp; Serve">🌟 Grow &amp; Serve</option>
+        <option value="Send">✈️ Send</option>
+      </select>
+    </div>
+    <div class="fg"><label>Column</label>
+      <select id="mCol">
+        <option value="prayer">🙏 Prayer Items</option>
+        <option value="backlog">📋 Backlog</option>
+        <option value="awaiting">⏳ Waiting</option>
+        <option value="progress">⚡ In Progress</option>
+        <option value="done">✅ Completed</option>
+      </select>
+    </div>
+    <div class="fg"><label>Owner / Responsible</label><input type="text" id="mOwner" placeholder="Name(s)"></div>
+    <div class="fg"><label>Due Date / Notes</label><textarea id="mNotes" placeholder="Due date, context, or action required..."></textarea></div>
+    <div class="m-actions">
+      <button class="btn-cancel" id="cancelBtn">Cancel</button>
+      <button class="btn-save" id="saveBtn">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'g7k_v1';
+
+const COLS = [
+  { id:'prayer',   label:'🙏 Prayer Items', cls:'prayer'   },
+  { id:'backlog',  label:'📋 Backlog',       cls:'backlog'  },
+  { id:'awaiting', label:'⏳ Waiting',       cls:'awaiting' },
+  { id:'progress', label:'⚡ In Progress',   cls:'progress' },
+  { id:'done',     label:'✅ Completed',     cls:'done'     },
+];
+const ARCHIVE_COL = { id:'archive', label:'📦 Archive', cls:'archive-hdr' };
+const COL_IDS = COLS.map(c => c.id);
+
+const TEAM_CONFIG = {
+  'Go':         { icon:'🌍', cls:'badge-go' },
+  'Glorify':    { icon:'🎵', cls:'badge-glorify' },
+  'Grow':       { icon:'🌱', cls:'badge-grow' },
+  'Giftedness': { icon:'🎁', cls:'badge-giftedness' },
+  'Governance': { icon:'⚖️', cls:'badge-governance' },
+  'Glue':       { icon:'🤝', cls:'badge-glue' },
+  'Gregarious': { icon:'🎉', cls:'badge-gregarious' },
+};
+
+const DEFAULT_CARDS = [
+  { id:1,  title:'Pray for Sunday worship to magnify Christ', team:'Glorify', kog:'Church Life',       col:'prayer',   owner:'All',           notes:'' },
+  { id:2,  title:'Pray for new people from SRE & outreach',   team:'Go',      kog:'First Contact',     col:'prayer',   owner:'All',           notes:'' },
+  { id:3,  title:'Pray for those attending Discovery Course',  team:'Go',      kog:'Integration',       col:'prayer',   owner:'All',           notes:'' },
+  { id:4,  title:'Companion booklet — next month',             team:'Glorify', kog:'Church Life',       col:'backlog',  owner:'David',         notes:'Prepare content, layout & print' },
+  { id:5,  title:'Translation — Simplified & Traditional Chinese', team:'Glorify', kog:'Church Life',   col:'backlog',  owner:'',              notes:'Announcements + Sunday bulletin' },
+  { id:6,  title:'Music & worship planning',                   team:'Glorify', kog:'Church Life',       col:'backlog',  owner:'',              notes:'Hymns & songs for upcoming Sundays' },
+  { id:7,  title:'AV roster — fill gaps',                      team:'Glorify', kog:'Church Life',       col:'backlog',  owner:'Jerry',         notes:'' },
+  { id:8,  title:'Tea Hut roster',                             team:'Glorify', kog:'Church Life',       col:'backlog',  owner:'Lucy Zhao',     notes:'' },
+  { id:9,  title:'KOGWorx community outreach planning',        team:'Go',      kog:'First Contact',     col:'backlog',  owner:'',              notes:'Next quarter planning' },
+  { id:10, title:'SRE coordination — school terms',            team:'Go',      kog:'First Contact',     col:'backlog',  owner:'David / Jenny', notes:'Bayside High & St George Girls High' },
+  { id:11, title:'Social media / promotion schedule',          team:'Go',      kog:'First Contact',     col:'backlog',  owner:'',              notes:'Schedule 4 weeks of posts' },
+  { id:12, title:'Mission update — local & overseas',          team:'Go',      kog:'Send',              col:'backlog',  owner:'',              notes:'Prayer letter + giving report' },
+  { id:13, title:"St Patrick's outreach planning",             team:'Go',      kog:'First Contact',     col:'backlog',  owner:'',              notes:'' },
+  { id:14, title:'Slides prep — Sunday services',              team:'Glorify', kog:'Church Life',       col:'progress', owner:'',              notes:'Weekly ongoing task' },
+  { id:15, title:'9:15am service launch',                      team:'Glorify', kog:'Church Life',       col:'progress', owner:'David',         notes:'June 2026 launch — ongoing prep' },
+  { id:16, title:'Clean up / set-up roster',                   team:'Glorify', kog:'Church Life',       col:'progress', owner:'Renjie Zhu',    notes:'' },
+  { id:17, title:'Easy English ministry',                      team:'Go',      kog:'Face to Face',      col:'progress', owner:'',              notes:'Ongoing Sunday program' },
+  { id:18, title:'Welcome & greeters coordination',            team:'Go',      kog:'First Contact',     col:'progress', owner:'',              notes:'ChurchSuite, greeting tent' },
+  { id:19, title:'Discovery Course — schedule next intake',    team:'Go',      kog:'Integration',       col:'awaiting', owner:'',              notes:'Awaiting venue confirmation' },
+  { id:20, title:'Meet the Minister — follow up visitors',     team:'Go',      kog:'Meet the Minister', col:'awaiting', owner:'David',         notes:'From recent Sunday visitors' },
+  { id:21, title:'Baptism / Confirmation prep',                team:'Glorify', kog:'Conversion/Baptism',col:'awaiting', owner:'David',         notes:'Awaiting candidates to confirm readiness' },
+  { id:22, title:'Partnership Course scheduling',              team:'Go',      kog:'Integration',       col:'awaiting', owner:'',              notes:'New members pathway' },
+  { id:23, title:'SRE Sunday service',                         team:'Go',      kog:'First Contact',     col:'done',     owner:'David',         notes:'Completed ✓' },
+  { id:24, title:'June companion booklet published',           team:'Glorify', kog:'Church Life',       col:'done',     owner:'David',         notes:'Completed ✓' },
+  // ── GOVERNANCE — ACTION ITEMS (In Progress) ──
+  { id:25, title:'Discuss sermon/service scheduling options with Jerry (leave / Ambo / Peter)', team:'Governance', kog:'', col:'progress', owner:'David Yung', notes:'Options: Jerry preaches English, Rev. Yung takes leave, or Ambo/Peter fill in' },
+  { id:26, title:'Follow up overdue car park payment — push before end of month',               team:'Governance', kog:'', col:'progress', owner:'David Yung', notes:'Payment overdue as of the 26th' },
+  { id:27, title:'Respond to SRE funder; prepare full proposal for parish council post-July',  team:'Governance', kog:'First Contact', col:'progress', owner:'David Yung', notes:'Meet funder in July; present full proposal to parish council afterward' },
+  { id:28, title:'Confirm bell heritage status with diocese; arrange plaque wording',           team:'Governance', kog:'', col:'progress', owner:'David Yung', notes:'Bell to be placed on school grounds; plaque confirms church ownership' },
+  { id:29, title:'Sign and return last meeting minutes to Enya',                                team:'Governance', kog:'', col:'progress', owner:'David Yung', notes:'' },
+  { id:30, title:'Re-message Kenny to confirm missionary payment details and preferred method', team:'Governance', kog:'Send', col:'progress', owner:'Lucy Zhao',  notes:'New missionary support amount to be confirmed before July' },
+  { id:31, title:'Get fence DA quotes; compare website/domain hosting costs',                   team:'Governance', kog:'', col:'progress', owner:'Rangi Zhu',  notes:'Goal: reduce current ~$1,200/yr website spend; evaluate parkwood.church (~$130/yr from yr 2)' },
+  { id:32, title:'Approve annex floor repair — landlord sign-off (~$8,000)',                   team:'Governance', kog:'', col:'progress', owner:'Michelle / Rangi (Wardens)', notes:'Funded from childcare trust fund (balance >$10,000); no parish council funds required' },
+  { id:33, title:'Confirm attendance at Parish Council Planning Day — Sat 4 July, 9:30am',     team:'Governance', kog:'', col:'progress', owner:'All',        notes:"Enya's place; advise food contributions via WeChat" },
+  // ── GOVERNANCE — PENDING CONFIRMATION (Waiting) ──
+  { id:34, title:'Sermon/service scheduling — finalise approach with Jerry',                   team:'Governance', kog:'', col:'awaiting', owner:'David Yung / Jerry', notes:'Options under review: Jerry preaches English first, Rev. Yung on leave, or Ambo/Peter fill in' },
+  { id:35, title:'SRE staffing fund — explore hiring part-time SRE teacher',                   team:'Governance', kog:'First Contact', col:'awaiting', owner:'David Yung', notes:'Early-stage; meeting external funder in July for details' },
+  { id:36, title:'Thriving Immigrant Church Initiative — pending Jerry availability',           team:'Governance', kog:'', col:'awaiting', owner:'David Yung', notes:'$2,000–$3,000 cost; eligibility requires Jerry at first session' },
+  { id:37, title:'Supervision client referrals — encourage council members to refer ministers', team:'Governance', kog:'', col:'awaiting', owner:'Parish Council', notes:'Rev. Yung prohibited by diocese from advertising; referrals only (Mandarin/Cantonese)' },
+  // ── GOVERNANCE — APPROVED DECISIONS (Backlog to implement) ──
+  { id:38, title:'NCLS Survey — register for National Church Life Survey',                     team:'Governance', kog:'', col:'backlog',  owner:'David Yung', notes:'Cost covered by Sydney Anglican Diocese' },
+  { id:39, title:'Communicate team bonding subsidy ($50/outing) to all ministry teams',        team:'Governance', kog:'Church Life', col:'backlog', owner:'David Yung', notes:'Approved as a token to encourage fellowship among ministry teams' },
+  { id:40, title:'Set supervision fee at ~$110–$120/session (≈50% of $220 standard rate)',    team:'Governance', kog:'', col:'done',    owner:'David Yung', notes:'Decided: provisional qualification status; ~50% of standard rate' },
+  // ── COMBINED SERVICE STRATEGY v2 (10 combined Sundays from 2 Aug 2026 → launch 7 Feb 2027) ──
+  { id:41, title:'Pray for wisdom, unity & courage — combined service transition',            team:'Glue',       kog:'Church Life', col:'prayer',   owner:'All',                notes:'Action Item 1 — stands over the whole strategy (Rev 5:9)' },
+  { id:42, title:'Brief wardens & G7 leaders on Version 2; draft bilingual pastoral letter',  team:'Governance', kog:'', col:'progress', owner:'David',              notes:'Due 17 July — v2: monthly combined cadence, 9:15 protected weekly' },
+  { id:43, title:'Recruit 3+ interpreters (English↔Mandarin, both directions)',               team:'Glorify',    kog:'Grow & Serve', col:'progress', owner:'David / Jerry',      notes:'Due 31 July — manuscript to interpreter by Thursday of each combined week' },
+  { id:44, title:'Appoint Children\'s Ministry Coordinator; merge KOGKids/KOGMini teams',     team:'Grow',       kog:'Church Life', col:'progress', owner:'David',              notes:'Due 26 July — one kids\' team from July, serving existing services + combined Sundays' },
+  { id:45, title:'Purchase & bench-test Auracast transmitter, mics, 20 loan receivers',       team:'Glorify',    kog:'', col:'progress', owner:'David / Wardens',    notes:'Bench test by 26 July; receivers by 31 July; ~$2,300–$4,000 total' },
+  { id:46, title:'Announcements & Q&A both congregations; publish monthly dates to January',  team:'Glue',       kog:'Church Life', col:'progress', owner:'David / Jerry',      notes:'Sundays 19 & 26 July — "nothing changes weekly; once a month one church at the Table"' },
+  { id:47, title:'Visit the seven anticipated departures personally',                          team:'Glue',       kog:'Church Life', col:'progress', owner:'David',              notes:'Before August — message: your 9:15 is being strengthened, not taken away' },
+  { id:48, title:'Phone/visit older Mandarin members re Auracast devices & loan desk',        team:'Glue',       kog:'Church Life', col:'progress', owner:'David + leaders',    notes:'Before 2 August — personal help fitting devices' },
+  { id:49, title:'Set up Translation Desk — signage, QR cards, storage, roster',              team:'Gregarious', kog:'Church Life', col:'backlog',  owner:'',                   notes:'By 2 August — staffed every combined Sunday; ~$200' },
+  { id:50, title:'Live Auracast rehearsal in the Hall after church',                          team:'Glorify',    kog:'', col:'backlog',  owner:'Wardens',            notes:'Sunday 26 July — go-live 2 August; printed sermon summary fallback every combined Sunday' },
+  { id:51, title:'Combined kids\' program ready for every combined Sunday',                   team:'Grow',       kog:'Church Life', col:'backlog',  owner:'Coordinator',        notes:'Bilingual-lite: teaching in English, verses & songs in both languages' },
+  { id:52, title:'Combined Service 1 — first combined Lord\'s Supper, Hall 9:15am',           team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'Sunday 2 August — Auracast live, loan desk open; both ministers co-leading (Action Item 6)' },
+  { id:53, title:'Set up combined-Sunday feedback channel + monthly bilingual update',        team:'Glue',       kog:'Church Life', col:'backlog',  owner:'',                   notes:'Bilingual card/QR each combined Sunday; update shares feedback & what changes next time' },
+  { id:54, title:'Launch 2 Chinese mid-week fellowships + 1 English fellowship (Q3 Goal 1)',  team:'Go',         kog:'First Contact', col:'backlog', owner:'',                  notes:'By 30 September — language-specific on purpose; front doors into the one house' },
+  { id:55, title:'Focus on Dads — five new dads by Father\'s Day',                            team:'Go',         kog:'First Contact', col:'backlog', owner:'',                  notes:'6 September — Combined Service 2: Father\'s Day + Communion (Q3 Goal 3)' },
+  { id:56, title:'Recruit 4 Chinese Parallel accompanists for combined music team',           team:'Glorify',    kog:'Grow & Serve', col:'backlog', owner:'',                   notes:'By 30 September (Q3 Goal 4) — one music team; six rehearsals together before launch' },
+  { id:57, title:'Recruit 6 kids\' ministry assistants — Safe Ministry checks & training',    team:'Grow',       kog:'Grow & Serve', col:'backlog', owner:'Coordinator',        notes:'By 30 September (Q3 Goal 2) — recruit from both congregations' },
+  { id:58, title:'Review 1 — debrief Combined Service 1',                                     team:'Governance', kog:'', col:'backlog',  owner:'Leadership',         notes:'Sunday 16 August — feedback, 9:15 attendance trend, Auracast experience' },
+  { id:59, title:'Review 2 — Q3 goals; cadence check; confirm Res 4.1 alignment',             team:'Governance', kog:'', col:'backlog',  owner:'Leadership',         notes:'27 September — may recommend adding combined Sundays Dec–Jan; step-up easier than step-down' },
+  { id:60, title:'Negotiate school licence for hall — storage, access, signage',              team:'Governance', kog:'', col:'backlog',  owner:'Wardens',            notes:'By 31 October — lockable storage cage; written licence; named school liaison warden' },
+  { id:61, title:'Review 3 — launch readiness; tech sign-off',                                team:'Governance', kog:'', col:'backlog',  owner:'Leadership',         notes:'29 November / December — Auracast at scale; volunteer load (Action Item 8)' },
+  { id:62, title:'Kids/Youth Minister scoping paper (Action Item 3)',                         team:'Governance', kog:'', col:'backlog',  owner:'David',              notes:'Due 31 December — toward 2028 appointment; 120-child capacity at new hall' },
+  { id:63, title:'Two dress rehearsals in new hall; LNY + school-family invitations out',     team:'Glorify',    kog:'', col:'backlog',  owner:'All teams',          notes:'January 2027 — set-up/pack-down, AV, Auracast range test, kids\' classrooms; nothing new on 7 Feb' },
+  { id:64, title:'Opening & commissioning Sunday — new auditorium, Lunar New Year weekend',   team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'7 February 2027 — one combined congregation (Option 5); LNY + school-gate invitations converge; Bishop invited' },
+  // ── v2 NEW: the ten combined Sundays & culturally specific front doors ──
+  { id:65, title:'Combined Service 3 — Anniversary Sunday; past-member invitations',          team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'20 September — church\'s story in both languages; invitations to past members early Sep (win-back)' },
+  { id:66, title:'Mid-Autumn Festival evangelistic celebration',                              team:'Go',         kog:'First Contact', col:'backlog', owner:'Jerry + fellowship leaders', notes:'Friday 25 September — Mandarin-led, culturally specific; guests invited to 4 Oct combined service' },
+  { id:67, title:'Combined Service 4 — Mid-Autumn thanksgiving flavour',                      team:'Glorify',    kog:'Face to Face', col:'backlog',  owner:'All',                notes:'4 October — welcome guests from 25 September festival' },
+  { id:68, title:'Liaise with Bishop re Confirmation Sunday; begin confirmee classes',        team:'Grow',       kog:'Conversion/Baptism', col:'backlog', owner:'David / Jerry', notes:'By 31 August — confirmees from both congregations presented together 13 Dec' },
+  { id:69, title:'Combined Service 5 — structured evaluation (Action Item 7)',                team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'1 November — falls within Trial Period 2 window' },
+  { id:70, title:'Combined Service 6',                                                        team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'6 December — December: tech readiness sign-off (Action Item 8)' },
+  { id:71, title:'Combined Service 7 — Confirmation Sunday with the Bishop',                  team:'Glorify',    kog:'Conversion/Baptism', col:'backlog', owner:'All',           notes:'13 December — combined church visible to the Diocese' },
+  { id:72, title:'Combined Service 8 — Christmas Day',                                        team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'25 December — full launch rehearsal in spirit: bilingual, Auracast, combined kids\' spot' },
+  { id:73, title:'Combined Service 9',                                                        team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'3 January 2027' },
+  { id:74, title:'Combined Service 10 — commissioning eve',                                   team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'31 January — final Sunday in the old pattern; "one church, one week to go"' },
+  { id:75, title:'Lunar New Year community celebration — eve of opening',                     team:'Go',         kog:'First Contact', col:'backlog', owner:'All',                notes:'Saturday 6 February 2027 — doubles as eve-of-opening invitation event; flows into 7 Feb' },
+  // ── GROW MINISTRY MEETING (14 July 2026) — Action Items A1–A10 ──
+  { id:76, title:'Plan & schedule KOGYouth supplementary seminars (dating, relationships)',   team:'Grow', kog:'Church Life',        col:'backlog',  owner:'Range Zhu / David',        notes:'A1 — Term 3 2026; youth-appropriate topics within a biblical framework' },
+  { id:77, title:'Follow up the three regulars not yet in a Home Group',                      team:'Grow', kog:'Integration',        col:'progress', owner:'Grow Team',                notes:'A2 — within 4 weeks; grow faith by words and deeds; match each to a suitable group' },
+  { id:78, title:'Monitor health of the six newly started Home Groups',                       team:'Grow', kog:'Church Life',        col:'progress', owner:'Jerry Zhu',                notes:'A3 — monthly review: leadership, attendance, syllabus' },
+  { id:79, title:'Home Group promotion — Companion Booklet & Sunday announcements',           team:'Grow', kog:'Integration',        col:'progress', owner:'David / Companion editor', notes:'A4 — ongoing monthly; group visibility a standing communication priority' },
+  { id:80, title:'Announce the Welcome Pathway once, cleanly',                                team:'Grow', kog:'Church Life',        col:'progress', owner:'David',                    notes:'A5 — next available Sunday; Welcome to Life → Welcome Home → Home Groups → Welcome to the Team; "naming what they\'ve always been: home"' },
+  { id:81, title:'Audit & update artefacts with old course names',                            team:'Grow', kog:'Church Life',        col:'backlog',  owner:'Grow Team',                notes:'A6 — within 6 weeks; service sheets, Companion Booklet, KOGCharts, slides, signage — owner per artefact' },
+  { id:82, title:'Leaders\' training on 2 Timothy 2:2; confirm 2026 training calendar',       team:'Grow', kog:'Grow & Serve',       col:'progress', owner:'Jerry Zhu / David',        notes:'A7 — ongoing; entrust to faithful people who will teach others also (1 Tim 4:16 in life & doctrine)' },
+  { id:83, title:'Establish new mid-week, mixed-gender Home Group',                           team:'Grow', kog:'Integration',        col:'progress', owner:'David',                    notes:'A8 — commence now; on-ramp for those unable to join existing groups' },
+  { id:84, title:'Explore restarting KOGMen — monthly ministry',                              team:'Grow', kog:'Church Life',        col:'progress', owner:'David',                    notes:'A9 — commence now; monthly (not weekly) to be sustainable for working men' },
+  { id:85, title:'Begin Music Ministries group',                                              team:'Grow', kog:'Grow & Serve',       col:'progress', owner:'David',                    notes:'A10 — commence now; growing musicians in skill and godliness in service of the gathered church' },
+];
+
+// ── PERSISTENCE ───────────────────────────────────────────────────────────────
+let saveTimer = null;
+
+function saveState() {
+  const state = {
+    cards,
+    nextId,
+    families:    document.getElementById('familiesInput').value,
+    iUpdated:    document.getElementById('iUpdated').value,
+    iNextReview: document.getElementById('iNextReview').value,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Flash indicator
+  const ind = document.getElementById('saveIndicator');
+  if (ind) { ind.classList.add('show'); clearTimeout(saveTimer); saveTimer = setTimeout(() => ind.classList.remove('show'), 1800); }
+  // Flash Save button
+  const btn = document.getElementById('saveBtn2');
+  if (btn) {
+    btn.textContent = '✓ Saved';
+    btn.classList.add('saved');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { btn.textContent = '💾 Save'; btn.classList.remove('saved'); }, 1800);
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const state = JSON.parse(raw);
+    if (state.cards)  cards  = state.cards;
+    if (state.nextId) nextId = state.nextId;
+    setTimeout(() => {
+      if (state.families)    document.getElementById('familiesInput').value = state.families;
+      if (state.iUpdated)    document.getElementById('iUpdated').value      = state.iUpdated;
+      if (state.iNextReview) document.getElementById('iNextReview').value   = state.iNextReview;
+      updateGoal();
+    }, 0);
+    return true;
+  } catch(e) { return false; }
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let cards  = JSON.parse(JSON.stringify(DEFAULT_CARDS));
+let nextId = 86;
+let fTeam      = 'all';
+let fKog       = 'all';
+let showArchive = false;
+let dragId = null;
+let editingId = null;
+
+// ── AUTO-ARCHIVE ─────────────────────────────────────────────────────────────
+function autoArchive() {
+  const oneMonthAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+  let changed = false;
+  cards.forEach(c => {
+    if (c.col === 'done' && c.movedToDoneAt && c.movedToDoneAt < oneMonthAgo) {
+      c.col = 'archive'; c.archivedAt = Date.now(); changed = true;
+    }
+  });
+  if (changed) saveState();
+}
+
+// ── GOAL ──────────────────────────────────────────────────────────────────────
+const GOAL = 75;
+const CIRC = 2 * Math.PI * 32;
+
+function updateGoal() {
+  const current = Math.max(0, parseInt(document.getElementById('familiesInput').value) || 0);
+  const pct = Math.min(current / GOAL, 1);
+  const pctStr = (pct * 100).toFixed(2);
+
+  const arc = document.getElementById('goalArc');
+  if (arc) {
+    arc.setAttribute('stroke-dashoffset', (CIRC * (1 - pct)).toFixed(2));
+    const r1=[232,160,32], r2=[217,85,26], r3=[39,174,96];
+    let r, g, b;
+    if (pct < 0.5) {
+      const t = pct * 2;
+      r = Math.round(r1[0]+(r2[0]-r1[0])*t);
+      g = Math.round(r1[1]+(r2[1]-r1[1])*t);
+      b = Math.round(r1[2]+(r2[2]-r1[2])*t);
+    } else {
+      const t = (pct-0.5)*2;
+      r = Math.round(r2[0]+(r3[0]-r2[0])*t);
+      g = Math.round(r2[1]+(r3[1]-r2[1])*t);
+      b = Math.round(r2[2]+(r3[2]-r2[2])*t);
+    }
+    arc.setAttribute('stroke', `rgb(${r},${g},${b})`);
+  }
+  const svgTxt = document.getElementById('goalPctSvg');
+  if (svgTxt) svgTxt.textContent = Math.round(pct*100) + '%';
+  const pctEl = document.getElementById('goalPctText');
+  if (pctEl) pctEl.textContent = pctStr + '%';
+  const fracEl = document.getElementById('goalPctFraction');
+  if (fracEl) fracEl.textContent = `${current} ÷ ${GOAL} = ${pctStr}%`;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+const KOG_ICON = {
+  'First Contact':     '👋',
+  'Face to Face':      '😊',
+  'Follow Up':         '📞',
+  'Meet the Minister': '🙏',
+  'Conversion/Baptism':'💧',
+  'Integration':       '🔗',
+  'Church Life':       '📖',
+  'Grow & Serve':      '🌟',
+  'Send':              '✈️',
+};
+function kogShort(k) {
+  const icon  = KOG_ICON[k] || '';
+  const short = {'Meet the Minister':'MTM','Conversion/Baptism':'Conversion'}[k] || k;
+  return icon ? `${icon} ${short}` : short;
+}
+
+function visCards(colId) {
+  return cards.filter(c => {
+    if (c.col !== colId) return false;
+    if (colId === 'archive') return true;
+    if (fTeam !== 'all' && c.team !== fTeam) return false;
+    if (fKog  !== 'all' && c.kog  !== fKog)  return false;
+    return true;
+  });
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function cardHTML(c) {
+  const tc = TEAM_CONFIG[c.team] || { icon:'⭕', cls:'badge-go' };
+  const gTag  = `<span class="badge badge-tag">#${String(c.team||'').toLowerCase()}</span>`;
+  const kog   = c.kog   ? `<span class="badge badge-kog">⭕ ${kogShort(c.kog)}</span>` : '';
+  const owner = c.owner ? `<div class="card-owner">👤 <b>${esc(c.owner)}</b></div>` : '';
+  const notes = c.notes ? `<div class="card-notes">${esc(c.notes)}</div>` : '';
+  const archBtn = c.col === 'done'
+    ? `<button class="cab" data-archive="${c.id}" title="Move to Archive">📦</button>`
+    : c.col === 'archive'
+      ? `<button class="cab" data-unarchive="${c.id}" title="Restore to Completed">↩️</button>`
+      : '';
+  const moveButtons = c.col !== 'archive'
+    ? `<button class="cab" data-mv="-1" data-id="${c.id}" title="Move left">←</button>
+      <button class="cab" data-mv="1"  data-id="${c.id}" title="Move right">→</button>`
+    : '';
+  return `<div class="card" id="card-${c.id}" draggable="${c.col !== 'archive'}">
+    <div class="card-actions">
+      ${moveButtons}
+      <button class="cab" data-edit="${c.id}" title="Edit">✎</button>
+      <button class="cab" data-del="${c.id}" title="Delete">✕</button>
+      ${archBtn}
+    </div>
+    <div class="card-title">${esc(c.title)}</div>
+    <div class="card-badges"><span class="badge ${tc.cls}">${tc.icon} ${esc(c.team)}</span>${gTag}${kog}</div>
+    ${owner}${notes}
+  </div>`;
+}
+
+function render() {
+  const board = document.getElementById('board');
+  const visibleCols = showArchive ? [...COLS, ARCHIVE_COL] : COLS;
+  board.innerHTML = visibleCols.map(col => {
+    const vis = visCards(col.id);
+    const isArch = col.id === 'archive';
+    return `<div class="column${isArch ? ' archive-column' : ''}">
+      <div class="col-hdr ${col.cls}">
+        <span class="col-title">${col.label}</span>
+        <span class="col-count${isArch ? ' archive-badge' : ''}">${vis.length}</span>
+      </div>
+      <div class="cards-area" data-col="${col.id}">${vis.map(cardHTML).join('')}</div>
+      <div class="col-foot">${!isArch ? `<button class="add-card-btn" data-add="${col.id}">+ Add</button>` : ''}</div>
+    </div>`;
+  }).join('');
+  attachCardEvents();
+}
+
+// ── CARD EVENTS ───────────────────────────────────────────────────────────────
+function attachCardEvents() {
+  document.querySelectorAll('.card').forEach(el => {
+    el.addEventListener('dragstart', () => {
+      dragId = parseInt(el.id.replace('card-',''));
+      setTimeout(() => el.classList.add('dragging'), 0);
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.cards-area').forEach(a => a.classList.remove('drag-over'));
+    });
+  });
+  document.querySelectorAll('.cards-area').forEach(area => {
+    area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag-over'); });
+    area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+    area.addEventListener('drop', e => {
+      e.preventDefault();
+      area.classList.remove('drag-over');
+      if (dragId !== null) {
+        const c = cards.find(x => x.id === dragId);
+        if (c) {
+          const newCol = area.dataset.col;
+          if (newCol === 'done' && c.col !== 'done') c.movedToDoneAt = Date.now();
+          else if (newCol === 'archive') { c.archivedAt = Date.now(); }
+          else if (newCol !== 'done' && newCol !== 'archive') { delete c.movedToDoneAt; delete c.archivedAt; }
+          c.col = newCol; dragId = null; render(); saveState();
+        }
+      }
+    });
+  });
+  document.querySelectorAll('[data-mv]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const id  = parseInt(btn.dataset.id);
+      const dir = parseInt(btn.dataset.mv);
+      const c   = cards.find(x => x.id === id);
+      if (!c) return;
+      const ni = COL_IDS.indexOf(c.col) + dir;
+      if (ni >= 0 && ni < COL_IDS.length) {
+        const newCol = COL_IDS[ni];
+        if (newCol === 'done' && c.col !== 'done') c.movedToDoneAt = Date.now();
+        else if (newCol !== 'done') delete c.movedToDoneAt;
+        c.col = newCol; render(); saveState();
+      }
+    });
+  });
+  document.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      cards = cards.filter(c => c.id !== parseInt(btn.dataset.del));
+      render(); saveState();
+    });
+  });
+  document.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); openModal(null, parseInt(btn.dataset.edit)); });
+  });
+  document.querySelectorAll('[data-archive]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const c = cards.find(x => x.id === parseInt(btn.dataset.archive));
+      if (c) { c.col = 'archive'; c.archivedAt = Date.now(); render(); saveState(); }
+    });
+  });
+  document.querySelectorAll('[data-unarchive]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const c = cards.find(x => x.id === parseInt(btn.dataset.unarchive));
+      if (c) { c.col = 'done'; c.movedToDoneAt = Date.now(); delete c.archivedAt; render(); saveState(); }
+    });
+  });
+  document.querySelectorAll('[data-add]').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.dataset.add));
+  });
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.fbtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.dataset.ftype, val = btn.dataset.fval;
+    if (type === 'team') fTeam = val; else fKog = val;
+    document.querySelectorAll(`.fbtn[data-ftype="${type}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+});
+
+document.getElementById('globalAddBtn').addEventListener('click', () => openModal('backlog'));
+
+// ── ARCHIVE TOGGLE ────────────────────────────────────────────────────────────
+document.getElementById('archiveToggle').addEventListener('click', () => {
+  showArchive = !showArchive;
+  document.getElementById('archiveToggle').classList.toggle('active', showArchive);
+  render();
+});
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(defaultCol, editId) {
+  editingId = editId || null;
+  const title   = document.getElementById('modalTitle');
+  const saveBtn = document.getElementById('saveBtn');
+  if (editId) {
+    const c = cards.find(x => x.id === editId);
+    if (!c) return;
+    title.textContent = 'Edit Task'; saveBtn.textContent = 'Save Changes';
+    document.getElementById('mTitle').value = c.title;
+    document.getElementById('mTeam').value  = c.team;
+    document.getElementById('mKog').value   = c.kog || '';
+    document.getElementById('mCol').value   = c.col;
+    document.getElementById('mOwner').value = c.owner || '';
+    document.getElementById('mNotes').value = c.notes || '';
+  } else {
+    title.textContent = 'Add New Task'; saveBtn.textContent = 'Add Task';
+    document.getElementById('mTitle').value = '';
+    document.getElementById('mTeam').value  = 'Go';
+    document.getElementById('mKog').value   = '';
+    document.getElementById('mCol').value   = defaultCol || 'backlog';
+    document.getElementById('mOwner').value = '';
+    document.getElementById('mNotes').value = '';
+  }
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('mTitle').focus();
+}
+
+function closeModal() { document.getElementById('overlay').classList.remove('show'); editingId = null; }
+
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeModal();
+});
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const title = document.getElementById('mTitle').value.trim();
+  if (!title) return;
+  const data = {
+    title,
+    team:  document.getElementById('mTeam').value,
+    kog:   document.getElementById('mKog').value,
+    col:   document.getElementById('mCol').value,
+    owner: document.getElementById('mOwner').value.trim(),
+    notes: document.getElementById('mNotes').value.trim(),
+  };
+  if (editingId) {
+    const c = cards.find(x => x.id === editingId);
+    if (c) Object.assign(c, data);
+  } else {
+    cards.push({ id: nextId++, ...data });
+  }
+  closeModal(); render(); saveState();
+});
+
+// ── SAVE BUTTON ───────────────────────────────────────────────────────────────
+document.getElementById('saveBtn2').addEventListener('click', saveState);
+
+// ── AUTO-SAVE INFO FIELDS & FAMILIES ──────────────────────────────────────────
+['iUpdated','iNextReview'].forEach(id => {
+  document.getElementById(id).addEventListener('change', saveState);
+});
+document.getElementById('familiesInput').addEventListener('input', () => { updateGoal(); saveState(); });
+
+// ── MERGE NEW DEFAULTS ────────────────────────────────────────────────────────
+// Adds any DEFAULT_CARDS not already in the saved state (preserves existing positions).
+function mergeNewDefaults() {
+  const existingIds = new Set(cards.map(c => c.id));
+  let changed = false;
+  DEFAULT_CARDS.forEach(dc => {
+    if (!existingIds.has(dc.id)) {
+      cards.push(JSON.parse(JSON.stringify(dc)));
+      changed = true;
+    }
+  });
+  const maxId = cards.reduce((m, c) => Math.max(m, c.id), 0);
+  if (nextId <= maxId) nextId = maxId + 1;
+  if (changed) saveState();
+}
+
+// ── STRATEGY v2 MIGRATION ─────────────────────────────────────────────────────
+// One-time update of saved combined-service cards (ids 42–64) to Version 2
+// of the Combined Service Strategy (10 July 2026). New v2 cards (65+) are
+// added separately by mergeNewDefaults().
+function migrateStrategyV2() {
+  if (localStorage.getItem('g7k_strategy_v2')) return;
+  const byId = {};
+  DEFAULT_CARDS.forEach(dc => { byId[dc.id] = dc; });
+  let changed = false;
+  cards.forEach(c => {
+    if (c.id >= 42 && c.id <= 64 && byId[c.id]) {
+      const d = byId[c.id];
+      c.title = d.title; c.team = d.team; c.kog = d.kog;
+      c.owner = d.owner; c.notes = d.notes;
+      changed = true;
+    }
+  });
+  localStorage.setItem('g7k_strategy_v2', '1');
+  if (changed) saveState();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadState();
+migrateStrategyV2();
+mergeNewDefaults();
+autoArchive();
+render();
+updateGoal();
+
+// ── PDF COLUMN PICKER ─────────────────────────────────────────────────────────
+const pdfCols = { prayer:true, backlog:true, awaiting:true, progress:true, done:true };
+document.querySelectorAll('.pdfcol').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const col = btn.dataset.pdfcol;
+    pdfCols[col] = !pdfCols[col];
+    btn.classList.toggle('active', pdfCols[col]);
+  });
+});
+
+// ── VIEW PDF — builds the PDF from what's on screen right now, using the
+//    approved print template format and the selected columns, then opens
+//    the preview overlay ─────────────────────────────────────────────────────
+function viewPdf() {
+  const today    = new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'long',year:'numeric'});
+  const families = document.getElementById('familiesInput').value || '50';
+  const pct      = (parseInt(families) / 75 * 100).toFixed(2);
+  const updated  = document.getElementById('iUpdated').value;
+  const nextRev  = document.getElementById('iNextReview').value;
+
+  const filterParts = [];
+  if (fTeam !== 'all') filterParts.push('Team: ' + fTeam);
+  if (fKog  !== 'all') filterParts.push('KOG: ' + fKog);
+  const selCols = COLS.filter(c => pdfCols[c.id]);
+  if (selCols.length < COLS.length) {
+    filterParts.push('Columns: ' + selCols.map(c => c.label.replace(/^[^ ]+ /, '')).join(' · '));
+  }
+  const filterNote = filterParts.length ? filterParts.join(' | ') : '';
+
+  // Official G7 Design Scheme colours
+  const TEAM_PRIMARY  = {Glorify:'#C0392B',Go:'#1E8449',Gregarious:'#CA6F1E',Grow:'#1A5276',Giftedness:'#6C3483',Governance:'#F0B800',Glue:'#7D6608'};
+  const TEAM_TINT     = {Glorify:'#FADBD8',Go:'#D5F5E3',Gregarious:'#FDEBD0',Grow:'#D6EAF8',Giftedness:'#E8DAEF',Governance:'#FFFBE6',Glue:'#FDF2E9'};
+  const TEAM_BADGETXT = {Glorify:'#fff',Go:'#fff',Gregarious:'#fff',Grow:'#fff',Giftedness:'#fff',Governance:'#212121',Glue:'#fff'};
+  const TEAM_ICON2    = {Go:'🌍',Glorify:'🎵',Grow:'🌱',Giftedness:'🎁',Governance:'⚖️',Glue:'🤝',Gregarious:'🎉'};
+  const COL_COLOR     = {prayer:'#9B59B6',backlog:'#3A8FD0',awaiting:'#D9551A',progress:'#E8A020',done:'#27AE60',archive:'#9B7050'};
+
+  const pickedCols = COLS.filter(c => pdfCols[c.id]);
+  const visibleCols = showArchive ? [...pickedCols, ARCHIVE_COL] : pickedCols;
+
+  let rows = '';
+  visibleCols.forEach(col => {
+    const colCards = visCards(col.id);
+    if (!colCards.length) return;
+    rows += `<tr class="sec-hdr">
+      <td colspan="6" style="background:${COL_COLOR[col.id]||'#888'};">
+        ${esc(col.label)} <span style="opacity:.7;font-size:6pt;font-weight:normal;">(${colCards.length} items)</span>
+      </td>
+    </tr>`;
+    colCards.forEach(c => {
+      const primary = TEAM_PRIMARY[c.team]  || '#888';
+      const tint    = TEAM_TINT[c.team]     || '#fafafa';
+      const bTxt    = TEAM_BADGETXT[c.team] || '#fff';
+      const tIcon   = TEAM_ICON2[c.team]    || '';
+      const kIcon   = KOG_ICON[c.kog]       || '';
+      rows += `<tr class="data-row" style="background:${tint};border-left:4px solid ${primary};">
+        <td class="pn">${c.id}</td>
+        <td class="pt">${esc(c.title)}</td>
+        <td class="pte"><span class="badge" style="background:${primary};color:${bTxt};">${tIcon} ${esc(c.team)}</span><div style="font-size:5pt;color:#9B7050;font-style:italic;margin-top:1px;">#${String(c.team||'').toLowerCase()}</div></td>
+        <td class="pk">${kIcon ? kIcon + ' ' : ''}${esc(c.kog||'—')}</td>
+        <td class="po">${esc(c.owner||'—')}</td>
+        <td class="pno">${esc(c.notes||'')}</td>
+      </tr>`;
+    });
+  });
+
+  document.getElementById('print-view').innerHTML = `
+    <div class="p-hdr">
+      <div class="p-cross">✝</div>
+      <div class="p-hdr-text">
+        <h1>G7 — Kanban Board</h1>
+        <p>St Paul's Anglican Church Kogarah &nbsp;|&nbsp; G7 Ministry Teams<br>
+        "We gather to build and to nurture a nation which lives and breathes the Gospel of Jesus Christ"</p>
+      </div>
+      <div class="p-hdr-right">
+        <div>Printed: ${today}</div>
+        ${updated ? `<div>Updated: ${esc(updated)}</div>` : ''}
+        ${nextRev ? `<div>Next Review: ${esc(nextRev)}</div>` : ''}
+        ${filterNote ? `<div style="opacity:.7">${esc(filterNote)}</div>` : ''}
+      </div>
+    </div>
+    <div class="p-goal">
+      <b>🏠 Household Goal:</b>
+      <span>${esc(families)} families / 75 households</span>
+      <span class="pct">= ${pct}%</span>
+      <span style="color:#9B7050;font-style:italic;">— Reaching every household with the Gospel of Jesus Christ in our parish</span>
+    </div>
+    <div class="p-kog-bar">
+      KOG Cycle:&nbsp; 👋 First Contact &rarr; 😊 Face to Face &rarr; 🙏 Meet the Minister &rarr; 📞 Follow Up &rarr; 💧 Conversion/Baptism &rarr; 🔗 Integration &rarr; 📖 Church Life &rarr; 🌟 Grow &amp; Serve &rarr; ✈️ Send
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Task / Description</th>
+          <th>Team</th>
+          <th>KOG Stage</th>
+          <th>Owner</th>
+          <th>Notes / Context</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="p-footer">
+      St Paul's Anglican Church Kogarah &nbsp;·&nbsp; www.stpaulskogarah.com.au &nbsp;·&nbsp;
+      See the Gospel · Hear the Gospel · Believe the Gospel · Tell the Gospel
+    </div>`;
+
+  document.getElementById('preview-overlay').classList.add('show');
+}
+
+function printPdf() {
+  hideHint();
+  window.print();
+}
+
+function savePdf() {
+  // Same browser dialog — user picks "Save as PDF" as the destination.
+  const hint = document.getElementById('pvHint');
+  hint.classList.add('show');
+  setTimeout(() => { window.print(); }, 150);
+  setTimeout(hideHint, 8000);
+}
+
+function hideHint() {
+  document.getElementById('pvHint').classList.remove('show');
+}
+
+function closePreview() {
+  hideHint();
+  document.getElementById('preview-overlay').classList.remove('show');
+}
+</script>
+
+<div id="preview-overlay">
+  <div class="pv-bar">
+    <span class="pv-bar-title">📄 PDF Preview</span>
+    <span class="pv-bar-sub">A4 Landscape — snapshot of the board as shown on screen</span>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button class="pv-btn-print" onclick="printPdf()">🖨️ Print</button>
+      <button class="pv-btn-save" onclick="savePdf()">💾 Save as PDF</button>
+      <button class="pv-btn-close" onclick="closePreview()">✕ Close</button>
+    </div>
+  </div>
+  <div class="pv-hint" id="pvHint">💡 In the print dialog that opens, choose <b>"Save as PDF"</b> as the destination (printer), then click Save.</div>
+  <div class="pv-scroll">
+    <div class="pv-page">
+      <div id="print-view"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── SUPABASE SYNC ────────────────────────────────────────────────────────────
+   The board lives in one row of a Supabase table. Access is gated by two
+   Postgres functions (get_board / save_board) that verify a SHA-256 hash of the
+   passcode server-side, so the data cannot be read without it. Local storage is
+   kept as an offline cache; the server is the source of truth. */
+
+const G7_BAKED = { url: "https://oqohvmvzudpxhviukfhz.supabase.co", key: "sb_publishable_L4z47rq55RTZSWbF6sU0IA_XvlfSAST" };
+const POLL_MS = 12000;
+
+let g7cfg = null, g7pass = null;
+let lastRemoteStamp = null, pushTimer = null, pushing = false, pollTimer = null;
+
+function cfgReady(c) { return c && c.url && c.key && !c.url.startsWith("__"); }
+
+/* Accept the URL in any form the dashboard shows it, e.g.
+   https://xxx.supabase.co, with a trailing slash, or with /rest/v1 appended. */
+function normUrl(u) {
+  return String(u).trim().replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
+}
+
+function loadCfg() {
+  if (cfgReady(G7_BAKED)) return { url: normUrl(G7_BAKED.url), key: G7_BAKED.key };
+  try {
+    const s = JSON.parse(localStorage.getItem("g7_cfg") || "null");
+    if (cfgReady(s)) return { url: normUrl(s.url), key: s.key };
+  } catch (e) {}
+  return null;
+}
+
+function setPill(cls, text) {
+  const p = document.getElementById("syncPill");
+  if (!p) return;
+  p.className = "sync-pill " + cls;
+  p.textContent = text;
+}
+
+async function rpc(fn, body) {
+  /* Legacy anon keys are JWTs (they start "eyJ") and are sent as a Bearer
+     token as well as the apikey. The newer sb_publishable_… keys are not
+     JWTs, so sending them as Bearer makes PostgREST reject the request. */
+  const headers = { "apikey": g7cfg.key, "Content-Type": "application/json" };
+  if (/^eyJ/.test(g7cfg.key)) headers["Authorization"] = "Bearer " + g7cfg.key;
+
+  const r = await fetch(g7cfg.url + "/rest/v1/rpc/" + fn, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(body),
+  });
+  const txt = await r.text();
+  if (!r.ok) {
+    const err = new Error(txt || ("HTTP " + r.status));
+    err.status = r.status;
+    err.body = txt;
+    throw err;
+  }
+  return txt ? JSON.parse(txt) : null;
+}
+
+function snapshot() {
+  return {
+    cards, nextId,
+    families:    document.getElementById("familiesInput").value,
+    iUpdated:    document.getElementById("iUpdated").value,
+    iNextReview: document.getElementById("iNextReview").value,
+  };
+}
+
+function applySnapshot(s) {
+  if (!s || !s.cards) return false;
+  cards = s.cards;
+  if (s.nextId) nextId = s.nextId;
+  if (s.families    != null) document.getElementById("familiesInput").value = s.families;
+  if (s.iUpdated    != null) document.getElementById("iUpdated").value      = s.iUpdated;
+  if (s.iNextReview != null) document.getElementById("iNextReview").value   = s.iNextReview;
+  render();
+  updateGoal();
+  return true;
+}
+
+/* Wrap saveState so every local change is also pushed to the server. */
+const _localSave = saveState;
+saveState = function () {
+  _localSave();
+  schedulePush();
+};
+
+function schedulePush() {
+  if (!g7cfg || !g7pass) return;
+  clearTimeout(pushTimer);
+  setPill("sync-busy", "saving…");
+  pushTimer = setTimeout(pushNow, 700);
+}
+
+async function pushNow() {
+  if (!g7cfg || !g7pass) return;
+  pushing = true;
+  try {
+    const stamp = await rpc("save_board", { pass: g7pass, new_data: snapshot() });
+    lastRemoteStamp = stamp;
+    setPill("sync-ok", "✓ synced");
+  } catch (e) {
+    console.warn("push failed", e);
+    setPill("sync-off", "offline — saved here");
+  } finally {
+    pushing = false;
+  }
+}
+
+async function pullNow(force) {
+  if (!g7cfg || !g7pass || pushing) return;
+  try {
+    const res = await rpc("get_board", { pass: g7pass });
+    if (!res) return;
+    const stamp = res.updated_at;
+    if (force || stamp !== lastRemoteStamp) {
+      if (res.data && res.data.cards) {
+        applySnapshot(res.data);
+        _localSave();
+      }
+      lastRemoteStamp = stamp;
+    }
+    setPill("sync-ok", "✓ synced");
+  } catch (e) {
+    console.warn("pull failed", e);
+    setPill("sync-off", "offline — saved here");
+  }
+}
+
+function startSync() {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(pullNow, POLL_MS);
+  window.addEventListener("focus", () => pullNow());
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pullNow(); });
+  window.addEventListener("beforeunload", () => { if (pushTimer) { clearTimeout(pushTimer); pushNow(); } });
+}
+
+/* ── GATE ─────────────────────────────────────────────────────────────────── */
+async function gateUnlock() {
+  const errEl = document.getElementById("gateErr");
+  errEl.textContent = "";
+
+  if (!g7cfg) {
+    const url = normUrl(document.getElementById("cfgUrl").value || "");
+    const key = (document.getElementById("cfgKey").value || "").trim();
+    if (!url || !key) { errEl.textContent = "Enter both the project URL and the anon key."; return; }
+    g7cfg = { url, key };
+  }
+
+  const pw = document.getElementById("gatePw").value;
+  if (!pw) { errEl.textContent = "Enter the passcode."; return; }
+
+  document.getElementById("gateBtn").textContent = "Checking…";
+  try {
+    const res = await rpc("get_board", { pass: pw });
+    g7pass = pw;
+    localStorage.setItem("g7_cfg", JSON.stringify(g7cfg));
+
+    /* "Remember me" keeps the passcode in localStorage so the board opens
+       straight away on this device — including when launched from the home
+       screen. Otherwise it lives only for this browser session. */
+    if (document.getElementById("gateRemember").checked) {
+      localStorage.setItem("g7_pass", pw);
+      sessionStorage.removeItem("g7_pass");
+    } else {
+      sessionStorage.setItem("g7_pass", pw);
+      localStorage.removeItem("g7_pass");
+    }
+
+    if (res && res.data && res.data.cards) {
+      applySnapshot(res.data);
+      _localSave();
+      lastRemoteStamp = res.updated_at;
+    } else {
+      await pushNow();          // first run: seed the server from this device
+    }
+
+    document.body.classList.remove("locked");
+    document.getElementById("g7gate").classList.add("hidden");
+    setPill("sync-ok", "✓ synced");
+    startSync();
+  } catch (e) {
+    const body = e.body || "";
+    if (/unauthorized/i.test(body)) {
+      errEl.textContent = "Incorrect passcode — please try again.";
+    } else if (/could not find the function|PGRST202/i.test(body)) {
+      errEl.textContent = "Setup incomplete: the database functions aren't there yet. Re-run the SQL script.";
+    } else if (e.status === 401 || e.status === 403) {
+      errEl.textContent = "The API key was rejected. Check the publishable key.";
+    } else {
+      /* Show the server's own words — far more useful than a guess. */
+      let msg = "";
+      try { msg = (JSON.parse(body).message || "").slice(0, 140); } catch (_) {}
+      errEl.textContent = msg ? ("Server said: " + msg) : "Could not reach the board — check the connection.";
+    }
+    console.warn("gate error", e.status, body);
+    document.getElementById("gateBtn").textContent = "Open the board";
+  }
+}
+
+(function initGate() {
+  g7cfg = loadCfg();
+  if (!g7cfg) {
+    document.getElementById("gateSetup").classList.add("show");
+    document.getElementById("gateNote").textContent =
+      "First run on this device: paste your Supabase project URL and anon key. They are remembered here afterwards.";
+  }
+  document.getElementById("gateBtn").addEventListener("click", gateUnlock);
+  ["gatePw", "cfgUrl", "cfgKey"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("keydown", e => { if (e.key === "Enter") gateUnlock(); });
+  });
+  const remembered = localStorage.getItem("g7_pass");
+  const saved = remembered || sessionStorage.getItem("g7_pass");
+  if (remembered) document.getElementById("gateRemember").checked = true;
+  if (saved && g7cfg) {
+    document.getElementById("gatePw").value = saved;
+    gateUnlock();
+  } else {
+    document.getElementById("gatePw").focus();
+  }
+})();
+
+/* Lock the board again and forget a remembered passcode on this device. */
+function lockBoard() {
+  localStorage.removeItem("g7_pass");
+  sessionStorage.removeItem("g7_pass");
+  location.reload();
+}
+</script>
+
+</body>
+</html>
