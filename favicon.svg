@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="St Paul's Kogarah term diary">
+  <title>St Paul's Kogarah — term diary</title>
+  <g fill="#2D7B8C">
+    <circle cx="32.0" cy="9.0" r="2.5" fill="#C8962E"/>
+    <circle cx="46.78" cy="14.38" r="1.75"/>
+    <circle cx="54.65" cy="28.01" r="1.75"/>
+    <circle cx="51.92" cy="43.5" r="1.75"/>
+    <circle cx="39.87" cy="53.61" r="1.75"/>
+    <circle cx="24.13" cy="53.61" r="1.75"/>
+    <circle cx="12.08" cy="43.5" r="1.75"/>
+    <circle cx="9.35" cy="28.01" r="1.75"/>
+    <circle cx="17.22" cy="14.38" r="1.75"/>
+  </g>
+  <circle cx="32" cy="32" r="17.4" fill="#E8714A"/>
+  <path fill="#15171C" d="M29.0 12.8 L34.9 12.0 L35.4 22.8 L45.0 22.2 L44.6 29.9 L35.2 29.4 L34.6 50.9 L28.8 51.5 L29.3 29.2 L19.2 29.8 L19.6 22.6 L29.2 23.1 Z"/>
+</svg>
