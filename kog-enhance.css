@@ -1,0 +1,63 @@
+/* KOGCycle enhancement — stage dropdowns, per-stage completed trays,
+   phone pathway. Loaded from cycle.html. Delete the two lines in
+   cycle.html to switch it off. */
+
+/* ---- stage dropdowns ---- */
+  .card > h4.stage-head{
+    display:flex; align-items:center; gap:8px; margin:0;
+    cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
+  }
+  .card > h4.stage-head:focus-visible{outline:2px solid var(--teal); outline-offset:3px; border-radius:4px}
+  .card > h4.stage-head .chev{
+    margin-left:auto; flex:0 0 auto; width:14px; height:14px;
+    border-right:2px solid var(--muted); border-bottom:2px solid var(--muted);
+    transform:rotate(45deg) translate(-2px,-2px); transition:transform .18s ease;
+  }
+  .card[data-open="0"] > h4.stage-head .chev{transform:rotate(-45deg) translate(-2px,2px)}
+  .card[data-open="0"] .stage-body{display:none}
+  .card .stage-body{margin-top:9px}
+  .card[data-clear="1"] > h4.stage-head{opacity:.62}
+
+  /* ---- completed tray, per stage ---- */
+  details.done-tray{margin-top:8px; border-top:1px dashed var(--cream-deep); padding-top:7px}
+  details.done-tray > summary{
+    cursor:pointer; list-style:none; font-family:Georgia,serif; font-size:.78rem;
+    color:var(--muted); letter-spacing:.02em; padding:2px 0;
+  }
+  details.done-tray > summary::-webkit-details-marker{display:none}
+  details.done-tray > summary::before{
+    content:"▸"; display:inline-block; margin-right:6px; transition:transform .18s ease;
+  }
+  details.done-tray[open] > summary::before{transform:rotate(90deg)}
+  details.done-tray > summary:hover{color:var(--teal)}
+  details.done-tray .item{opacity:.72}
+  details.done-tray .item .item-t{text-decoration:line-through; text-decoration-color:rgba(0,0,0,.25)}
+
+  /* the sidebar list is now duplicated per stage, so it starts folded away */
+  #doneBox.folded #doneList{display:none}
+  #doneBox.folded > h3{cursor:pointer}
+  #doneBox > h3 .foldnote{font-size:.7rem; color:var(--muted); font-weight:400; margin-left:6px}
+
+  /* ---- phone: the ring becomes a pathway ---- */
+  @media (max-width:760px){
+    .ring{display:none !important}
+    .grid{grid-template-columns:1fr !important; gap:0 !important}
+    .card{
+      position:relative; margin:0 0 0 0; padding-left:34px;
+      border-radius:0; border-left:none; border-right:none; border-bottom:none;
+    }
+    .card:last-child{border-bottom:1.5px solid var(--cream-deep)}
+    .card::before{
+      content:""; position:absolute; left:15px; top:0; bottom:0;
+      width:2px; background:var(--cream-deep);
+    }
+    .card:first-child::before{top:18px}
+    .card:last-child::before{bottom:auto; height:18px}
+    .card::after{
+      content:""; position:absolute; left:11px; top:16px;
+      width:10px; height:10px; border-radius:50%;
+      background:#fff; border:2px solid var(--teal);
+    }
+    .card[data-clear="1"]::after{border-color:var(--cream-deep)}
+    .card > h4.stage-head{padding:4px 0}
+  }
