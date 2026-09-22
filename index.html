@@ -249,6 +249,12 @@ footer{text-align:center;font-size:.67rem;color:var(--muted);padding:6px;border-
 .gate-remember input{width:auto;margin:0;transform:scale(1.15);accent-color:var(--orange);}
 .lock-btn{padding:4px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);cursor:pointer;font-size:.75rem;font-family:Georgia,serif;white-space:nowrap;text-decoration:none;display:inline-block;}
 .lock-btn:hover{border-color:var(--orange);color:var(--orange);}
+/* the three pages sit together as one group */
+.g7nav{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.g7nav .lock-btn{display:inline-flex;align-items:center;gap:6px;}
+.g7nav .lock-btn b{font-weight:400;}
+.lock-btn[aria-current="page"]{border-style:dashed;cursor:default;}
+.lock-btn[aria-current="page"]:hover{border-color:var(--border);color:var(--muted);}
 .gate-note{font-size:.68rem;color:var(--muted);margin-top:14px;font-style:italic;line-height:1.5;}
 .gate-setup{display:none;}
 .gate-setup.show{display:block;}
@@ -316,7 +322,11 @@ body.locked > *:not(#g7gate){display:none !important;}
   <div class="info-field"><label>Next Review:</label><input type="text" id="iNextReview" placeholder="DD MMM YYYY"></div>
   <span class="save-indicator" id="saveIndicator">✓ Saved</span>
   <span class="sync-pill sync-busy" id="syncPill">connecting…</span>
-  <a class="lock-btn" href="cycle.html" title="See these projects along the KOGCycle">◎ KOGCycle</a>
+  <nav class="g7nav" aria-label="G7 pages">
+    <a class="lock-btn" href="calendar.html" title="Term 4 2026 – Feb 2027 diary"><b>▤</b> Term Diary</a>
+    <span class="lock-btn" aria-current="page"><b>◻</b> Kanban</span>
+    <a class="lock-btn" href="cycle.html" title="See these projects along the KOGCycle"><b>◎</b> KOGCycle</a>
+  </nav>
   <button class="lock-btn" onclick="lockBoard()" title="Lock the board and forget the passcode on this device">🔒 Lock</button>
   <button class="save-btn" id="saveBtn2">💾 Save</button>
   <span class="filter-label" style="font-size:.72rem;color:var(--muted);font-style:italic;">PDF columns:</span>

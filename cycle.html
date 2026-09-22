@@ -122,7 +122,13 @@ body{font-family:Georgia,'Times New Roman',serif;background:var(--cream);color:v
 .gate-err{color:#C0392B;font-size:.75rem;margin-top:10px;min-height:1.1em;}
 body.locked > *:not(#g7gate){display:none !important;}
 
-.topbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:-6px;}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:-6px;}
+/* the three pages sit together on the left; page actions stay on the right */
+.g7nav{display:flex;flex-wrap:wrap;gap:8px;margin-right:auto;}
+.g7nav .tb{text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.g7nav .tb b{font-weight:400;}
+.tb[aria-current="page"]{border-style:dashed;color:var(--muted,#8A7A5E);cursor:default;}
+.tb[aria-current="page"]:hover{border-color:var(--gold-soft);}
 .tb{padding:4px 12px;border-radius:8px;border:1.5px solid var(--gold-soft);background:#fff;color:var(--navy);
     cursor:pointer;font-size:.72rem;font-family:Georgia,serif;text-decoration:none;}
 .tb:hover{border-color:var(--gold);}
@@ -156,7 +162,11 @@ body.locked > *:not(#g7gate){display:none !important;}
 
 <div class="frame">
   <div class="topbar">
-    <a class="tb" href="index.html">&#8592; Kanban board</a>
+    <nav class="g7nav" aria-label="G7 pages">
+      <a class="tb" href="calendar.html"><b>&#9636;</b> Term Diary</a>
+      <a class="tb" href="index.html"><b>&#9723;</b> Kanban</a>
+      <span class="tb" aria-current="page"><b>&#9678;</b> KOGCycle</span>
+    </nav>
     <button class="tb" onclick="window.print()">&#128424; Print</button>
     <button class="tb" onclick="lockBoard()">&#128274; Lock</button>
   </div>
