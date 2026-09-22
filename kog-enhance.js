@@ -14,45 +14,48 @@
   };
 
   /* One glyph per stage, drawn on a 24x24 grid, stroked in the current colour
-     so it inherits the teal and dims with the node when a stage is clear. */
+     so it inherits the node's tint and dims with it when a stage is clear.
+     Every glyph is drawn to the same rules so the ring reads evenly:
+       - it fills the box from 4 to 20 on both axes, no further and no less
+       - it is balanced about x=12, so nothing looks pushed to one side
+       - one stroke weight throughout, no per-path overrides
+     Break any of those and that one circle looks wrong next to the other eight. */
   function svg(inner) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
   }
   var ICONS = [
-    /* 1 First Contact - a voice going out */
-    svg('<circle cx="8" cy="12" r="2.4" fill="currentColor" stroke="none"/>' +
-        '<path d="M13 8.2a5.4 5.4 0 0 1 0 7.6"/><path d="M16.2 5a9.6 9.6 0 0 1 0 14"/>'),
+    /* 1 First Contact - a word spoken */
+    svg('<path d="M20 14.8a2.4 2.4 0 0 1-2.4 2.4H9.2L4.4 20.4V6.8a2.4 2.4 0 0 1 2.4-2.4h10.8A2.4 2.4 0 0 1 20 6.8z"/>' +
+        '<path d="M8.8 10.4h6.4M8.8 13.6h4"/>'),
     /* 2 Face to Face - two people, turned toward each other */
-    svg('<circle cx="7.6" cy="8.4" r="2.6"/><circle cx="16.4" cy="8.4" r="2.6"/>' +
-        '<path d="M3.4 18.6c.5-2.6 2.2-4 4.2-4s3.7 1.4 4.2 4"/>' +
-        '<path d="M12.2 18.6c.5-2.6 2.2-4 4.2-4s3.7 1.4 4.2 4"/>'),
+    svg('<circle cx="8.2" cy="8.8" r="2.7"/><circle cx="15.8" cy="8.8" r="2.7"/>' +
+        '<path d="M4.2 18.8c.5-2.6 2-4 4-4s3.5 1.4 4 4"/>' +
+        '<path d="M11.8 18.8c.5-2.6 2-4 4-4s3.5 1.4 4 4"/>'),
     /* 3 Follow Up - coming back round */
-    svg('<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20.4 4.2v4.4h-4.4"/>' +
-        '<circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none"/>'),
-    /* 4 Meet the Minister - a handshake */
-    svg('<path d="M3 10.6l3.4-3.1 3.6 1.4 2 1.9-1.7 1.6-2.2-1.5"/>' +
-        '<path d="M21 10.6l-3.4-3.1-3.2 1.2"/>' +
-        '<path d="M10.3 12.4l2.4 2.2M12.6 11l2.6 2.4M15 9.9l2.7 2.5"/>'),
+    svg('<path d="M19.6 12a7.6 7.6 0 1 1-2.5-5.6"/><path d="M20 4.4v4.2h-4.2"/>' +
+        '<circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none"/>'),
+    /* 4 Meet the Minister - sitting down together over a cup */
+    svg('<path d="M5.2 7.6h11.2v6.2a4.6 4.6 0 0 1-4.6 4.6H9.8a4.6 4.6 0 0 1-4.6-4.6z"/>' +
+        '<path d="M16.4 9.2h1.4a2.5 2.5 0 0 1 0 5h-1.4"/>' +
+        '<path d="M4 20.4h13.6"/>'),
     /* 5 Conversion / Baptism - water and the cross */
-    svg('<path d="M12 3.2c2.6 3.3 4 5.6 4 7.3a4 4 0 0 1-8 0c0-1.7 1.4-4 4-7.3z"/>' +
-        '<path d="M12 8.1v5.6M9.8 10.2h4.4" stroke-width="1.5"/>' +
-        '<path d="M3.2 18.4c1.6 0 1.6 1.5 3.2 1.5s1.6-1.5 3.2-1.5 1.6 1.5 3.2 1.5 1.6-1.5 3.2-1.5 1.6 1.5 3.2 1.5"/>'),
-    /* 6 Integration - brought into the body */
-    svg('<circle cx="8.6" cy="12" r="4.6"/><circle cx="15.4" cy="12" r="4.6"/>' +
-        '<path d="M12 8.2a4.6 4.6 0 0 0 0 7.6" stroke-width="1.4"/>'),
+    svg('<path d="M12 4c2.5 3.2 3.9 5.4 3.9 7.1a3.9 3.9 0 0 1-7.8 0C8.1 9.4 9.5 7.2 12 4z"/>' +
+        '<path d="M12 8.6v5M10 10.6h4"/>' +
+        '<path d="M4 18.8c1.6 0 1.6 1.4 3.2 1.4s1.6-1.4 3.2-1.4 1.6 1.4 3.2 1.4 1.6-1.4 3.2-1.4 1.6 1.4 3.2 1.4"/>'),
+    /* 6 Integration - brought into the one body */
+    svg('<circle cx="9.2" cy="12" r="5"/><circle cx="14.8" cy="12" r="5"/>'),
     /* 7 Church Life - the gathered church */
-    svg('<path d="M12 2.6v4M10.2 4.2h3.6" stroke-width="1.5"/>' +
-        '<path d="M5 20.4V11l7-4.4 7 4.4v9.4z"/>' +
-        '<path d="M10.2 20.4v-4.2a1.8 1.8 0 0 1 3.6 0v4.2"/>'),
+    svg('<path d="M12 4v3.8M10.3 5.6h3.4"/>' +
+        '<path d="M5 20.4v-9l7-4.2 7 4.2v9z"/>' +
+        '<path d="M10.2 20.4v-4a1.8 1.8 0 0 1 3.6 0v4"/>'),
     /* 8 Grow & Serve - growing up into him */
     svg('<path d="M12 20.4v-7.8"/>' +
-        '<path d="M12 12.6c0-2.6-1.7-4.6-4.4-5 0 2.8 1.6 4.7 4.4 5z"/>' +
-        '<path d="M12 12.6c0-3.1 1.9-5.4 5-5.8 0 3.3-1.9 5.5-5 5.8z"/>' +
-        '<path d="M7.6 20.4h8.8" stroke-width="1.5"/>'),
-    /* 9 Send - out from the circle */
-    svg('<path d="M12.6 3.4a8.6 8.6 0 1 0 8 8"/>' +
-        '<path d="M11.4 12.6L20.6 3.4"/><path d="M15.4 3.4h5.2v5.2"/>')
+        '<path d="M12 12.6c0-2.8-1.8-4.8-4.7-5.2 0 3 1.8 5 4.7 5.2z"/>' +
+        '<path d="M12 12.6c0-2.8 1.8-4.8 4.7-5.2 0 3-1.8 5-4.7 5.2z"/>' +
+        '<path d="M7.4 20.4h9.2"/>'),
+    /* 9 Send - carried out from here */
+    svg('<path d="M20.2 4.4 4 11.2l6.6 2.4 2.4 6.6z"/><path d="M20.2 4.4 10.6 13.6"/>')
   ];
 
   var lastCards = null;
