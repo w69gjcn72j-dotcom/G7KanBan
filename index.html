@@ -6,14 +6,12 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#D9551A">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="kanban-icon-180.png">
-<link rel="icon" type="image/png" sizes="32x32" href="kanban-icon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="kanban-icon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="G7 Kanban">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="followup.css">
 <style>
 :root {
   color-scheme: light;
@@ -126,6 +124,22 @@ header .motto{font-size:.68rem;opacity:.82;margin-top:4px;line-height:1.4;}
 .badge-gregarious{background:var(--gregarious-bg);color:var(--gregarious-text);}
 .badge-kog{background:var(--kog-bg);color:var(--kog-text);border:1px solid #F0C0A0;}
 .badge-tag{background:#F5EFE8;color:#9B7050;border:1px dashed #D9C4AC;font-style:italic;}
+
+/* ── FOLLOW-UPS ── */
+.card.fu-on{border-color:#E8A020;box-shadow:0 0 0 2px rgba(232,160,32,.22);}
+.card.fu-on .card-title::before{content:"⏰ ";}
+.cab.fu-set{color:#E8A020;}
+.fbtn.fu-btn.active{background:#E8A020;border-color:#E8A020;color:#fff;}
+.fu-count{display:inline-block;min-width:16px;padding:0 4px;margin-left:4px;border-radius:7px;background:rgba(0,0,0,.14);font-size:.66rem;}
+.fu-banner{display:none;background:linear-gradient(135deg,#FFF6E6,#FFEFD6);border-bottom:2px solid #E8A020;padding:10px 16px;flex-shrink:0;}
+.fu-banner.show{display:block;}
+.fu-banner h4{font-size:.84rem;color:#8A5A00;margin-bottom:5px;}
+.fu-banner ul{margin:0 0 0 18px;padding:0;}
+.fu-banner li{font-size:.75rem;color:#5C2F10;line-height:1.55;}
+.fu-banner li b{color:#2C1508;}
+.fu-banner .owner{color:#9B7050;font-style:italic;}
+.fu-dismiss{float:right;border:1px solid #E8A020;background:#fff;color:#8A5A00;border-radius:7px;padding:2px 10px;font-size:.7rem;font-family:Georgia,serif;cursor:pointer;}
+.fu-dismiss:hover{background:#FFF2DC;}
 .card-owner{font-size:.68rem;color:var(--muted);margin-top:3px;}
 .card-owner b{color:var(--mid);}
 .card-notes{font-size:.66rem;color:var(--muted);margin-top:2px;font-style:italic;line-height:1.3;}
@@ -251,12 +265,6 @@ footer{text-align:center;font-size:.67rem;color:var(--muted);padding:6px;border-
 .gate-remember input{width:auto;margin:0;transform:scale(1.15);accent-color:var(--orange);}
 .lock-btn{padding:4px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);cursor:pointer;font-size:.75rem;font-family:Georgia,serif;white-space:nowrap;text-decoration:none;display:inline-block;}
 .lock-btn:hover{border-color:var(--orange);color:var(--orange);}
-/* the three pages sit together as one group */
-.g7nav{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;}
-.g7nav .lock-btn{display:inline-flex;align-items:center;gap:6px;}
-.g7nav .lock-btn b{font-weight:400;}
-.lock-btn[aria-current="page"]{border-style:dashed;cursor:default;}
-.lock-btn[aria-current="page"]:hover{border-color:var(--border);color:var(--muted);}
 .gate-note{font-size:.68rem;color:var(--muted);margin-top:14px;font-style:italic;line-height:1.5;}
 .gate-setup{display:none;}
 .gate-setup.show{display:block;}
@@ -324,11 +332,7 @@ body.locked > *:not(#g7gate){display:none !important;}
   <div class="info-field"><label>Next Review:</label><input type="text" id="iNextReview" placeholder="DD MMM YYYY"></div>
   <span class="save-indicator" id="saveIndicator">✓ Saved</span>
   <span class="sync-pill sync-busy" id="syncPill">connecting…</span>
-  <nav class="g7nav" aria-label="G7 pages">
-    <a class="lock-btn" href="calendar.html" title="Term 4 2026 – Feb 2027 diary"><b>▤</b> Term Diary</a>
-    <span class="lock-btn" aria-current="page"><b>◻</b> Kanban</span>
-    <a class="lock-btn" href="cycle.html" title="See these projects along the KOGCycle"><b>◎</b> KOGCycle</a>
-  </nav>
+  <a class="lock-btn" href="cycle.html" title="See these projects along the KOGCycle">◎ KOGCycle</a>
   <button class="lock-btn" onclick="lockBoard()" title="Lock the board and forget the passcode on this device">🔒 Lock</button>
   <button class="save-btn" id="saveBtn2">💾 Save</button>
   <span class="filter-label" style="font-size:.72rem;color:var(--muted);font-style:italic;">PDF columns:</span>
@@ -388,11 +392,22 @@ body.locked > *:not(#g7gate){display:none !important;}
   <button class="fbtn active" data-ftype="kog" data-fval="all">All</button>
   <button class="fbtn" data-ftype="kog" data-fval="First Contact">👋 First Contact</button>
   <button class="fbtn" data-ftype="kog" data-fval="Face to Face">😊 Face to Face</button>
+  <button class="fbtn" data-ftype="kog" data-fval="Follow Up">📞 Follow Up</button>
+  <button class="fbtn" data-ftype="kog" data-fval="Meet the Minister">🙏 Meet the Minister</button>
+  <button class="fbtn" data-ftype="kog" data-fval="Conversion/Baptism">💧 Conversion</button>
   <button class="fbtn" data-ftype="kog" data-fval="Integration">🔗 Integration</button>
   <button class="fbtn" data-ftype="kog" data-fval="Church Life">📖 Church Life</button>
   <button class="fbtn" data-ftype="kog" data-fval="Grow &amp; Serve">🌟 Grow &amp; Serve</button>
   <button class="fbtn" data-ftype="kog" data-fval="Send">✈️ Send</button>
+  <div class="sep"></div>
+  <button class="fbtn fu-btn" id="fuFilterBtn" title="Show only the tasks flagged for follow-up">⏰ Follow-ups<span class="fu-count" id="fuCount">0</span></button>
   <button class="add-btn" id="globalAddBtn">+ Add Task</button>
+</div>
+
+<div class="fu-banner" id="fuBanner">
+  <button class="fu-dismiss" onclick="dismissFuBanner()">Dismiss for today</button>
+  <h4 id="fuBannerTitle">Monday follow-ups</h4>
+  <ul id="fuBannerList"></ul>
 </div>
 
 <div class="board" id="board"></div>
@@ -450,7 +465,7 @@ body.locked > *:not(#g7gate){display:none !important;}
         <option value="done">✅ Completed</option>
       </select>
     </div>
-    <div class="fg"><label>Team / Role Responsible</label><input type="text" id="mOwner" placeholder="e.g. Wardens, Grow Team, Minister, All" list="ownerRoles"><datalist id="ownerRoles"><option value="All"><option value="Minister"><option value="Wardens"><option value="Parish Council"><option value="Leadership"><option value="Go Team"><option value="Glorify Team"><option value="Grow Team"><option value="Giftedness Team"><option value="Governance Team"><option value="Glue Team"><option value="Gregarious Team"><option value="Kids Coordinator"><option value="Music Team"><option value="AV Team"></datalist></div>
+    <div class="fg"><label>Owner / Responsible</label><input type="text" id="mOwner" placeholder="Name(s)"></div>
     <div class="fg"><label>Due Date / Notes</label><textarea id="mNotes" placeholder="Due date, context, or action required..."></textarea></div>
     <div class="m-actions">
       <button class="btn-cancel" id="cancelBtn">Cancel</button>
@@ -483,9 +498,97 @@ const TEAM_CONFIG = {
 };
 
 const DEFAULT_CARDS = [
-  // Seed cards removed. The board's real content lives in Supabase and is
-  // fetched by get_board once the passcode is accepted. Nothing sensitive
-  // should ever be written into this file, which is publicly readable.
+  { id:1,  title:'Pray for Sunday worship to magnify Christ', team:'Glorify', kog:'Church Life',       col:'prayer',   owner:'All',           notes:'' },
+  { id:2,  title:'Pray for new people from SRE & outreach',   team:'Go',      kog:'First Contact',     col:'prayer',   owner:'All',           notes:'' },
+  { id:3,  title:'Pray for those attending Discovery Course',  team:'Go',      kog:'Integration',       col:'prayer',   owner:'All',           notes:'' },
+  { id:4,  title:'Companion booklet — next month',             team:'Glorify', kog:'Church Life',       col:'backlog',  owner:'David',         notes:'Prepare content, layout & print' },
+  { id:5,  title:'Translation — Simplified & Traditional Chinese', team:'Glorify', kog:'Church Life',   col:'backlog',  owner:'',              notes:'Announcements + Sunday bulletin' },
+  { id:6,  title:'Music & worship planning',                   team:'Glorify', kog:'Church Life',       col:'backlog',  owner:'',              notes:'Hymns & songs for upcoming Sundays' },
+  { id:7,  title:'AV roster — fill gaps',                      team:'Glorify', kog:'Church Life',       col:'backlog',  owner:'Jerry',         notes:'' },
+  { id:8,  title:'Tea Hut roster',                             team:'Glorify', kog:'Church Life',       col:'backlog',  owner:'Lucy Zhao',     notes:'' },
+  { id:9,  title:'KOGWorx community outreach planning',        team:'Go',      kog:'First Contact',     col:'backlog',  owner:'',              notes:'Next quarter planning' },
+  { id:10, title:'SRE coordination — school terms',            team:'Go',      kog:'First Contact',     col:'backlog',  owner:'David / Jenny', notes:'Bayside High & St George Girls High' },
+  { id:11, title:'Social media / promotion schedule',          team:'Go',      kog:'First Contact',     col:'backlog',  owner:'',              notes:'Schedule 4 weeks of posts' },
+  { id:12, title:'Mission update — local & overseas',          team:'Go',      kog:'Send',              col:'backlog',  owner:'',              notes:'Prayer letter + giving report' },
+  { id:13, title:"St Patrick's outreach planning",             team:'Go',      kog:'First Contact',     col:'backlog',  owner:'',              notes:'' },
+  { id:14, title:'Slides prep — Sunday services',              team:'Glorify', kog:'Church Life',       col:'progress', owner:'',              notes:'Weekly ongoing task' },
+  { id:15, title:'9:15am service launch',                      team:'Glorify', kog:'Church Life',       col:'progress', owner:'David',         notes:'June 2026 launch — ongoing prep' },
+  { id:16, title:'Clean up / set-up roster',                   team:'Glorify', kog:'Church Life',       col:'progress', owner:'Renjie Zhu',    notes:'' },
+  { id:17, title:'Easy English ministry',                      team:'Go',      kog:'Face to Face',      col:'progress', owner:'',              notes:'Ongoing Sunday program' },
+  { id:18, title:'Welcome & greeters coordination',            team:'Go',      kog:'First Contact',     col:'progress', owner:'',              notes:'ChurchSuite, greeting tent' },
+  { id:19, title:'Discovery Course — schedule next intake',    team:'Go',      kog:'Integration',       col:'awaiting', owner:'',              notes:'Awaiting venue confirmation' },
+  { id:20, title:'Meet the Minister — follow up visitors',     team:'Go',      kog:'Meet the Minister', col:'awaiting', owner:'David',         notes:'From recent Sunday visitors' },
+  { id:21, title:'Baptism / Confirmation prep',                team:'Glorify', kog:'Conversion/Baptism',col:'awaiting', owner:'David',         notes:'Awaiting candidates to confirm readiness' },
+  { id:22, title:'Partnership Course scheduling',              team:'Go',      kog:'Integration',       col:'awaiting', owner:'',              notes:'New members pathway' },
+  { id:23, title:'SRE Sunday service',                         team:'Go',      kog:'First Contact',     col:'done',     owner:'David',         notes:'Completed ✓' },
+  { id:24, title:'June companion booklet published',           team:'Glorify', kog:'Church Life',       col:'done',     owner:'David',         notes:'Completed ✓' },
+  // ── GOVERNANCE — ACTION ITEMS (In Progress) ──
+  { id:25, title:'Discuss sermon/service scheduling options with Jerry (leave / Ambo / Peter)', team:'Governance', kog:'', col:'progress', owner:'David Yung', notes:'Options: Jerry preaches English, Rev. Yung takes leave, or Ambo/Peter fill in' },
+  { id:26, title:'Follow up overdue car park payment — push before end of month',               team:'Governance', kog:'', col:'progress', owner:'David Yung', notes:'Payment overdue as of the 26th' },
+  { id:27, title:'Respond to SRE funder; prepare full proposal for parish council post-July',  team:'Governance', kog:'First Contact', col:'progress', owner:'David Yung', notes:'Meet funder in July; present full proposal to parish council afterward' },
+  { id:28, title:'Confirm bell heritage status with diocese; arrange plaque wording',           team:'Governance', kog:'', col:'progress', owner:'David Yung', notes:'Bell to be placed on school grounds; plaque confirms church ownership' },
+  { id:29, title:'Sign and return last meeting minutes to Enya',                                team:'Governance', kog:'', col:'progress', owner:'David Yung', notes:'' },
+  { id:30, title:'Re-message Kenny to confirm missionary payment details and preferred method', team:'Governance', kog:'Send', col:'progress', owner:'Lucy Zhao',  notes:'New missionary support amount to be confirmed before July' },
+  { id:31, title:'Get fence DA quotes; compare website/domain hosting costs',                   team:'Governance', kog:'', col:'progress', owner:'Rangi Zhu',  notes:'Goal: reduce current ~$1,200/yr website spend; evaluate parkwood.church (~$130/yr from yr 2)' },
+  { id:32, title:'Approve annex floor repair — landlord sign-off (~$8,000)',                   team:'Governance', kog:'', col:'progress', owner:'Michelle / Rangi (Wardens)', notes:'Funded from childcare trust fund (balance >$10,000); no parish council funds required' },
+  { id:33, title:'Confirm attendance at Parish Council Planning Day — Sat 4 July, 9:30am',     team:'Governance', kog:'', col:'progress', owner:'All',        notes:"Enya's place; advise food contributions via WeChat" },
+  // ── GOVERNANCE — PENDING CONFIRMATION (Waiting) ──
+  { id:34, title:'Sermon/service scheduling — finalise approach with Jerry',                   team:'Governance', kog:'', col:'awaiting', owner:'David Yung / Jerry', notes:'Options under review: Jerry preaches English first, Rev. Yung on leave, or Ambo/Peter fill in' },
+  { id:35, title:'SRE staffing fund — explore hiring part-time SRE teacher',                   team:'Governance', kog:'First Contact', col:'awaiting', owner:'David Yung', notes:'Early-stage; meeting external funder in July for details' },
+  { id:36, title:'Thriving Immigrant Church Initiative — pending Jerry availability',           team:'Governance', kog:'', col:'awaiting', owner:'David Yung', notes:'$2,000–$3,000 cost; eligibility requires Jerry at first session' },
+  { id:37, title:'Supervision client referrals — encourage council members to refer ministers', team:'Governance', kog:'', col:'awaiting', owner:'Parish Council', notes:'Rev. Yung prohibited by diocese from advertising; referrals only (Mandarin/Cantonese)' },
+  // ── GOVERNANCE — APPROVED DECISIONS (Backlog to implement) ──
+  { id:38, title:'NCLS Survey — register for National Church Life Survey',                     team:'Governance', kog:'', col:'backlog',  owner:'David Yung', notes:'Cost covered by Sydney Anglican Diocese' },
+  { id:39, title:'Communicate team bonding subsidy ($50/outing) to all ministry teams',        team:'Governance', kog:'Church Life', col:'backlog', owner:'David Yung', notes:'Approved as a token to encourage fellowship among ministry teams' },
+  { id:40, title:'Set supervision fee at ~$110–$120/session (≈50% of $220 standard rate)',    team:'Governance', kog:'', col:'done',    owner:'David Yung', notes:'Decided: provisional qualification status; ~50% of standard rate' },
+  // ── COMBINED SERVICE STRATEGY v2 (10 combined Sundays from 2 Aug 2026 → launch 7 Feb 2027) ──
+  { id:41, title:'Pray for wisdom, unity & courage — combined service transition',            team:'Glue',       kog:'Church Life', col:'prayer',   owner:'All',                notes:'Action Item 1 — stands over the whole strategy (Rev 5:9)' },
+  { id:42, title:'Brief wardens & G7 leaders on Version 2; draft bilingual pastoral letter',  team:'Governance', kog:'', col:'progress', owner:'David',              notes:'Due 17 July — v2: monthly combined cadence, 9:15 protected weekly' },
+  { id:43, title:'Recruit 3+ interpreters (English↔Mandarin, both directions)',               team:'Glorify',    kog:'Grow & Serve', col:'progress', owner:'David / Jerry',      notes:'Due 31 July — manuscript to interpreter by Thursday of each combined week' },
+  { id:44, title:'Appoint Children\'s Ministry Coordinator; merge KOGKids/KOGMini teams',     team:'Grow',       kog:'Church Life', col:'progress', owner:'David',              notes:'Due 26 July — one kids\' team from July, serving existing services + combined Sundays' },
+  { id:45, title:'Purchase & bench-test Auracast transmitter, mics, 20 loan receivers',       team:'Glorify',    kog:'', col:'progress', owner:'David / Wardens',    notes:'Bench test by 26 July; receivers by 31 July; ~$2,300–$4,000 total' },
+  { id:46, title:'Announcements & Q&A both congregations; publish monthly dates to January',  team:'Glue',       kog:'Church Life', col:'progress', owner:'David / Jerry',      notes:'Sundays 19 & 26 July — "nothing changes weekly; once a month one church at the Table"' },
+  { id:47, title:'Visit the seven anticipated departures personally',                          team:'Glue',       kog:'Church Life', col:'progress', owner:'David',              notes:'Before August — message: your 9:15 is being strengthened, not taken away' },
+  { id:48, title:'Phone/visit older Mandarin members re Auracast devices & loan desk',        team:'Glue',       kog:'Church Life', col:'progress', owner:'David + leaders',    notes:'Before 2 August — personal help fitting devices' },
+  { id:49, title:'Set up Translation Desk — signage, QR cards, storage, roster',              team:'Gregarious', kog:'Church Life', col:'backlog',  owner:'',                   notes:'By 2 August — staffed every combined Sunday; ~$200' },
+  { id:50, title:'Live Auracast rehearsal in the Hall after church',                          team:'Glorify',    kog:'', col:'backlog',  owner:'Wardens',            notes:'Sunday 26 July — go-live 2 August; printed sermon summary fallback every combined Sunday' },
+  { id:51, title:'Combined kids\' program ready for every combined Sunday',                   team:'Grow',       kog:'Church Life', col:'backlog',  owner:'Coordinator',        notes:'Bilingual-lite: teaching in English, verses & songs in both languages' },
+  { id:52, title:'Combined Service 1 — first combined Lord\'s Supper, Hall 9:15am',           team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'Sunday 2 August — Auracast live, loan desk open; both ministers co-leading (Action Item 6)' },
+  { id:53, title:'Set up combined-Sunday feedback channel + monthly bilingual update',        team:'Glue',       kog:'Church Life', col:'backlog',  owner:'',                   notes:'Bilingual card/QR each combined Sunday; update shares feedback & what changes next time' },
+  { id:54, title:'Launch 2 Chinese mid-week fellowships + 1 English fellowship (Q3 Goal 1)',  team:'Go',         kog:'First Contact', col:'backlog', owner:'',                  notes:'By 30 September — language-specific on purpose; front doors into the one house' },
+  { id:55, title:'Focus on Dads — five new dads by Father\'s Day',                            team:'Go',         kog:'First Contact', col:'backlog', owner:'',                  notes:'6 September — Combined Service 2: Father\'s Day + Communion (Q3 Goal 3)' },
+  { id:56, title:'Recruit 4 Chinese Parallel accompanists for combined music team',           team:'Glorify',    kog:'Grow & Serve', col:'backlog', owner:'',                   notes:'By 30 September (Q3 Goal 4) — one music team; six rehearsals together before launch' },
+  { id:57, title:'Recruit 6 kids\' ministry assistants — Safe Ministry checks & training',    team:'Grow',       kog:'Grow & Serve', col:'backlog', owner:'Coordinator',        notes:'By 30 September (Q3 Goal 2) — recruit from both congregations' },
+  { id:58, title:'Review 1 — debrief Combined Service 1',                                     team:'Governance', kog:'', col:'backlog',  owner:'Leadership',         notes:'Sunday 16 August — feedback, 9:15 attendance trend, Auracast experience' },
+  { id:59, title:'Review 2 — Q3 goals; cadence check; confirm Res 4.1 alignment',             team:'Governance', kog:'', col:'backlog',  owner:'Leadership',         notes:'27 September — may recommend adding combined Sundays Dec–Jan; step-up easier than step-down' },
+  { id:60, title:'Negotiate school licence for hall — storage, access, signage',              team:'Governance', kog:'', col:'backlog',  owner:'Wardens',            notes:'By 31 October — lockable storage cage; written licence; named school liaison warden' },
+  { id:61, title:'Review 3 — launch readiness; tech sign-off',                                team:'Governance', kog:'', col:'backlog',  owner:'Leadership',         notes:'29 November / December — Auracast at scale; volunteer load (Action Item 8)' },
+  { id:62, title:'Kids/Youth Minister scoping paper (Action Item 3)',                         team:'Governance', kog:'', col:'backlog',  owner:'David',              notes:'Due 31 December — toward 2028 appointment; 120-child capacity at new hall' },
+  { id:63, title:'Two dress rehearsals in new hall; LNY + school-family invitations out',     team:'Glorify',    kog:'', col:'backlog',  owner:'All teams',          notes:'January 2027 — set-up/pack-down, AV, Auracast range test, kids\' classrooms; nothing new on 7 Feb' },
+  { id:64, title:'Opening & commissioning Sunday — new auditorium, Lunar New Year weekend',   team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'7 February 2027 — one combined congregation (Option 5); LNY + school-gate invitations converge; Bishop invited' },
+  // ── v2 NEW: the ten combined Sundays & culturally specific front doors ──
+  { id:65, title:'Combined Service 3 — Anniversary Sunday; past-member invitations',          team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'20 September — church\'s story in both languages; invitations to past members early Sep (win-back)' },
+  { id:66, title:'Mid-Autumn Festival evangelistic celebration',                              team:'Go',         kog:'First Contact', col:'backlog', owner:'Jerry + fellowship leaders', notes:'Friday 25 September — Mandarin-led, culturally specific; guests invited to 4 Oct combined service' },
+  { id:67, title:'Combined Service 4 — Mid-Autumn thanksgiving flavour',                      team:'Glorify',    kog:'Face to Face', col:'backlog',  owner:'All',                notes:'4 October — welcome guests from 25 September festival' },
+  { id:68, title:'Liaise with Bishop re Confirmation Sunday; begin confirmee classes',        team:'Grow',       kog:'Conversion/Baptism', col:'backlog', owner:'David / Jerry', notes:'By 31 August — confirmees from both congregations presented together 13 Dec' },
+  { id:69, title:'Combined Service 5 — structured evaluation (Action Item 7)',                team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'1 November — falls within Trial Period 2 window' },
+  { id:70, title:'Combined Service 6',                                                        team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'6 December — December: tech readiness sign-off (Action Item 8)' },
+  { id:71, title:'Combined Service 7 — Confirmation Sunday with the Bishop',                  team:'Glorify',    kog:'Conversion/Baptism', col:'backlog', owner:'All',           notes:'13 December — combined church visible to the Diocese' },
+  { id:72, title:'Combined Service 8 — Christmas Day',                                        team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'25 December — full launch rehearsal in spirit: bilingual, Auracast, combined kids\' spot' },
+  { id:73, title:'Combined Service 9',                                                        team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'3 January 2027' },
+  { id:74, title:'Combined Service 10 — commissioning eve',                                   team:'Glorify',    kog:'Church Life', col:'backlog',  owner:'All',                notes:'31 January — final Sunday in the old pattern; "one church, one week to go"' },
+  { id:75, title:'Lunar New Year community celebration — eve of opening',                     team:'Go',         kog:'First Contact', col:'backlog', owner:'All',                notes:'Saturday 6 February 2027 — doubles as eve-of-opening invitation event; flows into 7 Feb' },
+  // ── GROW MINISTRY MEETING (14 July 2026) — Action Items A1–A10 ──
+  { id:76, title:'Plan & schedule KOGYouth supplementary seminars (dating, relationships)',   team:'Grow', kog:'Church Life',        col:'backlog',  owner:'Range Zhu / David',        notes:'A1 — Term 3 2026; youth-appropriate topics within a biblical framework' },
+  { id:77, title:'Follow up the three regulars not yet in a Home Group',                      team:'Grow', kog:'Integration',        col:'progress', owner:'Grow Team',                notes:'A2 — within 4 weeks; grow faith by words and deeds; match each to a suitable group' },
+  { id:78, title:'Monitor health of the six newly started Home Groups',                       team:'Grow', kog:'Church Life',        col:'progress', owner:'Jerry Zhu',                notes:'A3 — monthly review: leadership, attendance, syllabus' },
+  { id:79, title:'Home Group promotion — Companion Booklet & Sunday announcements',           team:'Grow', kog:'Integration',        col:'progress', owner:'David / Companion editor', notes:'A4 — ongoing monthly; group visibility a standing communication priority' },
+  { id:80, title:'Announce the Welcome Pathway once, cleanly',                                team:'Grow', kog:'Church Life',        col:'progress', owner:'David',                    notes:'A5 — next available Sunday; Welcome to Life → Welcome Home → Home Groups → Welcome to the Team; "naming what they\'ve always been: home"' },
+  { id:81, title:'Audit & update artefacts with old course names',                            team:'Grow', kog:'Church Life',        col:'backlog',  owner:'Grow Team',                notes:'A6 — within 6 weeks; service sheets, Companion Booklet, KOGCharts, slides, signage — owner per artefact' },
+  { id:82, title:'Leaders\' training on 2 Timothy 2:2; confirm 2026 training calendar',       team:'Grow', kog:'Grow & Serve',       col:'progress', owner:'Jerry Zhu / David',        notes:'A7 — ongoing; entrust to faithful people who will teach others also (1 Tim 4:16 in life & doctrine)' },
+  { id:83, title:'Establish new mid-week, mixed-gender Home Group',                           team:'Grow', kog:'Integration',        col:'progress', owner:'David',                    notes:'A8 — commence now; on-ramp for those unable to join existing groups' },
+  { id:84, title:'Explore restarting KOGMen — monthly ministry',                              team:'Grow', kog:'Church Life',        col:'progress', owner:'David',                    notes:'A9 — commence now; monthly (not weekly) to be sustainable for working men' },
+  { id:85, title:'Begin Music Ministries group',                                              team:'Grow', kog:'Grow & Serve',       col:'progress', owner:'David',                    notes:'A10 — commence now; growing musicians in skill and godliness in service of the gathered church' },
 ];
 
 // ── PERSISTENCE ───────────────────────────────────────────────────────────────
@@ -535,6 +638,7 @@ let cards  = JSON.parse(JSON.stringify(DEFAULT_CARDS));
 let nextId = 86;
 let fTeam      = 'all';
 let fKog       = 'all';
+let fFollowUp  = false;
 let showArchive = false;
 let dragId = null;
 let editingId = null;
@@ -608,6 +712,7 @@ function visCards(colId) {
   return cards.filter(c => {
     if (c.col !== colId) return false;
     if (colId === 'archive') return true;
+    if (fFollowUp && !c.fu) return false;
     if (fTeam !== 'all' && c.team !== fTeam) return false;
     if (fKog  !== 'all' && c.kog  !== fKog)  return false;
     return true;
@@ -631,9 +736,11 @@ function cardHTML(c) {
     ? `<button class="cab" data-mv="-1" data-id="${c.id}" title="Move left">←</button>
       <button class="cab" data-mv="1"  data-id="${c.id}" title="Move right">→</button>`
     : '';
-  return `<div class="card" id="card-${c.id}" draggable="${c.col !== 'archive'}">
+  const fuBtn = `<button class="cab${c.fu ? ' fu-set' : ''}" data-fu="${c.id}" title="${c.fu ? 'Clear the follow-up flag' : 'Flag this for Monday follow-up'}">⏰</button>`;
+  return `<div class="card${c.fu ? ' fu-on' : ''}" id="card-${c.id}" draggable="${c.col !== 'archive'}">
     <div class="card-actions">
       ${moveButtons}
+      ${fuBtn}
       <button class="cab" data-edit="${c.id}" title="Edit">✎</button>
       <button class="cab" data-del="${c.id}" title="Delete">✕</button>
       ${archBtn}
@@ -660,6 +767,7 @@ function render() {
     </div>`;
   }).join('');
   attachCardEvents();
+  renderFollowUps();
 }
 
 // ── CARD EVENTS ───────────────────────────────────────────────────────────────
@@ -732,20 +840,75 @@ function attachCardEvents() {
       if (c) { c.col = 'done'; c.movedToDoneAt = Date.now(); delete c.archivedAt; render(); saveState(); }
     });
   });
+  document.querySelectorAll('[data-fu]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const c = cards.find(x => x.id === parseInt(btn.dataset.fu));
+      if (!c) return;
+      if (c.fu) { delete c.fu; delete c.fuAt; }
+      else      { c.fu = true; c.fuAt = Date.now(); }
+      render(); saveState();
+    });
+  });
   document.querySelectorAll('[data-add]').forEach(btn => {
     btn.addEventListener('click', () => openModal(btn.dataset.add));
   });
+}
+
+// ── FOLLOW-UPS ────────────────────────────────────────────────────────────────
+// A card can be flagged for follow-up with the clock button. The flag travels
+// with the card through Supabase, so it shows on every device. On Mondays the
+// banner lists everything still flagged.
+function followUps() {
+  return cards.filter(c => c.fu && c.col !== 'done' && c.col !== 'archive');
+}
+
+function renderFollowUps() {
+  const list = followUps();
+  const cnt = document.getElementById('fuCount');
+  if (cnt) cnt.textContent = list.length;
+
+  const banner = document.getElementById('fuBanner');
+  if (!banner) return;
+
+  const today = new Date();
+  const isMonday = today.getDay() === 1;
+  const stamp = today.toISOString().slice(0, 10);
+  const dismissed = localStorage.getItem('g7_fu_dismissed') === stamp;
+
+  if (isMonday && list.length && !dismissed) {
+    document.getElementById('fuBannerTitle').textContent =
+      `Monday follow-ups — ${list.length} ${list.length === 1 ? 'task' : 'tasks'} to chase up`;
+    document.getElementById('fuBannerList').innerHTML = list.map(c =>
+      `<li><b>${esc(c.title)}</b>${c.owner ? ` <span class="owner">(${esc(c.owner)})</span>` : ''}</li>`
+    ).join('');
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+function dismissFuBanner() {
+  localStorage.setItem('g7_fu_dismissed', new Date().toISOString().slice(0, 10));
+  document.getElementById('fuBanner').classList.remove('show');
 }
 
 // ── FILTERS ───────────────────────────────────────────────────────────────────
 document.querySelectorAll('.fbtn').forEach(btn => {
   btn.addEventListener('click', () => {
     const type = btn.dataset.ftype, val = btn.dataset.fval;
+    if (!type) return;          // the Follow-ups button shares this class but has its own handler
     if (type === 'team') fTeam = val; else fKog = val;
     document.querySelectorAll(`.fbtn[data-ftype="${type}"]`).forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     render();
   });
+});
+
+document.getElementById('fuFilterBtn').addEventListener('click', () => {
+  fFollowUp = !fFollowUp;
+  document.getElementById('fuFilterBtn').classList.toggle('active', fFollowUp);
+  render();
 });
 
 document.getElementById('globalAddBtn').addEventListener('click', () => openModal('backlog'));
@@ -1248,7 +1411,5 @@ function lockBoard() {
 }
 </script>
 
-<!-- G7 Follow-up (email / WhatsApp / SMS / WeChat). Remove these two followup lines to switch it off. -->
-<script src="followup.js"></script>
 </body>
 </html>
