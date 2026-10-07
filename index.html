@@ -50,6 +50,7 @@ header .motto{font-size:.68rem;opacity:.82;margin-top:4px;line-height:1.4;}
 .info-bar{background:var(--orange-pale);border-bottom:2px solid var(--border);padding:7px 14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;flex-shrink:0;}
 .info-field{display:flex;align-items:center;gap:5px;font-size:.77rem;color:var(--mid);}
 .info-field label{font-weight:bold;color:var(--orange);white-space:nowrap;}
+.info-field input[readonly]{background:var(--orange-pale);color:var(--mid);cursor:default;}
 .info-field input{border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-family:Georgia,serif;font-size:.77rem;background:white;color:var(--dark);min-width:140px;}
 .save-indicator{font-size:.68rem;color:var(--muted);font-style:italic;opacity:0;transition:opacity .4s;}
 .save-indicator.show{opacity:1;}
@@ -359,8 +360,8 @@ body.locked > *:not(#g7gate){display:none !important;}
 </header>
 
 <div class="info-bar">
-  <div class="info-field"><label>Updated:</label><input type="text" id="iUpdated" placeholder="DD MMM YYYY"></div>
-  <div class="info-field"><label>Next Review:</label><input type="text" id="iNextReview" placeholder="DD MMM YYYY"></div>
+  <div class="info-field"><label>Updated:</label><input type="text" id="iUpdated" readonly title="Set automatically each time the board saves"></div>
+  <div class="info-field"><label>Next Review:</label><input type="text" id="iNextReview" readonly title="One week after the board was last updated"></div>
   <span class="save-indicator" id="saveIndicator">✓ Saved</span>
   <span class="sync-pill sync-busy" id="syncPill">connecting…</span>
   <a class="lock-btn" href="cycle.html" title="See these projects along the KOGCycle">◎ KOGCycle</a>
@@ -638,8 +639,31 @@ const DEFAULT_CARDS = [
 
 // ── PERSISTENCE ───────────────────────────────────────────────────────────────
 let saveTimer = null;
+let lastSig = '';
+
+/* The board stamps its own dates: "Updated" is whenever it last saved, and
+   "Next Review" is a week after that. Both fields are read-only on screen. */
+function fmtDate(d) {
+  return d.toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric' });
+}
+function stampDates() {
+  const now = new Date();
+  const next = new Date(now.getTime() + 7 * 86400000);
+  const u = document.getElementById('iUpdated');
+  const n = document.getElementById('iNextReview');
+  if (u) u.value = fmtDate(now);
+  if (n) n.value = fmtDate(next);
+}
+
+/* A signature of everything worth saving, so the once-a-minute autosave only
+   writes when something has actually changed. */
+function boardSig() {
+  return JSON.stringify([cards, document.getElementById('familiesInput').value, emailBook]);
+}
 
 function saveState() {
+  stampDates();
+  lastSig = boardSig();
   const state = {
     cards,
     nextId,
@@ -674,6 +698,7 @@ function loadState() {
       if (state.families)    document.getElementById('familiesInput').value = state.families;
       if (state.iUpdated)    document.getElementById('iUpdated').value      = state.iUpdated;
       if (state.iNextReview) document.getElementById('iNextReview').value   = state.iNextReview;
+      lastSig = boardSig();
       updateGoal();
     }, 0);
     return true;
@@ -1280,9 +1305,6 @@ document.getElementById('saveBtn').addEventListener('click', () => {
 document.getElementById('saveBtn2').addEventListener('click', saveState);
 
 // ── AUTO-SAVE INFO FIELDS & FAMILIES ──────────────────────────────────────────
-['iUpdated','iNextReview'].forEach(id => {
-  document.getElementById(id).addEventListener('change', saveState);
-});
 document.getElementById('familiesInput').addEventListener('input', () => { updateGoal(); saveState(); });
 
 // ── MERGE NEW DEFAULTS ────────────────────────────────────────────────────────
@@ -1323,6 +1345,10 @@ function migrateStrategyV2() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
+/* Safety net: if anything has changed and has not reached the server,
+   save it on the next minute's tick. */
+setInterval(() => { if (boardSig() !== lastSig) saveState(); }, 60000);
+
 loadState();
 migrateStrategyV2();
 mergeNewDefaults();
