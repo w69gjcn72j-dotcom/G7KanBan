@@ -16,6 +16,10 @@
 .ct-me{font-size:.62rem;background:var(--orange-pale);color:var(--orange);border-radius:8px;padding:1px 6px;vertical-align:middle;}
 .ct-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .ct-pill{font-size:.64rem;background:#E3F2E8;color:#1E8449;border-radius:9px;padding:1px 8px;white-space:nowrap;}
+.ct-leader{background:var(--orange-pale);color:var(--orange);}
+.ct-check{display:flex!important;align-items:center;gap:6px;font-weight:normal!important;font-size:.74rem!important;cursor:pointer;}
+.ct-check input{width:auto!important;}
+.ct-allnote{margin-top:6px;}
 .ct-link{border:none;background:none;color:#1E8449;cursor:pointer;font-family:Georgia,serif;font-size:.72rem;text-decoration:underline;padding:0 2px;}
 .rm-person h4 .ct-link{margin-left:auto;font-weight:normal;}
 

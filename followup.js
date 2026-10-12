@@ -7,6 +7,8 @@
      WhatsApp, SMS or WeChat when a mobile or WeChat ID is on file.
    - Addresses already typed into Send reminders (the board's emailBook) are
      brought into Contacts, and the two are kept in step.
+   - A card for all leaders (owner "All", "All leaders", "All teams" and the
+     like) goes to every contact ticked as a G7 leader, all in one email.
    - index.html#followup opens Send reminders; #contacts opens the Contacts tab.
    It adds no button or counter of its own: the ⏰ Follow-ups chip stays the
    only count. Loaded at the end of index.html; remove the two followup lines
@@ -62,13 +64,21 @@
 
   /* ── owners → people ───────────────────────────────────────────────────── */
   function norm(s) { return String(s || "").toLowerCase().replace(/^rev\.?\s+/, "").replace(/\s+/g, " ").trim(); }
+  /* Owners that mean "every G7 leader". */
+  var ALL_RE = /^(all|everyone|all teams|all g7|leaders|g7 leaders|all (?:of )?(?:the )?(?:g7 |team |group )?leaders)$/i;
+  function isAllToken(t) { return ALL_RE.test(String(t || "").trim()); }
+  function hasAll(who) {
+    return String(who || "").replace(/\([^)]*\)/g, "").split(/\s*(?:\/|\+|&|,|;)\s*/).some(isAllToken);
+  }
   function ownerTokens(owner) {
     return String(owner || "")
       .replace(/\([^)]*\)/g, "")
       .split(/\s*(?:\/|\+|&|,|;|\band\b)\s*/i)
       .map(function (t) { return t.trim(); })
-      .filter(function (t) { return t && !/^(all|unassigned)$/i.test(t); });
+      .filter(function (t) { return t && !/^unassigned$/i.test(t) && !isAllToken(t) && !/^all$/i.test(t); });
   }
+  function isLeader(c) { return !c.me && c.leader !== false; }
+  function leaders() { return contacts.filter(isLeader); }
   function namesOf(c) { return [c.name].concat(String(c.aliases || "").split(",")).map(norm).filter(Boolean); }
   function findContact(token) {
     var n = norm(token);
@@ -85,6 +95,14 @@
     return out;
   }
   function emailFor(who) {
+    if (hasAll(who)) {
+      var list = [];
+      leaders().concat(contactsFor(who)).forEach(function (c) {
+        var e = String(c.email || "").trim();
+        if (e && !c.me && list.indexOf(e) < 0) list.push(e);
+      });
+      return list.join(",");
+    }
     var cs = contactsFor(who), toks = ownerTokens(who);
     if (cs.length && cs.length === toks.length && cs.every(function (c) { return c.email; })) {
       return cs.map(function (c) { return c.email; }).join(",");
@@ -100,7 +118,7 @@
     Object.keys(emailBook).forEach(function (who) {
       var addr = String(emailBook[who] || "").trim();
       if (!addr || addr.indexOf(",") >= 0) return;          // shared addresses stay in emailBook
-      if (ownerTokens(who).length !== 1) return;            // "Range / Jerry" is not one person
+      if (hasAll(who) || ownerTokens(who).length !== 1) return;   // groups are not one person
       var c = findContact(who);
       if (c) { if (!c.email) { c.email = addr; changed = true; } return; }
       contacts.push({ id: "c" + Date.now() + Math.floor(Math.random() * 1000), name: who.trim(), aliases: "",
@@ -124,6 +142,30 @@
       if (c.email) emailBook[w] = c.email; else if (emailBook[w] && !c.me) delete emailBook[w];
     });
   }
+
+  /* ── one email for all-leaders cards ("All", "All leaders", "All teams"…) ── */
+  var _group = groupFollowUpsByOwner;
+  groupFollowUpsByOwner = function () {
+    var out = [], all = null;
+    _group().forEach(function (g) {
+      if (hasAll(g.who) && !ownerTokens(g.who).length) {
+        if (!all) { all = { who: "All leaders", tasks: [] }; out.push(all); }
+        all.tasks = all.tasks.concat(g.tasks);
+      } else out.push(g);
+    });
+    return out;
+  };
+
+  /* ── greeting for a reminder that goes to all leaders ──────────────── */
+  var _text = reminderText, _html = reminderHtml;
+  reminderText = function (who, tasks) {
+    if (!hasAll(who)) return _text(who, tasks);
+    return _text("everyone", tasks).replace(/^Dear everyone,/, "Dear G7 leaders,");
+  };
+  reminderHtml = function (who, tasks) {
+    if (!hasAll(who)) return _html(who, tasks);
+    return _html("everyone", tasks).replace("Hi everyone,", "Hi G7 leaders,").replace("everyone您好：", "各位G7同工您好：");
+  };
 
   /* ── other channels ──────────────────────────────────────────────────── */
   function intlMobile(m) {
@@ -200,11 +242,19 @@
     /* Let the original window use Contacts addresses where emailBook has none. */
     var groups = groupFollowUpsByOwner();
     var filled = [];
+    var kept = {};
     groups.forEach(function (g) {
-      if (!emailBook[g.who]) { var a = emailFor(g.who); if (a) { emailBook[g.who] = a; filled.push(g.who); } }
+      if (hasAll(g.who)) {                         // always the current list of leaders
+        kept[g.who] = emailBook[g.who];
+        var all = emailFor(g.who);
+        if (all) emailBook[g.who] = all; else delete emailBook[g.who];
+        filled.push(g.who);
+      } else if (!emailBook[g.who]) { var a = emailFor(g.who); if (a) { emailBook[g.who] = a; filled.push(g.who); } }
     });
     _openReminders();
-    filled.forEach(function (w) { delete emailBook[w]; });   // not a real edit; don't save it
+    filled.forEach(function (w) {                  // not a real edit; don't save it
+      if (kept[w]) emailBook[w] = kept[w]; else delete emailBook[w];
+    });
 
     groups.forEach(function (g, i) {
       var input = document.getElementById("rmEmail" + i);
@@ -220,6 +270,22 @@
       var person = row && row.parentNode;
       if (!person) return;
       var label = person.querySelector("h4");
+      if (hasAll(g.who)) {
+        var L = leaders(), noMail = L.filter(function (c) { return !c.email; });
+        var info = document.createElement("div");
+        info.className = "rm-hint ct-allnote";
+        info.innerHTML = L.length
+          ? "Goes to all " + L.length + " leader" + (L.length === 1 ? "" : "s") + " in Contacts in one email." +
+            (noMail.length ? " <b>No email yet:</b> " + noMail.map(function (c) { return h(c.name); }).join(", ") + "." : "")
+          : "No leaders in Contacts yet. Add them in the Contacts tab.";
+        var lk = document.createElement("button");
+        lk.type = "button"; lk.className = "ct-link"; lk.textContent = "Edit leaders";
+        lk.addEventListener("click", function () { showTab("contacts"); });
+        info.appendChild(document.createTextNode(" ")); info.appendChild(lk);
+        row.parentNode.insertBefore(info, row.nextSibling);
+        input.title = "All leaders' addresses. Change who is a leader in Contacts.";
+        return;
+      }
       if (label && !cs.length && ownerTokens(g.who).length) {
         var add = document.createElement("button");
         add.type = "button"; add.className = "ct-link"; add.textContent = "+ Add to Contacts";
@@ -270,7 +336,8 @@
   function renderContacts() {
     var x = '<div class="rm-sub">Saved with the board, behind the passcode, so every device sees them. ' +
             '"Other names" are the names used in a card\'s Owner field, separated by commas. ' +
-            "Send reminders uses these addresses, and offers WhatsApp, SMS or WeChat when a mobile or WeChat ID is here.</div>";
+            "Send reminders uses these addresses, and offers WhatsApp, SMS or WeChat when a mobile or WeChat ID is here. " +
+            "A card for all leaders (owner \"All\" or \"All leaders\") is emailed to everyone ticked as a G7 leader.</div>";
     x += '<div class="ct-list">';
     contacts.forEach(function (c) {
       var ways = [c.email ? "✉️ " + h(c.email) : "", c.mobile ? "📱 " + h(c.mobile) : "", c.wechat ? "💬 " + h(c.wechat) : ""].filter(Boolean);
@@ -278,6 +345,7 @@
            (c.aliases ? '<div class="ct-alias">also: ' + h(c.aliases) + "</div>" : "") +
            '<div class="ct-ways">' + (ways.length ? ways.join(" · ") : '<span class="ct-missing">no details yet</span>') + "</div></div>" +
            '<div class="ct-side"><span class="ct-pill">' + (PREF[c.pref] || "Email") + " · " + (LANG[c.lang] || "English") + "</span>" +
+           (isLeader(c) ? '<span class="ct-pill ct-leader">G7 leader</span>' : "") +
            '<button type="button" class="ct-link" data-edit="' + h(c.id) + '">Edit</button></div></div>';
     });
     x += "</div>";
@@ -297,6 +365,8 @@
            '<div><label>WeChat ID</label><input data-f="wechat" value="' + h(c.wechat) + '"></div>' +
            '<div><label>Prefers</label><select data-f="pref">' + opt("email", "Email", c.pref) + opt("whatsapp", "WhatsApp", c.pref) + opt("sms", "SMS", c.pref) + opt("wechat", "WeChat", c.pref) + "</select></div>" +
            '<div><label>Language</label><select data-f="lang">' + opt("en", "English", c.lang) + opt("zh", "繁體中文", c.lang) + opt("both", "English + 繁體中文", c.lang) + "</select></div>" +
+           (c.me ? "" : '<div class="full"><label class="ct-check"><input type="checkbox" data-leader' + (c.leader !== false ? " checked" : "") +
+             '> G7 leader (included when a card is for all leaders)</label></div>') +
            '<div class="full rm-row"><button type="button" class="rm-send" data-save>Save contact</button>' +
            '<button type="button" class="rm-copy" data-cancel>Cancel</button>' +
            (c._new || c.me ? "" : '<button type="button" class="rm-copy ct-remove" data-remove>Remove</button>') +
@@ -317,6 +387,7 @@
     form.querySelector("[data-save]").addEventListener("click", function () {
       var c = editing;
       form.querySelectorAll("[data-f]").forEach(function (i) { c[i.dataset.f] = i.value.trim(); });
+      var lb = form.querySelector("[data-leader]"); if (lb) c.leader = lb.checked;
       if (!c.name) { document.getElementById("ctNote").textContent = "Please enter a name."; return; }
       delete c._new;
       var idx = contacts.findIndex(function (k) { return k.id === c.id; });
