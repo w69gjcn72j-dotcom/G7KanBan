@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1A6B7A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Year Planner">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="planner.webmanifest">
+<link rel="apple-touch-icon" href="planner-icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="planner-icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="planner-icon-16.png">
+<link rel="icon" type="image/svg+xml" href="planner-icon.svg">
+<title>Kogarah Year Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@300;400;700&display=swap">
+<style>
+/* Layout: brand-teal title band with a coral rule, then one working surface per tab: a wide editable year table, a promotion runway, four goal lanes, a roll-over form.
+   G7 Design Scheme: brand teal + coral, white surface, ink text, Calibri Light headings (never bold), Calibri body; team colours from the G7 scheme; church calendar fills from the house planner. Single light look, as the scheme defines. */
+:root{
+  color-scheme:light;
+  --brand-teal:#1A6B7A; --brand-coral:#E8724A;
+  --surface:#FFFFFF; --surface-alt:#F5F5F5; --ink:#212121; --on-colour:#FFFFFF;
+  --muted:#5C5C5C; --faint:#8A8A8A; --line:#E3E3E3; --line-2:#C9C9C9;
+  --teal-tint:#DCEEF1; --coral-tint:#FCE6DD;
+  --glorify:#C0392B; --glorify-tint:#FADBD8; --go:#1E8449; --go-tint:#D5F5E3;
+  --gregarious:#CA6F1E; --gregarious-tint:#FDEBD0; --grow:#1A5276; --grow-tint:#D6EAF8;
+  --giftedness:#6C3483; --giftedness-tint:#E8DAEF; --governance:#F0B800; --governance-tint:#FFFBE6;
+  --glue:#7D6608; --glue-tint:#FDF2E9; --rector:#1A6B7A; --rector-tint:#DCEEF1;
+  /* church calendar (house planner fills) */
+  --cal-green:#70AD47; --cal-purple:#7030A0; --cal-white:#FFFFFF; --cal-red:#FF0000; --cal-black:#000000; --cal-holiday:#EAD1DC;
+  --heading:"Calibri Light",Calibri,Carlito,Arial,"Noto Sans SC",sans-serif;
+  --sans:Calibri,Carlito,Arial,"Helvetica Neue",Helvetica,"Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1320px;margin:0 auto}
+h1,h2,h3{font-family:var(--heading);font-weight:300;margin:0;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brand-coral);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* masthead: brand teal band, coral rule */
+.mast{background:var(--brand-teal);color:var(--on-colour);border-bottom:4px solid var(--brand-coral)}
+.mast .wrap{padding-block:20px 0;display:flex;flex-direction:column;gap:12px}
+.eyebrow{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.9}
+.mast h1{font-size:clamp(28px,4vw,38px);line-height:1.1}
+.mast-row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+.yearpick{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.06em}
+.yearpick select{background:var(--surface);border:1px solid var(--surface);border-radius:4px;padding:4px 8px;color:var(--ink)}
+.yearpick .lect{opacity:.85}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs button{background:none;border:none;border-bottom:4px solid transparent;color:var(--on-colour);opacity:.78;padding:9px 14px 8px;cursor:pointer;white-space:nowrap;font-size:15px}
+.tabs button[aria-selected="true"]{opacity:1;border-bottom-color:var(--brand-coral);font-weight:700}
+.tabs button:hover{opacity:1}
+.tabs .count{font-size:12px;background:var(--brand-coral);color:var(--ink);border-radius:10px;padding:0 7px;margin-left:6px;font-weight:700}
+
+/* rail */
+.rail{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.rail .wrap{display:flex;gap:10px;align-items:center;padding-block:9px;overflow-x:auto}
+.rail-lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.cd{display:flex;border:1px solid var(--line-2);border-radius:4px;overflow:hidden;flex:0 0 auto;background:var(--surface);cursor:pointer;padding:0;text-align:left}
+.cd b{font-weight:700;font-size:13px;padding:5px 8px;color:var(--ink);background:var(--brand-coral);font-variant-numeric:tabular-nums;display:flex;align-items:center}
+.cd.w2 b{background:var(--brand-teal);color:var(--on-colour)} .cd.w3 b{background:var(--governance);color:var(--ink)} .cd.far b{background:var(--surface-alt);color:var(--muted)}
+.cd span{padding:5px 10px;font-size:13.5px;white-space:nowrap}
+.cd span i{font-style:normal;color:var(--muted);font-size:12px;margin-left:6px}
+
+main .wrap{padding-block:22px 40px}
+.panel-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.panel-head h2{font-size:24px;color:var(--brand-teal)}
+.panel-head p{margin:0;color:var(--muted);max-width:72ch}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:4px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--brand-teal);color:var(--brand-teal)}
+.btn.primary{background:var(--brand-teal);border-color:var(--brand-teal);color:var(--on-colour)}
+.btn.primary:hover{filter:brightness(1.1);color:var(--on-colour)}
+.btn.danger{border-color:var(--glorify);color:var(--glorify)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:4px;overflow:hidden}
+.seg button{border:none;background:var(--surface);padding:5px 10px;cursor:pointer;font-size:13.5px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--brand-teal);color:var(--on-colour)}
+.search{border:1px solid var(--line-2);border-radius:4px;padding:6px 10px;background:var(--surface);min-width:0;width:230px;max-width:100%}
+
+/* planner table */
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table.pl{border-collapse:separate;border-spacing:0;width:100%;min-width:1420px}
+.pl th{position:sticky;top:0;background:var(--brand-teal);color:var(--on-colour);font-size:12.5px;letter-spacing:.04em;font-weight:700;text-align:left;padding:8px;white-space:nowrap;z-index:2}
+.pl td{border-bottom:1px solid var(--line);padding:3px 4px;vertical-align:top}
+.pl tr.svc:nth-of-type(even) td{background:var(--surface-alt)}
+.pl tr.month td{background:var(--surface);padding:16px 10px 6px;border-bottom:2px solid var(--brand-coral)}
+.month-name{font-family:var(--heading);font-size:21px;color:var(--brand-teal)}
+.month-theme{margin-left:12px;font-size:14px}
+.month-theme input{border:none;background:transparent;color:var(--muted);font-style:italic;width:min(560px,60vw);padding:2px 4px;border-radius:3px}
+.month-theme input:hover,.month-theme input:focus{background:var(--surface-alt)}
+.pl tr.past td{opacity:.55}
+.pl tr.hl-important td:first-child{box-shadow:inset 5px 0 0 var(--brand-teal)}
+.pl tr.hl-major td:first-child{box-shadow:inset 7px 0 0 var(--brand-coral)}
+.pl tr.hl-important td{background:var(--teal-tint)!important}
+.pl tr.hl-major td{background:var(--coral-tint)!important}
+.datecell{padding:7px 8px 6px 14px!important;white-space:nowrap;width:92px}
+.datecell b{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;display:block}
+.datecell span{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.cell{width:100%;border:1px solid transparent;background:transparent;border-radius:3px;padding:5px 6px;min-width:0}
+.cell:hover{border-color:var(--line-2)}
+.cell:focus{border-color:var(--brand-teal);background:var(--surface);outline:none}
+.cell::placeholder{color:var(--faint);font-style:italic}
+.cell.passage{font-size:15.5px;font-weight:700}
+.cell.preacher{font-weight:700}
+textarea.cell{resize:vertical;min-height:30px;line-height:1.35}
+/* church calendar fills */
+.cal{border-radius:3px;font-weight:700}
+.cal.c-green{background:var(--cal-green);color:var(--ink)}
+.cal.c-purple{background:var(--cal-purple);color:var(--on-colour)}
+.cal.c-white{background:var(--cal-white);color:var(--ink);border-color:var(--line-2)}
+.cal.c-red{background:var(--cal-red);color:var(--on-colour)}
+.cal.c-black{background:var(--cal-black);color:var(--on-colour)}
+.cal.c-purple::placeholder,.cal.c-red::placeholder,.cal.c-black::placeholder{color:var(--on-colour)}
+.term.c-holiday{background:var(--cal-holiday);border-radius:3px}
+.ro .cell{pointer-events:none}
+.ro .needwrite{display:none!important}
+.star{border:1px solid var(--line-2);background:var(--surface);border-radius:20px;padding:2px 9px;cursor:pointer;font-size:12px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;color:var(--muted)}
+.star[data-v="important"]{border-color:var(--brand-teal);background:var(--brand-teal);color:var(--on-colour)}
+.star[data-v="major"]{border-color:var(--brand-coral);background:var(--brand-coral);color:var(--ink);font-weight:700}
+.evs{display:flex;flex-wrap:wrap;gap:4px;padding:4px 2px}
+.ev{border:1px solid var(--line-2);background:var(--surface);border-radius:3px;padding:2px 8px;font-size:13px;cursor:pointer;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;display:inline-flex;align-items:center;gap:6px}
+.ev .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:var(--line-2)}
+.ev[data-hl="important"]{box-shadow:inset 0 -2px 0 var(--brand-teal)}
+.ev[data-hl="major"]{box-shadow:inset 0 -3px 0 var(--brand-coral);font-weight:700}
+.addev{border:1px dashed var(--line-2);background:none;border-radius:3px;padding:2px 8px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.addev:hover{color:var(--brand-teal);border-color:var(--brand-teal)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:12px 2px 0;font-size:13px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:6px;vertical-align:-2px;border:1px solid var(--line-2)}
+.legend b{color:var(--ink);font-weight:700;margin-right:2px}
+
+/* team colour per G7 scheme */
+[data-team="glorify"]{--tc:var(--glorify);--tt:var(--glorify-tint)} [data-team="go"]{--tc:var(--go);--tt:var(--go-tint)}
+[data-team="gregarious"]{--tc:var(--gregarious);--tt:var(--gregarious-tint)} [data-team="grow"]{--tc:var(--grow);--tt:var(--grow-tint)}
+[data-team="giftedness"]{--tc:var(--giftedness);--tt:var(--giftedness-tint)} [data-team="governance"]{--tc:var(--governance);--tt:var(--governance-tint)}
+[data-team="glue"]{--tc:var(--glue);--tt:var(--glue-tint)} [data-team="rector"]{--tc:var(--rector);--tt:var(--rector-tint)}
+.ev[data-team]:not([data-team=""]){background:var(--tt);border-color:var(--tt)}
+.ev[data-team]:not([data-team=""]) .dot{background:var(--tc)}
+.teamtag{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+.teamtag img{width:24px;height:24px}
+
+/* promotion */
+.promo-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-bottom:22px}
+@media (max-width:820px){.promo-grid{grid-template-columns:1fr}}
+.box{border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:14px 16px}
+.box h3{font-size:19px;color:var(--brand-teal);margin-bottom:2px}
+.box .sub{font-size:13.5px;color:var(--muted);margin-bottom:10px}
+.plist{display:flex;flex-direction:column;gap:8px}
+.pitem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:4px;padding:8px 10px;cursor:pointer;background:var(--surface);text-align:left;width:100%}
+.pitem:hover{border-color:var(--brand-teal)}
+.weeks{font-size:12.5px;font-weight:700;color:var(--ink);background:var(--brand-coral);border-radius:3px;padding:3px 8px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.weeks.w2{background:var(--brand-teal);color:var(--on-colour)} .weeks.w3{background:var(--governance)} .weeks.far{background:var(--surface-alt);color:var(--muted)}
+.pitem b{display:block;line-height:1.3}
+.pitem small{color:var(--muted);font-size:13px}
+.pitem .when{font-size:13px;color:var(--muted);white-space:nowrap}
+.empty{color:var(--muted);font-style:italic;padding:6px 0}
+.runway{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.rw{display:grid;min-width:900px}
+.rw .hd{font-size:11.5px;color:var(--muted);padding:6px 0 6px 4px;border-bottom:1px solid var(--line);border-left:1px solid var(--line);white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums}
+.rw .hd.now{color:var(--brand-coral);font-weight:700}
+.rw .lab{padding:7px 10px;border-bottom:1px solid var(--line);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.rw .lab small{color:var(--muted);font-size:12px;margin-left:6px}
+.rw .lane{position:relative;border-bottom:1px solid var(--line);grid-column:2 / -1;min-height:32px}
+.rw .tick{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.rw .nowline{position:absolute;top:0;bottom:0;border-left:2px solid var(--brand-coral);z-index:1}
+.bar{position:absolute;top:7px;height:18px;border-radius:3px;display:flex;overflow:hidden}
+.bar span{flex:1;min-width:0}
+.bar .g{background:var(--line-2)} .bar .w3{background:var(--governance)} .bar .w2{background:var(--brand-teal)} .bar .w1{background:var(--brand-coral)}
+.pin{position:absolute;top:4px;width:3px;height:24px;background:var(--ink);border-radius:2px}
+
+/* goals */
+.lanes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:1050px){.lanes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.lanes{grid-template-columns:1fr}}
+.lane-col{background:var(--surface-alt);border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:9px;min-width:0;border-top:4px solid var(--brand-teal)}
+.lane-col header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.lane-col h3{font-size:20px;color:var(--brand-teal)}
+.lane-col header span{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.goal{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:9px 10px;display:flex;flex-direction:column;gap:5px}
+.goal .gtop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.goal .gtop .teamtag{color:var(--ink)}
+.status{font-size:12px;font-weight:700;border-radius:20px;padding:1px 8px;white-space:nowrap}
+.status[data-s="planned"]{background:var(--surface-alt);color:var(--muted)}
+.status[data-s="progress"]{background:var(--brand-teal);color:var(--on-colour)}
+.status[data-s="achieved"]{background:var(--go);color:var(--on-colour)}
+.status[data-s="missed"]{background:var(--glorify);color:var(--on-colour)}
+.goal .cell{padding:3px 4px}
+.goal .gt{font-weight:700}
+.goal .gn{font-size:13.5px;color:var(--muted)}
+.grow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.grow select,.grow input{border:1px solid var(--line);border-radius:3px;background:var(--surface);padding:2px 5px;font-size:13px;max-width:100%}
+.x{border:none;background:none;color:var(--faint);cursor:pointer;font-size:13px;padding:2px 4px;margin-left:auto}
+.x:hover{color:var(--glorify)}
+.gfilter{margin-bottom:12px}
+
+/* roll-over */
+.roll{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.roll{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{font-size:13.5px;font-weight:700}
+.field input,.field select,.field textarea{border:1px solid var(--line-2);border-radius:4px;padding:6px 8px;background:var(--surface);max-width:100%}
+.terms{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 10px;align-items:center}
+.terms span{font-size:13.5px;color:var(--muted)}
+.terms input{border:1px solid var(--line-2);border-radius:4px;padding:5px 7px;background:var(--surface);min-width:0}
+.check{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+.preview{max-height:440px;overflow:auto;border:1px solid var(--line);border-radius:4px}
+.preview table{border-collapse:collapse;width:100%;font-size:13.5px}
+.preview td,.preview th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.preview th{background:var(--brand-teal);color:var(--on-colour);font-size:12px;letter-spacing:.04em;position:sticky;top:0}
+.preview .sw{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line-2)}
+.confirm{border:1px solid var(--brand-coral);background:var(--coral-tint);border-radius:4px;padding:10px 12px;margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+/* editor sheet */
+.sheet-bg{position:fixed;inset:0;background:rgba(20,20,20,.45);z-index:50;display:flex;justify-content:flex-end}
+.sheet{width:min(440px,100%);height:100%;background:var(--surface);border-left:4px solid var(--brand-coral);display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) 18px;overflow:auto}
+.sheet h2{font-size:23px;color:var(--brand-teal);margin-bottom:12px}
+.sheet .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sheet .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.hint{font-size:13px;color:var(--muted);margin-top:-6px;margin-bottom:10px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--surface);padding:8px 14px;border-radius:4px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1}
+.state{border:1px dashed var(--line-2);border-radius:4px;padding:28px;text-align:center;color:var(--muted);font-size:16px}
+
+/* archive */
+.archbtn{background:transparent;border:1px solid rgba(255,255,255,.6);color:var(--on-colour);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:13px}
+.archbtn:hover{background:rgba(255,255,255,.12)}
+.prevbtn{display:block;margin:2px 6px 4px;border:none;background:var(--teal-tint);color:var(--brand-teal);border-radius:3px;padding:1px 7px;font-size:12px;font-weight:700;cursor:pointer;text-align:left}
+.prevbtn:hover{background:var(--brand-teal);color:var(--on-colour)}
+.books{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:5px;margin-bottom:18px}
+.bk{border:1px solid var(--line);background:var(--surface);border-radius:3px;padding:5px 7px;text-align:left;cursor:pointer;font-size:13px;line-height:1.2;min-width:0}
+.bk b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk span{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bk.n0{color:var(--faint);background:var(--surface-alt);border-color:var(--surface-alt)}
+.bk.n0 span{color:var(--faint)}
+.bk.n1{background:var(--teal-tint);border-color:var(--teal-tint)}
+.bk.n2{background:#9CCAD3;border-color:#9CCAD3}
+.bk.n3{background:var(--brand-teal);border-color:var(--brand-teal);color:var(--on-colour)}
+.bk.n3 span{color:var(--on-colour)}
+.bk[aria-pressed="true"]{outline:2px solid var(--brand-coral);outline-offset:1px}
+.testament{font-family:var(--heading);font-size:18px;color:var(--brand-teal);margin:6px 0 8px}
+.arch-table{border-collapse:separate;border-spacing:0;width:100%;min-width:760px}
+.arch-table th{background:var(--brand-teal);color:var(--on-colour);text-align:left;padding:7px 8px;font-size:12.5px;position:sticky;top:0}
+.arch-table td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.arch-table tr:nth-child(even) td{background:var(--surface-alt)}
+.arch-table td.p{font-weight:700}
+.pill{display:inline-block;padding:1px 7px;border-radius:3px;font-size:12.5px;font-weight:700;border:1px solid transparent}
+.pill.c-green{background:var(--cal-green)} .pill.c-purple{background:var(--cal-purple);color:var(--on-colour)} .pill.c-white{background:#fff;border-color:var(--line-2)} .pill.c-red{background:var(--cal-red);color:var(--on-colour)} .pill.c-black{background:#000;color:var(--on-colour)}
+.yearhead{display:flex;align-items:baseline;gap:12px;margin:18px 0 8px;border-bottom:2px solid var(--brand-coral);padding-bottom:4px}
+.yearhead h3{font-size:22px;color:var(--brand-teal)}
+.yearhead span{color:var(--muted);font-size:13px}
+.summary-list{margin:0 0 6px;padding-left:20px;columns:2 280px;column-gap:28px}
+.summary-list li{margin-bottom:3px;break-inside:avoid}
+.src{font-size:12px;color:var(--faint);font-style:italic}
+
+/* footer */
+.foot{border-top:4px solid var(--brand-coral);margin-top:10px}
+.foot .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;justify-content:space-between;padding-block:14px calc(18px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--muted)}
+.foot q{font-style:italic}
+.foot img{height:44px;width:auto}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+.gate{position:fixed;inset:0;z-index:100;background:var(--brand-teal);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.gate-card{background:var(--surface);border-radius:6px;border-top:5px solid var(--brand-coral);padding:26px 24px;width:min(380px,100%);display:flex;flex-direction:column;gap:12px}
+.gate-card img{width:64px;height:64px;border-radius:12px}
+.gate-card h1{font-size:26px;color:var(--brand-teal)}
+.gate-card p{margin:0;color:var(--muted);font-size:14px}
+.gate-card input[type=password]{border:1px solid var(--line-2);border-radius:4px;padding:9px 10px;font:inherit;font-size:16px}
+.gate-card label{display:flex;gap:8px;align-items:center;font-size:14px}
+.gate-err{color:var(--glorify);font-size:14px;min-height:1.2em}
+.mast-links{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mast-links a,.mast-links button{color:var(--on-colour);font-size:13px;text-decoration:none;border:1px solid rgba(255,255,255,.55);border-radius:4px;padding:3px 9px;background:transparent;cursor:pointer;font-family:inherit}
+.mast-links a:hover,.mast-links button:hover{background:rgba(255,255,255,.12)}
+.sync{font-size:12.5px;opacity:.85}
+</style>
+</head>
+<body class="locked">
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <img src="planner-icon-192.png" alt="">
+    <h1>Kogarah Year Planner</h1>
+    <p>For G7 leaders at St Paul's Kogarah. Enter the G7 passcode to open the planner.</p>
+    <input type="password" id="gatePw" placeholder="Passcode" autocomplete="current-password" aria-label="Passcode">
+    <label><input type="checkbox" id="gateRemember"> Remember me on this device</label>
+    <div class="gate-err" id="gateErr" role="alert"></div>
+    <button class="btn primary" id="gateBtn" type="button">Open the planner</button>
+  </div>
+</div>
+
+
+<header class="mast gut">
+  <div class="wrap">
+    <div class="mast-row"><div class="eyebrow">St Paul's Anglican Church Kogarah · Planning</div>
+      <div class="mast-links"><span class="sync" id="syncPill"></span><a href="index.html">G7 Kanban</a><a href="cycle.html">KOGCycle</a><a href="calendar.html">Term Diary</a><button type="button" id="lockBtn" title="Lock the planner and forget the passcode on this device">Lock</button></div></div>
+    <div class="mast-row">
+      <h1>Kogarah Year Planner</h1>
+      <div class="yearpick"><label for="yearSel">YEAR</label><select id="yearSel"></select><span class="lect" id="lectLab"></span><button class="archbtn" id="archBtn" type="button">Previous years</button></div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="plan" aria-selected="true">Year planner</button>
+      <button role="tab" data-tab="promo" aria-selected="false">Promotion<span class="count" id="promoCount" hidden></span></button>
+      <button role="tab" data-tab="goals" aria-selected="false">Goals</button>
+      <button role="tab" data-tab="arch" aria-selected="false">Archive</button>
+      <button role="tab" data-tab="roll" aria-selected="false">Prepare next year</button>
+    </nav>
+  </div>
+</header>
+
+<div class="rail gut"><div class="wrap" id="rail"><span class="rail-lab">Highlighted dates</span><span class="empty">Loading…</span></div></div>
+
+<main class="gut"><div class="wrap">
+
+<section id="tab-plan">
+  <div class="panel-head">
+    <h2 id="planTitle">Sundays and special services</h2>
+    <div class="tools">
+      <input class="search" id="q" type="search" placeholder="Find a passage, preacher, event…" aria-label="Search">
+      <span class="seg" role="group" aria-label="Show">
+        <button data-show="all" aria-pressed="true">All</button>
+        <button data-show="upcoming" aria-pressed="false">From today</button>
+        <button data-show="hl" aria-pressed="false">Highlighted</button>
+      </span>
+      <button class="btn needwrite" id="addService">Add a service date</button>
+    </div>
+  </div>
+  <div id="planBody"><div class="state">Opening the shared planner…</div></div>
+  <div class="legend">
+    <span><b>Church calendar</b></span>
+    <span><i style="background:#70AD47"></i>Ordinary, King of the Universe</span>
+    <span><i style="background:#7030A0"></i>Advent, Lent, Palm Sunday, Christmas Eve</span>
+    <span><i style="background:#FFFFFF"></i>Christmas, Epiphany, Easter, Trinity</span>
+    <span><i style="background:#FF0000"></i>Pentecost</span>
+    <span><i style="background:#000000"></i>Good Friday</span>
+    <span><i style="background:#EAD1DC"></i>School holidays</span>
+  </div>
+  <div class="legend">
+    <span><b>Highlight</b></span>
+    <span><i style="background:var(--brand-teal)"></i>Important: promoted 3 weeks ahead</span>
+    <span><i style="background:var(--brand-coral)"></i>Major: promoted 5 weeks ahead</span>
+    <span>Click a field to edit. Changes save for everyone when you leave the field.</span>
+  </div>
+</section>
+
+<section id="tab-promo" hidden>
+  <div class="panel-head">
+    <h2>Promotion runway</h2>
+    <p>Every important or major date starts its promotion a set number of weeks before. Coral is the final week, teal two weeks out, gold three weeks out, matching the Term Diary countdown.</p>
+  </div>
+  <div class="promo-grid">
+    <div class="box"><h3>Promote this week</h3><div class="sub">Inside their lead-in window now</div><div class="plist" id="promoNow"></div></div>
+    <div class="box"><h3>Starting in the next four weeks</h3><div class="sub">Get artwork, WeChat posts and booklet notices ready</div><div class="plist" id="promoSoon"></div></div>
+  </div>
+  <div class="box" style="padding:0;border:none;background:none">
+    <div class="panel-head" style="margin-bottom:8px"><h3 style="font-size:16px">Next 16 weeks</h3><span class="mono" style="font-size:11px;color:var(--muted)">Bar = promotion window · black pin = the day</span></div>
+    <div class="runway" id="runway"></div>
+  </div>
+</section>
+
+<section id="tab-goals" hidden>
+  <div class="panel-head">
+    <h2>Goals</h2>
+    <p>Quarterly, yearly, three-year and ten-year goals, each tied to a G7 team. Change the status as you go.</p>
+  </div>
+  <div class="tools gfilter">
+    <span class="seg" role="group" aria-label="Status filter">
+      <button data-gf="all" aria-pressed="true">All</button>
+      <button data-gf="open" aria-pressed="false">Still open</button>
+      <button data-gf="achieved" aria-pressed="false">Achieved</button>
+    </span>
+    <select id="gTeam" class="search" style="width:auto" aria-label="Team filter"></select>
+  </div>
+  <div class="lanes" id="lanes"></div>
+</section>
+
+<section id="tab-arch" hidden>
+  <div class="panel-head">
+    <h2>Archive</h2>
+    <p>Earlier years from the 2025 and 2026 planners and the Bible Passages list going back to 2017. Dates in this planner move into the archive by themselves once they have passed.</p>
+  </div>
+  <div class="tools" style="margin-bottom:14px">
+    <span class="seg" role="group" aria-label="Archive view">
+      <button data-av="passages" aria-pressed="true">Passages preached</button>
+      <button data-av="year" aria-pressed="false">Year by year</button>
+    </span>
+    <input class="search" id="hq" type="search" placeholder="Book or passage, e.g. Luke 2 or Genesis" aria-label="Search passages">
+    <select class="search" id="hy" style="width:auto" aria-label="Year"></select>
+  </div>
+  <div id="archBody"><div class="state">Opening the archive…</div></div>
+</section>
+
+<section id="tab-roll" hidden>
+  <div class="panel-head">
+    <h2>Prepare next year</h2>
+    <p>Builds every Sunday of the new year with the church calendar worked out from Easter, Good Friday and Christmas included. Term labels come from the NSW dates you enter. Preachers and passages are left blank. Dates that already exist are never overwritten.</p>
+  </div>
+  <div class="roll">
+    <div class="box">
+      <div class="field"><label for="rYear">Year to prepare</label><input id="rYear" type="number" min="2026" max="2100"></div>
+      <div class="field"><label>NSW public school terms (student days)</label>
+        <div class="terms" id="rTerms"></div>
+        <div class="hint" style="margin-top:6px">Check against education.nsw.gov.au. 2027 is filled in already.</div>
+      </div>
+      <label class="check"><input type="checkbox" id="rThemes" checked> <span>Carry the monthly G7 emphasis (for example “Glorify: Thanksgiving and pledging” in November)</span></label>
+      <label class="check"><input type="checkbox" id="rRepeat" checked> <span>Copy events marked “repeats every year” (Vision Sunday, Anniversary, Christmas services…)</span></label>
+      <label class="check"><input type="checkbox" id="rHl" checked> <span>Mark Easter, Christmas and Good Friday as major dates for promotion</span></label>
+      <div class="tools"><button class="btn" id="rPreview">Preview the year</button><button class="btn primary needwrite" id="rCreate" disabled>Create the year</button></div>
+      <div id="rConfirm"></div>
+    </div>
+    <div class="box"><h3>Preview</h3><div class="sub" id="rSummary">Choose a year and press Preview.</div><div class="preview" id="rPreviewBox"></div></div>
+  </div>
+</section>
+
+</div></main>
+
+<footer class="foot gut"><div class="wrap">
+  <div><q>Each of you should use whatever gift you have received to serve others.</q> 1 Peter 4:10 (CSB)<br>St Paul's Kogarah | stpaulskogarah.org</div>
+  <img id="logo" src="planner-assets/st-pauls-logo.png" alt="St Paul's Anglican Church Kogarah">
+</div></footer>
+<datalist id="engines">
+  <option value="Welcome to Life"><option value="Welcome Home"><option value="Home Groups"><option value="Welcome to the Team">
+  <option value="Invites (Contact)"><option value="Invites (Contact) & Welcome Home"><option value="Christmas (Connect)"><option value="Easter (Connect)">
+</datalist>
+<div class="toast" id="toast" role="status"></div>
+<div id="sheetHost"></div>
+
+<script>
+"use strict";
+/* ---------- constants ---------- */
+const TEAMS = [["","No team"],["glorify","Glorify"],["grow","Grow"],["giftedness","Giftedness"],["gregarious","Gregarious"],["go","Go"],["glue","Glue"],["governance","Governance"],["rector","Rector"]];
+const TEAMNAME = Object.fromEntries(TEAMS);
+const TEAMICON = {glorify:"planner-assets/glorify.png",go:"planner-assets/go.png",gregarious:"planner-assets/gregarious.png",grow:"planner-assets/grow.png",giftedness:"planner-assets/giftedness.png",governance:"planner-assets/governance.png",glue:"planner-assets/glue.png"};
+const HORIZONS = [["q","Quarterly","90 days"],["y","Yearly","12 months"],["3","Three-year","3 years"],["10","Ten-year","10 years"]];
+const STATUSES = [["planned","Planned"],["progress","In progress"],["achieved","Achieved"],["missed","Not achieved"]];
+const DEFAULT_LEAD = {important:3, major:5};
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const KNOWN_TERMS = {2027:[["2027-02-03","2027-04-09"],["2027-04-27","2027-07-02"],["2027-07-19","2027-09-24"],["2027-10-11","2027-12-20"]]};
+
+/* ---------- state ---------- */
+const S = { history:new Map(), histVer:0, av:"passages", hq:"", hy:"", hbook:"", services:new Map(), events:new Map(), goals:new Map(), settings:{}, year:null, tab:"plan", show:"all", q:"", gf:"all", gteam:"", ro:false, ready:{s:false,e:false,g:false,h:false} };
+let db = null;
+
+/* ---------- dates ---------- */
+const pad = n => String(n).padStart(2,"0");
+const iso = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const today = () => { const t=new Date(); return new Date(t.getFullYear(),t.getMonth(),t.getDate()); };
+const daysBetween = (a,b) => Math.round((b-a)/86400000);
+const fmtShort = s => { const d=parse(s); return d.getDate()+" "+MONTHS[d.getMonth()].slice(0,3); };
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da);}
+function advent1(y){const xmas=new Date(y,11,25);const back=xmas.getDay()===0?7:xmas.getDay();return addDays(xmas,-back-21);}
+function churchDay(d){
+  const y=d.getFullYear(), E=easter(y), A1=advent1(y), K=addDays(A1,-7);
+  const diffE=daysBetween(E,d);
+  if(d.getMonth()===11&&d.getDate()===24) return "Christmas Eve";
+  if(d.getMonth()===11&&d.getDate()===25) return "Christmas Day";
+  if(diffE===-2) return "Good Friday";
+  if(d.getDay()!==0) return "";
+  if(d>=A1){ const w=daysBetween(A1,d)/7; return w<4?"Advent "+(w+1):"Sunday After Christmas"; }
+  const ep=new Date(y,0,6); const bap=addDays(ep,7-ep.getDay()===7?7:7-ep.getDay());
+  if(d<bap) return d.getDate()<=7&&d.getMonth()===0?"2nd after Christmas":"Sunday After Christmas";
+  const ash=addDays(E,-46), lent1=addDays(E,-42);
+  if(d<lent1){ const n=daysBetween(bap,d)/7+1; return n===1?"First Sunday after Epiphany":"Ord Sunday "+n; }
+  if(diffE<0){ const w=daysBetween(lent1,d)/7; return w===5?"Palm Sunday":["1st","2nd","3rd","4th","5th"][w]+" Sunday Lent"; }
+  if(diffE===0) return "Easter Sunday";
+  if(diffE<49) return "Sunday after Easter "+(diffE/7);
+  if(diffE===49) return "Pentecost";
+  if(diffE===56) return "Trinity Sunday";
+  if(+d===+K) return "KING OF THE UNIVERSE";
+  return "Ord Sunday "+(34-daysBetween(d,K)/7);
+}
+function termLabel(sun, terms){
+  const end=addDays(sun,6);
+  for(let i=0;i<terms.length;i++){ const [a,b]=terms[i].map(parse);
+    if(end>=a && sun<=b){ const first = sun<=a; const wks=Math.ceil((daysBetween(a,b)+3)/7); return first?`Term ${i+1} (${wks})`:`Term ${i+1}`; } }
+  const t=terms.map(p=>p.map(parse));
+  if(!t.length) return "";
+  if(sun<t[0][0]||sun>t[3]?.[1]) return "Summer Holidays";
+  if(sun>t[0][1]&&sun<t[1][0]) return "Autumn Holidays";
+  if(sun>t[1][1]&&sun<t[2][0]) return "Winter Holidays";
+  return "Spring Holidays";
+}
+
+function calClass(lit){ const t=String(lit||"").toLowerCase(); if(!t) return "";
+  if(t.includes("good friday")) return "c-black";
+  if(t.includes("pentecost")) return "c-red";
+  if(t.includes("christmas eve")||t.includes("lent")||t.includes("palm")||t.includes("advent")) return "c-purple";
+  if(/\bord\b|ordinary|king of the universe|christ the king/.test(t)) return "c-green";
+  if(/christmas|epiphany|easter|trinity|baptism/.test(t)) return "c-white";
+  return ""; }
+const CALSW={"c-green":"#70AD47","c-purple":"#7030A0","c-white":"#FFFFFF","c-red":"#FF0000","c-black":"#000000"};
+const lect = y => ["C","A","B"][y%3];
+/* ---------- Bible references ---------- */
+const BOOKS=[["Genesis","gen|genesis"],["Exodus","ex|exod|exodus"],["Leviticus","lev|leviticus"],["Numbers","num|numbers"],["Deuteronomy","deut|deuteronomy"],["Joshua","josh|joshua"],["Judges","judg|judges"],["Ruth","ruth"],["1 Samuel","1 ?sam|1 ?samuel|1 ?smauel"],["2 Samuel","2 ?sam|2 ?samuel"],["1 Kings","1 ?kgs|1 ?kings"],["2 Kings","2 ?kgs|2 ?kings"],["1 Chronicles","1 ?chr|1 ?chron|1 ?chronicles"],["2 Chronicles","2 ?chr|2 ?chron|2 ?chronicles"],["Ezra","ezra"],["Nehemiah","neh|nehemiah"],["Esther","esth|esther"],["Job","job"],["Psalms","ps|psa|psalm|psalms"],["Proverbs","prov|proverbs"],["Ecclesiastes","eccl|eccles|ecclesiastes"],["Song of Songs","song of songs|song"],["Isaiah","isa|isaiah"],["Jeremiah","jer|jeremiah"],["Lamentations","lam|lamentations"],["Ezekiel","ezek|ezekiel"],["Daniel","dan|daniel"],["Hosea","hos|hosea"],["Joel","joel"],["Amos","amos"],["Obadiah","obad|obadiah"],["Jonah","jonah"],["Micah","mic|micah"],["Nahum","nah|nahum"],["Habakkuk","hab|habakkuk"],["Zephaniah","zeph|zephaniah"],["Haggai","hag|haggai"],["Zechariah","zech|zechariah"],["Malachi","mal|malachi"],
+["Matthew","matt|mt|matthew"],["Mark","mk|mark"],["Luke","lk|luke"],["John","jn|john"],["Acts","acts"],["Romans","rom|romans"],["1 Corinthians","1 ?cor|1 ?corinthians"],["2 Corinthians","2 ?cor|2 ?corinthians"],["Galatians","gal|galatians"],["Ephesians","eph|ephesians"],["Philippians","phil|philippians"],["Colossians","col|colossians"],["1 Thessalonians","1 ?thess|1 ?thessalonians"],["2 Thessalonians","2 ?thess|2 ?thessalonians"],["1 Timothy","1 ?tim|1 ?timothy"],["2 Timothy","2 ?tim|2 ?timothy"],["Titus","titus"],["Philemon","phlm|philem|philemon"],["Hebrews","heb|hebrews"],["James","jas|james"],["1 Peter","1 ?pet|1 ?peter"],["2 Peter","2 ?pet|2 ?peter"],["1 John","1 ?john|1 ?jn"],["2 John","2 ?john"],["3 John","3 ?john"],["Jude","jude"],["Revelation","rev|revelation"]];
+const OT_COUNT=39;
+const ALIASES=BOOKS.flatMap(([name,al])=>al.split("|").map(x=>[x.replace(" ?",""),name])).sort((x,y)=>y[0].length-x[0].length);
+const ALIAS_MAP=Object.fromEntries(ALIASES);
+const BOOK_RE=new RegExp("\\b("+ALIASES.map(x=>x[0].replace(/^(\d)/,"$1\\s*")).join("|")+")\\b\\.?\\s*(\\d+)?(?::(\\d+))?(?:\\s*[-–]\\s*(\\d+)(?::(\\d+))?)?","gi");
+function parseRefs(str){ const out=[]; if(!str) return out; const txt=String(str).replace(/：/g,":").replace(/([A-Za-z])(\d)/g,"$1 $2");
+  for(const m of txt.matchAll(BOOK_RE)){ const book=ALIAS_MAP[m[1].toLowerCase().replace(/\s+/g,"")]; if(!book) continue;
+    const c1=m[2]?+m[2]:null; let c2=c1;
+    if(m[4]){ if(m[5]) c2=+m[4]; else if(m[3]) c2=c1; else c2=+m[4]; }
+    if(c1!=null&&c2<c1) c2=c1;
+    out.push({book,c1,c2}); }
+  return out; }
+function overlaps(a,b){ if(a.book!==b.book) return false; if(a.c1==null||b.c1==null) return true; return a.c1<=b.c2&&b.c1<=a.c2; }
+function allPreached(){ const out=[]; const t=iso(today());
+  S.history.forEach(h=>{ (h.rows||[]).forEach(r=>{ if(r.passage&&!/confirm/i.test(r.passage)) out.push({year:h.year,date:r.date,passage:r.passage,preacher:r.preacher||"",series:r.series||"",src:"planner"}); });
+    (h.summary||[]).forEach(p=>out.push({year:h.year,date:"",passage:p,preacher:"",series:"",src:"list"})); });
+  S.services.forEach(s=>{ if(s.date<t&&s.passage&&!/confirm/i.test(s.passage)) out.push({year:+s.date.slice(0,4),date:s.date,passage:s.passage,preacher:s.preacher||"",series:s.series||"",src:"planner"}); });
+  return out.map(x=>({...x,refs:parseRefs(x.passage)})); }
+let _preachedCache=null, _pcKey="";
+function preachedIndex(){ const k=S.history.size+":"+S.services.size+":"+S.histVer; if(_pcKey!==k){ _preachedCache=allPreached(); _pcKey=k; } return _preachedCache; }
+function preachedBefore(passage, date){ const refs=parseRefs(passage); if(!refs.length) return []; const y=+date.slice(0,4);
+  return preachedIndex().filter(p=>p.year<y&&p.refs.some(a=>refs.some(b=>overlaps(a,b)))).sort((a,b)=>(b.date||b.year+"").localeCompare(a.date||a.year+"")).map(p=>({...p,label:(p.date?fmtShort(p.date)+" ":"")+p.year+": "+p.passage+(p.preacher?" ("+p.preacher+")":"")})); }
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let toastT; function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2600);}
+function leadOf(x){ if(!x.hl) return 0; const n=Number(x.lead); return Number.isFinite(n)&&n>0?n:DEFAULT_LEAD[x.hl]||3; }
+function wkClass(days){ if(days<=7) return ""; if(days<=14) return "w2"; if(days<=21) return "w3"; return "far"; }
+function newId(p){ return p+"-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+async function write(path, data, mode="update"){
+  if(!db||S.ro){ toast("This view is read-only."); return false; }
+  try{ const ref=db.doc(path); if(mode==="set") await ref.set(data); else if(mode==="delete") await ref.delete(); else await ref.update(data); return true; }
+  catch(e){
+    if(e&&e.code==="invalid_argument"&&mode!=="set"){ setRO(true); toast("You can view this planner but not change it."); }
+    else if(e&&e.code==="quota_exceeded") toast("The planner is full. Delete old years' dates to make room.");
+    else if(e&&e.code==="unavailable"){ toast("Connection hiccup. Trying again…"); await new Promise(r=>setTimeout(r,800+Math.random()*600)); try{const ref=db.doc(path); if(mode==="set") await ref.set(data); else if(mode==="delete") await ref.delete(); else await ref.update(data); return true;}catch(_){toast("Couldn't save. Try again in a moment.");} }
+    else toast("Couldn't save that change.");
+    return false; }
+}
+function setRO(v){ S.ro=v; document.body.classList.toggle("ro",v); }
+
+/* ---------- derived ---------- */
+function yearsAvailable(){
+  const ys=new Set(); S.services.forEach(s=>ys.add(+s.date.slice(0,4))); S.events.forEach(e=>e.date&&ys.add(+e.date.slice(0,4)));
+  if(!ys.size) ys.add(today().getFullYear());
+  return [...ys].sort();
+}
+function eventsOn(date){ return [...S.events.values()].filter(e=>e.date===date).sort((a,b)=>(a.title||"").localeCompare(b.title||"")); }
+function highlighted(){
+  const items=[];
+  S.services.forEach(s=>{ if(s.hl) items.push({kind:"service",id:s.date,date:s.date,title:s.title||s.lit||"Service",sub:[s.preacher,s.passage].filter(Boolean).join(" · "),hl:s.hl,lead:leadOf(s),promo:s.promo||""}); });
+  S.events.forEach(e=>{ if(e.hl&&e.date) items.push({kind:"event",id:e.id,date:e.date,title:e.title||"Event",sub:[TEAMNAME[e.team]||"",e.when||""].filter(Boolean).join(" · "),hl:e.hl,lead:leadOf(e),promo:e.promo||""}); });
+  return items.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+/* ---------- rail ---------- */
+function renderRail(){
+  const t=today(); const up=highlighted().filter(i=>parse(i.date)>=t).slice(0,10);
+  const el=$("#rail");
+  el.innerHTML='<span class="rail-lab">Highlighted dates</span>'+(up.length?up.map(i=>{const d=daysBetween(t,parse(i.date));
+    return `<button class="cd ${wkClass(d)}" data-open="${i.kind}:${esc(i.id)}"><b>${d===0?"Today":d+"d"}</b><span>${esc(i.title)}<i>${fmtShort(i.date)}</i></span></button>`;}).join(""):'<span class="empty">No highlighted dates ahead. Use the Highlight button on any row.</span>');
+}
+
+/* ---------- planner ---------- */
+function renderPlan(){
+  const box=$("#planBody"); const y=S.year;
+  if(!S.ready.s){ return; }
+  const t=iso(today()); const q=S.q.trim().toLowerCase();
+  let rows=[...S.services.values()].filter(s=>s.date.startsWith(y+"-")).sort((a,b)=>a.date.localeCompare(b.date));
+  // dates that only have events still show as rows
+  const evDates=new Set([...S.events.values()].filter(e=>e.date&&e.date.startsWith(y+"-")&&!S.services.has(e.date)).map(e=>e.date));
+  evDates.forEach(d=>rows.push({date:d,_eventOnly:true}));
+  rows.sort((a,b)=>a.date.localeCompare(b.date));
+  if(S.show==="upcoming") rows=rows.filter(r=>r.date>=t);
+  if(S.show==="hl") rows=rows.filter(r=>r.hl||eventsOn(r.date).some(e=>e.hl));
+  if(q) rows=rows.filter(r=>[r.lit,r.term,r.staff,r.preacher,r.passage,r.series,r.engine,r.notes,r.title,...eventsOn(r.date).map(e=>e.title)].join(" ").toLowerCase().includes(q));
+  $("#planTitle").textContent=`${y}: Sundays and special services`; $("#lectLab").textContent=`Year ${lect(y)} · Year ${lect(y+1)} from Advent 1`;
+  if(!rows.length){ box.innerHTML=`<div class="state">${S.services.size?"Nothing matches in "+y+".":"No dates for "+y+" yet. Use “Prepare next year” to build them."}</div>`; return; }
+  const themes=(S.settings.monthThemes)||{};
+  const yThemes=(S.settings["themes"+y])||{};
+  let html='<div class="tablebox"><table class="pl"><thead><tr><th>Date</th><th>Church calendar</th><th>Term</th><th>Staff away</th><th>Preacher</th><th>Passage</th><th>Series</th><th>Welcome Pathway / engine</th><th>Notes and events</th><th>Highlight</th></tr></thead><tbody>';
+  let lastM=-1;
+  for(const r of rows){
+    const d=parse(r.date), m=d.getMonth();
+    if(m!==lastM){ lastM=m; const key=String(m+1); const th=yThemes[key]??themes[key]??"";
+      html+=`<tr class="month"><td colspan="10"><span class="month-name">${MONTHS[m]}</span><span class="month-theme"><input id="theme-${y}-${key}" data-theme="${key}" value="${esc(th)}" placeholder="G7 emphasis for the month" aria-label="G7 emphasis for ${MONTHS[m]}"></span></td></tr>`; }
+    const cls=["svc"]; if(r.date<t) cls.push("past"); if(r.hl) cls.push("hl-"+r.hl);
+    const evs=eventsOn(r.date);
+    const f=(k,ph,c="",after="")=> r._eventOnly?"":`<input class="cell ${c}" id="f-${r.date}-${k}" data-svc="${r.date}" data-k="${k}"${k==="engine"?' list="engines"':""} value="${esc(r[k])}" placeholder="${ph}">${after}`;
+    const prev=r.passage?preachedBefore(r.passage,r.date):[];
+    html+=`<tr class="${cls.join(" ")}" id="row-${r.date}"><td class="datecell"><b>${d.getDate()} ${MONTHS[m].slice(0,3)}</b><span>${DOW[d.getDay()]}</span></td>
+      <td style="min-width:150px">${f("lit","","cal "+calClass(r.lit))}</td><td style="min-width:150px">${f("term","","term "+(/holiday/i.test(r.term||"")?"c-holiday":""))}</td><td style="min-width:90px">${f("staff","")}</td>
+      <td style="min-width:150px">${f("preacher","TBC","preacher")}</td><td style="min-width:180px">${f("passage","—","passage",prev.length?`<button class="prevbtn" data-hist="${esc(r.passage)}" title="Preached before: ${esc(prev.map(p=>p.label).join("; "))}">Preached before · ${esc([...new Set(prev.map(p=>p.year))].slice(0,3).join(", "))}</button>`:"")}</td>
+      <td style="min-width:140px">${f("series","")}</td><td style="min-width:140px">${f("engine","")}</td>
+      <td style="min-width:240px">${r._eventOnly?"":`<textarea class="cell" rows="1" id="f-${r.date}-notes" data-svc="${r.date}" data-k="notes" placeholder="Notes for the service">${esc(r.notes)}</textarea>`}
+        <div class="evs">${evs.map(e=>`<button class="ev" data-hl="${e.hl||""}" data-team="${esc(e.team||"")}" data-ev="${esc(e.id)}" title="${esc((TEAMNAME[e.team]?TEAMNAME[e.team]+": ":"")+e.title)}"><span class="dot"></span>${esc(e.title)}</button>`).join("")}<button class="addev needwrite" data-addev="${r.date}">+ event</button></div></td>
+      <td>${r._eventOnly?"":`<button class="star needwrite-ok" data-star="${r.date}" data-v="${r.hl||""}">${r.hl?(r.hl==="major"?"Major":"Important"):"Highlight"}</button>`}</td></tr>`;
+  }
+  html+='</tbody></table></div>';
+  box.innerHTML=html;
+}
+
+/* ---------- promotion ---------- */
+function renderPromo(){
+  const t=today(); const items=highlighted();
+  const now=[], soon=[];
+  for(const i of items){ const d=parse(i.date); const start=addDays(d,-7*i.lead); const left=daysBetween(t,d);
+    if(left<0) continue;
+    if(start<=t) now.push({...i,left}); else if(daysBetween(t,start)<=28) soon.push({...i,left,startsIn:daysBetween(t,start),start}); }
+  const card=(i,extra)=>`<button class="pitem" data-open="${i.kind}:${esc(i.id)}"><span class="weeks ${wkClass(i.left)}">${i.left===0?"Today":i.left<7?i.left+" days":Math.ceil(i.left/7)+" wks"}</span><span><b>${esc(i.title)}</b><small>${esc(extra||i.promo||i.sub||"")}</small></span><span class="when">${fmtShort(i.date)}</span></button>`;
+  $("#promoNow").innerHTML=now.length?now.map(i=>card(i,i.promo)).join(""):'<div class="empty">Nothing in its promotion window this week.</div>';
+  $("#promoSoon").innerHTML=soon.length?soon.map(i=>card(i,`Start promoting ${fmtShort(iso(i.start))} (in ${i.startsIn} days)`)).join(""):'<div class="empty">No promotion windows open in the next four weeks.</div>';
+  const pc=$("#promoCount"); pc.hidden=!now.length; pc.textContent=now.length;
+  // runway
+  const start=addDays(t,-t.getDay()), weeks=16, end=addDays(start,weeks*7);
+  const rows=items.filter(i=>{const d=parse(i.date);return d>=t&&addDays(d,-7*i.lead)<end;});
+  const pct=d=>Math.max(0,Math.min(100,daysBetween(start,d)/(weeks*7)*100));
+  let h=`<div class="rw" style="grid-template-columns:220px repeat(${weeks},minmax(0,1fr))"><div class="hd" style="border-left:none;padding-left:10px">Date</div>`;
+  for(let w=0;w<weeks;w++){ const ws=addDays(start,w*7); h+=`<div class="hd ${w===0?"now":""}">${fmtShort(iso(ws))}</div>`; }
+  if(!rows.length) h+=`<div class="lab" style="grid-column:1/-1;font-style:italic;color:var(--muted)">No highlighted dates in the next 16 weeks.</div>`;
+  for(const i of rows){ const d=parse(i.date), ps=addDays(d,-7*i.lead);
+    const l=pct(ps), r=pct(addDays(d,1)); const segs=[];
+    for(let k=i.lead;k>=1;k--) segs.push(k>3?"g":"w"+k);
+    h+=`<div class="lab" data-open="${i.kind}:${esc(i.id)}" title="${esc(i.title)}">${esc(i.title)}<small>${fmtShort(i.date)}</small></div><div class="lane">`;
+    for(let w=1;w<weeks;w++) h+=`<span class="tick" style="left:${w/weeks*100}%"></span>`;
+    h+=`<span class="nowline" style="left:${pct(t)}%"></span><span class="bar" style="left:${l}%;width:${Math.max(r-l,1)}%">${segs.map(s=>`<span class="${s}"></span>`).join("")}</span><span class="pin" style="left:calc(${pct(d)}% + ${100/weeks/7*0.5}%)"></span></div>`;
+  }
+  $("#runway").innerHTML=h+"</div>";
+}
+
+/* ---------- goals ---------- */
+function renderGoals(){
+  const sel=$("#gTeam"); if(!sel.options.length) sel.innerHTML='<option value="">All teams</option>'+TEAMS.slice(1).map(([k,n])=>`<option value="${k}">${n}</option>`).join("");
+  const gs=[...S.goals.values()].filter(g=>(S.gf==="all")||(S.gf==="achieved"?g.status==="achieved":g.status!=="achieved")).filter(g=>!S.gteam||g.team===S.gteam);
+  $("#lanes").innerHTML=HORIZONS.map(([h,name,span])=>{
+    const list=gs.filter(g=>g.horizon===h).sort((a,b)=>(a.due||"9").localeCompare(b.due||"9"));
+    return `<div class="lane-col"><header><h3>${name}</h3><span>${span}</span></header>${list.map(g=>`
+      <div class="goal" data-s="${g.status||"planned"}">
+        <div class="gtop"><span class="teamtag">${g.team&&TEAMICON[g.team]?`<img src="${TEAMICON[g.team]}" alt="">`:""}${esc(g.team?TEAMNAME[g.team]:"No team")}</span><span class="status" data-s="${g.status||"planned"}">${esc((STATUSES.find(x=>x[0]===g.status)||STATUSES[0])[1])}</span></div>
+        <input class="cell gt" id="g-${g.id}-title" data-goal="${g.id}" data-k="title" value="${esc(g.title)}" placeholder="Goal">
+        <textarea class="cell gn" rows="2" id="g-${g.id}-note" data-goal="${g.id}" data-k="note" placeholder="What this looks like when it's done">${esc(g.note)}</textarea>
+        <div class="grow">
+          <select id="g-${g.id}-status" data-goal="${g.id}" data-k="status" aria-label="Status">${STATUSES.map(([k,n])=>`<option value="${k}" ${g.status===k?"selected":""}>${n}</option>`).join("")}</select>
+          <select id="g-${g.id}-team" data-goal="${g.id}" data-k="team" aria-label="Team">${TEAMS.map(([k,n])=>`<option value="${k}" ${g.team===k?"selected":""}>${n}</option>`).join("")}</select>
+          <input type="date" id="g-${g.id}-due" data-goal="${g.id}" data-k="due" value="${esc(g.due)}" aria-label="Due date">
+          <button class="x needwrite" data-delgoal="${g.id}" aria-label="Delete goal">Delete</button>
+        </div></div>`).join("")||'<div class="empty" style="font-size:14px">No goals here yet.</div>'}
+      <button class="addev needwrite" data-addgoal="${h}" style="align-self:flex-start">+ ${name.toLowerCase()} goal</button></div>`;
+  }).join("");
+}
+
+/* ---------- archive ---------- */
+function archiveYears(){ const ys=new Set([...S.history.keys()].map(Number)); const cy=today().getFullYear(); S.services.forEach(s=>{ const y=+s.date.slice(0,4); if(y<cy) ys.add(y); }); return [...ys].sort((a,b)=>b-a); }
+function renderArch(){
+  const ys=archiveYears(); const hy=$("#hy");
+  const opts='<option value="">All years</option>'+ys.map(y=>`<option value="${y}" ${String(y)===S.hy?"selected":""}>${y}</option>`).join("");
+  if(hy.innerHTML!==opts) hy.innerHTML=opts;
+  document.querySelectorAll("[data-av]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.av===S.av));
+  $("#hq").hidden=S.av!=="passages";
+  const box=$("#archBody");
+  if(!S.ready.h){ return; }
+  if(S.av==="year"){
+    const list=S.hy?[+S.hy]:ys; const t=iso(today());
+    box.innerHTML=list.map(y=>{ const h=S.history.get(y)||{}; let rows=[...(h.rows||[])];
+      S.services.forEach(s=>{ if(s.date.startsWith(y+"-")&&s.date<t&&!rows.some(r=>r.date===s.date)) rows.push({...s,events:eventsOn(s.date).map(e=>e.title).join(", ")}); });
+      rows.sort((a,b)=>a.date.localeCompare(b.date));
+      const sum=h.summary||[];
+      return `<div class="yearhead"><h3>${y}</h3><span>${rows.length?rows.length+" dates":""}${rows.length&&sum.length?" · ":""}${sum.length?"Bible Passages list":""}</span></div>`+
+        (sum.length?`<ul class="summary-list">${sum.map(p=>`<li>${esc(p)}</li>`).join("")}</ul>`:"")+
+        (rows.length?`<div class="tablebox"><table class="arch-table"><thead><tr><th>Date</th><th>Church calendar</th><th>Preacher</th><th>Passage</th><th>Series</th><th>Notes and events</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="num" style="white-space:nowrap">${DOW[parse(r.date).getDay()]} ${fmtShort(r.date)}</td><td>${r.lit?`<span class="pill ${calClass(r.lit)}">${esc(r.lit)}</span>`:""}</td><td>${esc(r.preacher)}</td><td class="p">${esc(r.passage)}</td><td>${esc(r.series)}</td><td>${esc([r.notes,r.events].filter(Boolean).join(" · "))}</td></tr>`).join("")}</tbody></table></div>`:"");
+    }).join("")||'<div class="state">No earlier years yet.</div>';
+    return;
+  }
+  // passages view
+  let items=preachedIndex(); if(S.hy) items=items.filter(i=>String(i.year)===S.hy);
+  const counts={}, last={};
+  items.forEach(i=>new Set(i.refs.map(r=>r.book)).forEach(b=>{ counts[b]=(counts[b]||0)+1; last[b]=Math.max(last[b]||0,i.year); }));
+  const bk=(name)=>{ const n=counts[name]||0; const cls=n===0?"n0":n<3?"n1":n<6?"n2":"n3"; return `<button class="bk ${cls}" data-book="${esc(name)}" aria-pressed="${S.hbook===name}"><b>${esc(name)}</b><span>${n?n+"× · last "+last[name]:"not yet"}</span></button>`; };
+  let q=S.hq.trim(); let qrefs=parseRefs(q);
+  let shown=items;
+  if(S.hbook) shown=shown.filter(i=>i.refs.some(r=>r.book===S.hbook));
+  if(q){ shown= qrefs.length? shown.filter(i=>i.refs.some(a=>qrefs.some(b=>overlaps(a,b)))) : shown.filter(i=>(i.passage+" "+i.series+" "+i.preacher).toLowerCase().includes(q.toLowerCase())); }
+  shown=[...shown].sort((a,b)=>(b.date||b.year+"-99").localeCompare(a.date||a.year+"-99"));
+  const filt=S.hbook||q;
+  box.innerHTML=`<div class="testament">Old Testament</div><div class="books">${BOOKS.slice(0,OT_COUNT).map(b=>bk(b[0])).join("")}</div>
+    <div class="testament">New Testament</div><div class="books">${BOOKS.slice(OT_COUNT).map(b=>bk(b[0])).join("")}</div>
+    <div class="yearhead"><h3>${filt?esc(S.hbook||q):"Everything preached"}</h3><span>${shown.length} ${shown.length===1?"entry":"entries"}${S.hy?" in "+S.hy:""}${filt?' · <button class="addev" id="clearH">Clear</button>':""}</span></div>
+    ${shown.length?`<div class="tablebox"><table class="arch-table"><thead><tr><th>When</th><th>Passage</th><th>Preacher</th><th>Series</th></tr></thead><tbody>${shown.slice(0,400).map(i=>`<tr><td class="num" style="white-space:nowrap">${i.date?fmtShort(i.date)+" "+i.year:i.year+' <span class="src">(list)</span>'}</td><td class="p">${esc(i.passage)}</td><td>${esc(i.preacher)}</td><td>${esc(i.series)}</td></tr>`).join("")}</tbody></table></div>`:'<div class="state">Not preached in the years on file.</div>'}`;
+}
+
+/* ---------- editor sheet ---------- */
+function openSheet(html, onMount){
+  $("#sheetHost").innerHTML=`<div class="sheet-bg" id="sheetBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  $("#sheetBg").addEventListener("click",e=>{ if(e.target.id==="sheetBg") closeSheet(); });
+  onMount&&onMount(); const f=$(".sheet input,.sheet select"); f&&f.focus();
+}
+function closeSheet(){ $("#sheetHost").innerHTML=""; }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeSheet(); });
+
+function editEvent(id, date){
+  const e = id? {...S.events.get(id)} : {id:newId("ev"),date,title:"",team:"",hl:"",lead:"",when:"",promo:"",detail:"",repeat:"none"};
+  const isNew=!id;
+  openSheet(`<h2>${isNew?"Add an event":"Edit event"}</h2>
+    <div class="field"><label for="eT">Event</label><input id="eT" value="${esc(e.title)}" placeholder="e.g. Christmas Eve service"></div>
+    <div class="row2"><div class="field"><label for="eD">Date</label><input id="eD" type="date" value="${esc(e.date)}"></div>
+      <div class="field"><label for="eW">Time and place</label><input id="eW" value="${esc(e.when)}" placeholder="2:00pm · 57 Princes Hwy"></div></div>
+    <div class="row2"><div class="field"><label for="eTeam">G7 team</label><select id="eTeam">${TEAMS.map(([k,n])=>`<option value="${k}" ${e.team===k?"selected":""}>${n}</option>`).join("")}</select></div>
+      <div class="field"><label for="eHl">Highlight</label><select id="eHl"><option value="">Not highlighted</option><option value="important" ${e.hl==="important"?"selected":""}>Important</option><option value="major" ${e.hl==="major"?"selected":""}>Major</option></select></div></div>
+    <div class="row2"><div class="field"><label for="eL">Promote this many weeks ahead</label><input id="eL" type="number" min="0" max="26" value="${esc(e.lead)}" placeholder="Default: 3 or 5"></div>
+      <div class="field"><label for="eR">Repeats every year</label><select id="eR"><option value="none">No</option><option value="date" ${e.repeat==="date"?"selected":""}>Same date</option><option value="nth" ${e.repeat==="nth"?"selected":""}>Same week and day of the month</option></select></div></div>
+    <div class="field"><label for="eP">Promotion plan</label><textarea id="eP" rows="2" placeholder="Booklet notice, WeChat, Facebook, flyers…">${esc(e.promo)}</textarea></div>
+    <div class="field"><label for="eX">Details</label><textarea id="eX" rows="4">${esc(e.detail)}</textarea></div>
+    <div id="eConfirm"></div>
+    <div class="actions"><button class="btn primary needwrite" id="eSave">${isNew?"Add event":"Save"}</button><button class="btn" id="eCancel">Cancel</button>${isNew?"":'<button class="btn danger needwrite" id="eDel" style="margin-left:auto">Delete</button>'}</div>`, ()=>{
+    $("#eCancel").onclick=closeSheet;
+    $("#eSave").onclick=async()=>{ const body={id:e.id,title:$("#eT").value.trim(),date:$("#eD").value,when:$("#eW").value.trim(),team:$("#eTeam").value,hl:$("#eHl").value,lead:$("#eL").value?Number($("#eL").value):"",repeat:$("#eR").value,promo:$("#eP").value.trim(),detail:$("#eX").value.trim()};
+      if(!body.title||!body.date){ toast("An event needs a name and a date."); return; }
+      if(await write("events/"+e.id, body, "set")){ toast(isNew?"Event added":"Event saved"); closeSheet(); } };
+    const del=$("#eDel"); if(del) del.onclick=()=>{ $("#eConfirm").innerHTML=`<div class="confirm">Delete “${esc(e.title)}” for everyone?<button class="btn danger" id="eDelYes">Delete</button><button class="btn" id="eDelNo">Keep it</button></div>`;
+      $("#eDelNo").onclick=()=>$("#eConfirm").innerHTML="";
+      $("#eDelYes").onclick=async()=>{ if(await write("events/"+e.id,null,"delete")){ toast("Event deleted"); closeSheet(); } }; };
+  });
+}
+function editServicePromo(date){
+  const s=S.services.get(date); if(!s) return;
+  openSheet(`<h2>${esc(fmtShort(date))}: ${esc(s.lit||"Service")}</h2>
+    <div class="field"><label for="sT">Name shown in promotion</label><input id="sT" value="${esc(s.title||"")}" placeholder="${esc(s.lit||"")}"></div>
+    <div class="row2"><div class="field"><label for="sHl">Highlight</label><select id="sHl"><option value="">Not highlighted</option><option value="important" ${s.hl==="important"?"selected":""}>Important</option><option value="major" ${s.hl==="major"?"selected":""}>Major</option></select></div>
+    <div class="field"><label for="sL">Promote this many weeks ahead</label><input id="sL" type="number" min="0" max="26" value="${esc(s.lead??"")}" placeholder="Default: 3 or 5"></div></div>
+    <div class="field"><label for="sP">Promotion plan</label><textarea id="sP" rows="3" placeholder="Booklet notice, WeChat, Facebook, flyers…">${esc(s.promo||"")}</textarea></div>
+    <div class="hint">${esc([s.preacher,s.passage,s.series].filter(Boolean).join(" · "))}</div>
+    <div class="actions"><button class="btn primary needwrite" id="sSave">Save</button><button class="btn" id="sCancel">Cancel</button><button class="btn" id="sGo" style="margin-left:auto">Show in planner</button></div>`,()=>{
+    $("#sCancel").onclick=closeSheet;
+    $("#sGo").onclick=()=>{ closeSheet(); jumpTo(date); };
+    $("#sSave").onclick=async()=>{ if(await write("services/"+date,{title:$("#sT").value.trim(),hl:$("#sHl").value,lead:$("#sL").value?Number($("#sL").value):"",promo:$("#sP").value.trim()})){ toast("Saved"); closeSheet(); } };
+  });
+}
+function addServiceDate(){
+  openSheet(`<h2>Add a service date</h2>
+    <div class="field"><label for="nD">Date</label><input id="nD" type="date"></div>
+    <div class="hint">For a weekday service (Ash Wednesday, a funeral) or a Sunday missing from the year. The church calendar fills in by itself.</div>
+    <div class="actions"><button class="btn primary" id="nSave">Add</button><button class="btn" id="nCancel">Cancel</button></div>`,()=>{
+    $("#nCancel").onclick=closeSheet;
+    $("#nSave").onclick=async()=>{ const v=$("#nD").value; if(!v) return; if(S.services.has(v)){toast("That date is already in the planner.");return;}
+      if(await write("services/"+v,blankService(v,[]),"set")){ toast("Date added"); closeSheet(); S.year=+v.slice(0,4); syncYear(); renderAll(); setTimeout(()=>jumpTo(v),100);} };
+  });
+}
+function blankService(date, terms){ const d=parse(date); return {date,lit:churchDay(d),term:terms.length?termLabel(d,terms):"",staff:"",preacher:"",passage:"",series:"",engine:"",notes:"",hl:"",lead:"",promo:"",title:""}; }
+function jumpTo(date){ switchTab("plan"); S.show="all"; S.q=""; $("#q").value=""; syncSeg(); if(S.year!==+date.slice(0,4)){S.year=+date.slice(0,4); syncYear();} renderPlan(); const r=document.getElementById("row-"+date); if(r){ r.scrollIntoView({block:"center",behavior:"smooth"}); r.querySelector(".cell")?.focus({preventScroll:true}); } }
+
+/* ---------- roll-over ---------- */
+let rollPlan=null;
+function initRoll(){
+  const ys=yearsAvailable(); const next=Math.max(...ys)+1;
+  $("#rYear").value=next; fillTerms(next);
+}
+function fillTerms(y){
+  const saved=(S.settings.terms||{})[y]||KNOWN_TERMS[y]||[["",""],["",""],["",""],["",""]];
+  $("#rTerms").innerHTML=saved.map((p,i)=>`<span>Term ${i+1}</span><input type="date" id="t${i}a" value="${p[0]}" aria-label="Term ${i+1} first day"><input type="date" id="t${i}b" value="${p[1]}" aria-label="Term ${i+1} last day">`).join("");
+  rollPlan=null; $("#rCreate").disabled=true; $("#rConfirm").innerHTML="";
+}
+function readTerms(){ const t=[]; for(let i=0;i<4;i++){ const a=$("#t"+i+"a").value,b=$("#t"+i+"b").value; if(!a||!b) return null; t.push([a,b]); } return t; }
+function buildRoll(){
+  const y=+$("#rYear").value; if(!y||y<2000){ toast("Enter a year."); return; }
+  const terms=readTerms(); if(!terms){ $("#rSummary").textContent="Enter all four term start and end dates first."; return; }
+  const dates=[]; let d=new Date(y,0,1); while(d.getDay()!==0) d=addDays(d,1);
+  for(;d.getFullYear()===y;d=addDays(d,7)) dates.push(iso(d));
+  const gf=addDays(easter(y),-2); dates.push(iso(gf), y+"-12-24", y+"-12-25");
+  const uniq=[...new Set(dates)].sort();
+  const services=uniq.filter(x=>!S.services.has(x)).map(x=>{ const s=blankService(x,terms); if($("#rHl").checked&&/Easter Sunday|Good Friday|Christmas/.test(s.lit)) s.hl="major"; return s; });
+  const events=[];
+  if($("#rRepeat").checked){ S.events.forEach(e=>{ if(!e.repeat||e.repeat==="none"||!e.date) return; const src=parse(e.date); if(src.getFullYear()!==y-1) return;
+      let nd; if(e.repeat==="date") nd=new Date(y,src.getMonth(),src.getDate());
+      else { const nth=Math.ceil(src.getDate()/7); nd=new Date(y,src.getMonth(),1); while(nd.getDay()!==src.getDay()) nd=addDays(nd,1); nd=addDays(nd,7*(nth-1)); if(nd.getMonth()!==src.getMonth()) nd=addDays(nd,-7); }
+      const ndate=iso(nd); if([...S.events.values()].some(x=>x.title===e.title&&x.date===ndate)) return;
+      events.push({...e,id:newId("ev"),date:ndate}); }); }
+  const themes=$("#rThemes").checked?((S.settings["themes"+(y-1)])||S.settings.monthThemes||{}):null;
+  rollPlan={y,terms,services,events,themes};
+  $("#rSummary").textContent=`${services.length} new dates and ${events.length} repeating events for ${y}.`+(uniq.length-services.length?` ${uniq.length-services.length} dates already exist and stay as they are.`:"");
+  $("#rPreviewBox").innerHTML=`<table><thead><tr><th>Date</th><th>Church calendar</th><th>Term</th><th>Events</th></tr></thead><tbody>${
+    uniq.map(x=>{ const s=services.find(v=>v.date===x)||S.services.get(x); const ev=events.filter(v=>v.date===x).map(v=>v.title).join(", ");
+      return `<tr><td class="mono">${DOW[parse(x).getDay()]} ${fmtShort(x)}</td><td><span class="sw" style="background:${CALSW[calClass(s?.lit)]||"transparent"}"></span>${esc(s?.lit)}${s?.hl?" ★":""}</td><td>${esc(s?.term)}</td><td>${esc(ev)}${S.services.has(x)?' <em style="color:var(--faint)">(exists)</em>':""}</td></tr>`;}).join("")}</tbody></table>`;
+  $("#rCreate").disabled=!(services.length||events.length);
+}
+async function createRoll(){
+  if(!rollPlan) return;
+  $("#rConfirm").innerHTML=`<div class="confirm">Create ${rollPlan.services.length} dates and ${rollPlan.events.length} events for ${rollPlan.y}? Everyone with the link will see them.<button class="btn primary" id="rYes">Create</button><button class="btn" id="rNo">Not yet</button></div>`;
+  $("#rNo").onclick=()=>$("#rConfirm").innerHTML="";
+  $("#rYes").onclick=async()=>{
+    const p=rollPlan; $("#rConfirm").innerHTML='<div class="sub">Creating…</div>'; let n=0;
+    const terms={...(S.settings.terms||{}),[p.y]:p.terms};
+    const st={terms}; if(p.themes) st["themes"+p.y]=p.themes;
+    await write("settings/main",{...S.settings,...st},"set");
+    for(const s of p.services){ if(await write("services/"+s.date,s,"set")) n++; else break; }
+    for(const e of p.events){ await write("events/"+e.id,e,"set"); }
+    $("#rConfirm").innerHTML=""; toast(`${p.y} created: ${n} dates`); rollPlan=null; $("#rCreate").disabled=true;
+    S.year=p.y; syncYear(); switchTab("plan");
+  };
+}
+
+/* ---------- tabs, wiring ---------- */
+function switchTab(t){ S.tab=t; document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t)); ["plan","promo","goals","arch","roll"].forEach(k=>$("#tab-"+k).hidden=k!==t); try{localStorage.setItem("kyp-tab",t);}catch(_){}
+  if(t==="roll"&&!$("#rTerms").children.length) initRoll(); renderAll(); }
+function syncSeg(){ document.querySelectorAll("[data-show]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.show===S.show)); }
+function syncYear(){ const ys=yearsAvailable(); if(!ys.includes(S.year)) ys.push(S.year); ys.sort(); $("#yearSel").innerHTML=ys.map(y=>`<option ${y===S.year?"selected":""}>${y}</option>`).join(""); }
+function renderAll(){ renderRail(); if(S.tab==="plan") renderPlan(); if(S.tab==="promo") renderPromo(); if(S.tab==="goals") renderGoals(); if(S.tab==="arch") renderArch(); if(S.tab!=="promo"){ /* keep badge fresh */ const t=today(); const n=highlighted().filter(i=>{const d=parse(i.date);return d>=t&&addDays(d,-7*i.lead)<=t;}).length; const pc=$("#promoCount"); pc.hidden=!n; pc.textContent=n; } }
+
+document.querySelector(".tabs").addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b) switchTab(b.dataset.tab); });
+$("#yearSel").addEventListener("change",e=>{ S.year=+e.target.value; try{localStorage.setItem("kyp-year",S.year);}catch(_){} renderAll(); });
+document.querySelectorAll("[data-show]").forEach(b=>b.addEventListener("click",()=>{ S.show=b.dataset.show; syncSeg(); renderPlan(); }));
+document.querySelectorAll("[data-gf]").forEach(b=>b.addEventListener("click",()=>{ S.gf=b.dataset.gf; document.querySelectorAll("[data-gf]").forEach(x=>x.setAttribute("aria-pressed",x===b)); renderGoals(); }));
+$("#gTeam").addEventListener("change",e=>{ S.gteam=e.target.value; renderGoals(); });
+let qT; $("#q").addEventListener("input",e=>{ clearTimeout(qT); qT=setTimeout(()=>{S.q=e.target.value; renderPlan();},200); });
+$("#addService").addEventListener("click",addServiceDate);
+$("#archBtn").addEventListener("click",()=>switchTab("arch"));
+document.querySelectorAll("[data-av]").forEach(b=>b.addEventListener("click",()=>{ S.av=b.dataset.av; renderArch(); }));
+let hqT; $("#hq").addEventListener("input",e=>{ clearTimeout(hqT); hqT=setTimeout(()=>{ S.hq=e.target.value; S.hbook=""; renderArch(); },200); });
+$("#hy").addEventListener("change",e=>{ S.hy=e.target.value; renderArch(); });
+$("#rPreview").addEventListener("click",buildRoll);
+$("#rCreate").addEventListener("click",createRoll);
+$("#rYear").addEventListener("change",e=>fillTerms(+e.target.value));
+
+document.addEventListener("change",async e=>{
+  const el=e.target;
+  if(el.dataset.svc){ const s=S.services.get(el.dataset.svc); const v=el.value.trim(); if(!s||(s[el.dataset.k]||"")===v) return; await write("services/"+el.dataset.svc,{[el.dataset.k]:v}); return; }
+  if(el.dataset.theme){ const key="themes"+S.year; const cur={...((S.settings[key])||S.settings.monthThemes||{})}; cur[el.dataset.theme]=el.value.trim(); await write("settings/main",{...S.settings,[key]:cur},"set"); return; }
+  if(el.dataset.goal){ const g=S.goals.get(el.dataset.goal); const v=el.value.trim(); if(!g||(g[el.dataset.k]||"")===v) return; await write("goals/"+el.dataset.goal,{[el.dataset.k]:v}); return; }
+});
+document.addEventListener("click",async e=>{
+  const st=e.target.closest("[data-star]"); if(st){ if(S.ro) return; const s=S.services.get(st.dataset.star); const next=s.hl===""||!s.hl?"important":s.hl==="important"?"major":""; await write("services/"+s.date,{hl:next}); if(next) toast(`${next==="major"?"Major":"Important"}: promotion starts ${leadOf({hl:next,lead:s.lead})} weeks before`); return; }
+  const hb=e.target.closest("[data-hist]"); if(hb){ S.av="passages"; S.hq=hb.dataset.hist; S.hbook=""; S.hy=""; $("#hq").value=S.hq; switchTab("arch"); return; }
+  const bk=e.target.closest("[data-book]"); if(bk){ S.hbook=S.hbook===bk.dataset.book?"":bk.dataset.book; S.hq=""; $("#hq").value=""; renderArch(); return; }
+  if(e.target.id==="clearH"){ S.hbook=""; S.hq=""; $("#hq").value=""; renderArch(); return; }
+  const ev=e.target.closest("[data-ev]"); if(ev){ editEvent(ev.dataset.ev); return; }
+  const ad=e.target.closest("[data-addev]"); if(ad){ editEvent(null, ad.dataset.addev); return; }
+  const op=e.target.closest("[data-open]"); if(op){ const [k,id]=op.dataset.open.split(":"); if(k==="event") editEvent(id); else editServicePromo(id); return; }
+  const ag=e.target.closest("[data-addgoal]"); if(ag){ const id=newId("g"); await write("goals/"+id,{id,horizon:ag.dataset.addgoal,title:"New goal",note:"",team:"",status:"planned",due:""},"set"); setTimeout(()=>{const f=document.getElementById("g-"+id+"-title"); f&&(f.focus(),f.select());},250); return; }
+  const dg=e.target.closest("[data-delgoal]"); if(dg){ const id=dg.dataset.delgoal; if(dg.dataset.sure){ await write("goals/"+id,null,"delete"); toast("Goal deleted"); } else { dg.dataset.sure="1"; dg.textContent="Tap again to delete"; dg.style.color="var(--coral)"; setTimeout(()=>{ if(dg.isConnected){ delete dg.dataset.sure; dg.textContent="Delete"; dg.style.color=""; } },3000); } return; }
+});
+
+
+/* ---------- Supabase sync (same pattern as the G7 Kanban) ----------
+   Every document lives in one row of the g7_planner table. Reads and writes go
+   through passcode-checked Postgres functions, so nothing can be read without it. */
+const PL_CFG = { url: "https://oqohvmvzudpxhviukfhz.supabase.co", key: "sb_publishable_L4z47rq55RTZSWbF6sU0IA_XvlfSAST" };
+const POLL_MS = 12000;
+let PASS = null, unlockResolve = null;
+const store = { docs: new Map(), listeners: new Set(), stamp: null, loaded: false, pending: 0 };
+function waitForUnlock(){ return new Promise(r => { unlockResolve = r; }); }
+function pill(t){ const p=document.getElementById("syncPill"); if(p) p.textContent=t; }
+async function rpc(fn, body){
+  const headers = { "apikey": PL_CFG.key, "Content-Type": "application/json" };
+  if (/^eyJ/.test(PL_CFG.key)) headers["Authorization"] = "Bearer " + PL_CFG.key;
+  const r = await fetch(PL_CFG.url + "/rest/v1/rpc/" + fn, { method: "POST", headers, body: JSON.stringify(body) });
+  const txt = await r.text();
+  if (!r.ok) { const e = new Error(txt || ("HTTP " + r.status)); e.status = r.status; e.body = txt;
+    e.code = /unauthorized/i.test(txt) ? "invalid_argument" : /not_found/i.test(txt) ? "invalid_argument" : "unavailable"; throw e; }
+  return txt ? JSON.parse(txt) : null;
+}
+function emit(){ store.listeners.forEach(f => { try { f(); } catch (e) { console.warn(e); } }); }
+function applyRemote(res){
+  if (!res) return;
+  if (store.loaded && res.stamp === store.stamp) return;
+  const m = new Map(); (res.docs || []).forEach(d => m.set(d.coll + "/" + d.id, d.data));
+  store.docs = m; store.stamp = res.stamp; store.loaded = true; emit();
+}
+async function pull(){
+  if (!PASS || store.pending) return;
+  try { applyRemote(await rpc("get_planner", { pass: PASS })); pill("✓ synced"); }
+  catch (e) { console.warn("pull failed", e); pill("offline"); }
+}
+async function remoteWrite(fn, body){
+  store.pending++; pill("saving…");
+  try { const stamp = await rpc(fn, Object.assign({ pass: PASS }, body)); pill("✓ synced"); return stamp; }
+  catch (e) { pill("not saved"); throw e; }
+  finally { store.pending--; }
+}
+function snapDoc(path){ const v = store.docs.get(path); return { id: path.split("/")[1], exists: !!v, data: () => v, metadata: { fromCache: false, hasPendingWrites: false } }; }
+const plannerDb = {
+  collection(name){ return { onSnapshot(cb){ const f = () => { const docs = [...store.docs.keys()].filter(k => k.startsWith(name + "/")).sort().map(snapDoc); cb({ docs, size: docs.length, empty: !docs.length }); };
+      store.listeners.add(f); if (store.loaded) f(); return () => store.listeners.delete(f); } }; },
+  doc(path){ const [c, id] = path.split("/"); return {
+    async set(d){ const prev = store.docs.get(path); store.docs.set(path, d); emit();
+      try { await remoteWrite("save_planner_doc", { p_coll: c, p_id: id, p_data: d, mode: "set" }); } catch (e) { if (prev) store.docs.set(path, prev); else store.docs.delete(path); emit(); throw e; } },
+    async update(d){ const cur = store.docs.get(path); if (!cur) throw { code: "invalid_argument" }; store.docs.set(path, Object.assign({}, cur, d)); emit();
+      try { await remoteWrite("save_planner_doc", { p_coll: c, p_id: id, p_data: d, mode: "update" }); } catch (e) { store.docs.set(path, cur); emit(); throw e; } },
+    async delete(){ const prev = store.docs.get(path); store.docs.delete(path); emit();
+      try { await remoteWrite("delete_planner_doc", { p_coll: c, p_id: id }); } catch (e) { if (prev) store.docs.set(path, prev); emit(); throw e; } },
+    onSnapshot(cb){ const f = () => cb(snapDoc(path)); store.listeners.add(f); if (store.loaded) f(); return () => store.listeners.delete(f); } }; }
+};
+async function gateUnlock(){
+  const err = document.getElementById("gateErr"); err.textContent = "";
+  const pw = document.getElementById("gatePw").value; if (!pw) { err.textContent = "Enter the passcode."; return; }
+  const btn = document.getElementById("gateBtn"); btn.textContent = "Checking…";
+  try {
+    const res = await rpc("get_planner", { pass: pw });
+    PASS = pw;
+    try { if (document.getElementById("gateRemember").checked) { localStorage.setItem("g7_pass", pw); sessionStorage.removeItem("g7_planner_pass"); }
+          else { sessionStorage.setItem("g7_planner_pass", pw); } } catch (_) {}
+    applyRemote(res); pill("✓ synced");
+    document.getElementById("gate").hidden = true; document.body.classList.remove("locked");
+    setInterval(pull, POLL_MS);
+    window.addEventListener("focus", pull);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); });
+    if (unlockResolve) unlockResolve(plannerDb);
+  } catch (e) {
+    const body = e.body || "";
+    err.textContent = /unauthorized/i.test(body) ? "Incorrect passcode. Please try again."
+      : /could not find the function|PGRST202/i.test(body) ? "Setup incomplete: the planner's database functions aren't there yet."
+      : "Could not reach the planner. Check the connection.";
+    btn.textContent = "Open the planner";
+  }
+}
+document.getElementById("gateBtn").addEventListener("click", gateUnlock);
+document.getElementById("gatePw").addEventListener("keydown", e => { if (e.key === "Enter") gateUnlock(); });
+document.getElementById("lockBtn").addEventListener("click", () => { try { localStorage.removeItem("g7_pass"); sessionStorage.removeItem("g7_planner_pass"); } catch (_) {} location.reload(); });
+(function(){ let saved = null, rem = false; try { rem = !!localStorage.getItem("g7_pass"); saved = localStorage.getItem("g7_pass") || sessionStorage.getItem("g7_planner_pass"); } catch (_) {}
+  document.getElementById("gateRemember").checked = rem;
+  if (saved) { document.getElementById("gatePw").value = saved; gateUnlock(); } else document.getElementById("gatePw").focus(); })();
+
+/* ---------- boot ---------- */
+try{ const y=+localStorage.getItem("kyp-year"); if(y) S.year=y; const t=localStorage.getItem("kyp-tab"); if(t) S.tab=t; }catch(_){}
+if(!S.year) S.year=today().getFullYear();
+syncYear(); switchTab(S.tab||"plan");
+
+(async()=>{
+  db = await waitForUnlock();
+  if(!db){ $("#planBody").innerHTML='<div class="state">The planner could not be opened.</div>'; setRO(true); return; }
+  const onErr=e=>{ if(e&&e.code!=="revoked") toast("Lost the live connection. Reload to reconnect."); };
+  // keep focus and typing intact while live updates arrive
+  const safeRender=()=>{ const a=document.activeElement; const id=a&&a.id; const val=a&&a.value; const sel=a&&a.selectionStart;
+    renderAll(); if(id){ const n=document.getElementById(id); if(n&&n!==a){ if(val!==undefined&&n.value!==val&&document.activeElement!==n){ n.value=val; } n.focus({preventScroll:true}); try{ if(sel!=null) n.setSelectionRange(sel,sel);}catch(_){} } } };
+  let first=true;
+  db.collection("services").onSnapshot(snap=>{ S.services=new Map(snap.docs.map(d=>[d.id,{date:d.id,...d.data()}])); S.ready.s=true;
+    if(first){ first=false; const ys=yearsAvailable(); if(!ys.includes(S.year)) S.year=ys.includes(today().getFullYear())?today().getFullYear():ys[ys.length-1]; }
+    syncYear(); safeRender(); }, onErr);
+  db.collection("events").onSnapshot(snap=>{ S.events=new Map(snap.docs.map(d=>[d.id,{id:d.id,...d.data()}])); S.ready.e=true; syncYear(); safeRender(); }, onErr);
+  db.collection("goals").onSnapshot(snap=>{ S.goals=new Map(snap.docs.map(d=>[d.id,{id:d.id,...d.data()}])); S.ready.g=true; safeRender(); }, onErr);
+  db.collection("history").onSnapshot(snap=>{ S.history=new Map(snap.docs.map(d=>{ const v=d.data(); return [Number(v.year||d.id.slice(1)),v]; })); S.histVer++; S.ready.h=true; safeRender(); }, onErr);
+  db.doc("settings/main").onSnapshot(snap=>{ S.settings=snap.exists?snap.data():{}; safeRender(); }, onErr);
+})();
+</script>
+
+</body>
+</html>

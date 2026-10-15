@@ -1,0 +1,16 @@
+{
+  "name": "Kogarah Year Planner — St Paul's Kogarah",
+  "short_name": "Year Planner",
+  "description": "Preachers, passages, highlighted dates, goals and archive for St Paul's Anglican Church Kogarah",
+  "start_url": "./planner.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1A6B7A",
+  "icons": [
+    {"src": "planner-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "planner-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "planner-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
