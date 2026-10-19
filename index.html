@@ -988,6 +988,14 @@ function reminderText(who, tasks) {
   lines.push(`Dear ${who},`, '');
   lines.push('I give God thanks for you.', '');
   lines.push('Just a short note about what is sitting with you on the G7 board at the moment:', '');
+  const tms = [...new Set(tasks.map(t => t.team).filter(Boolean))];
+  const sts = [...new Set(tasks.map(t => t.kog).filter(Boolean))];
+  if (tms.length) lines.push(`G7 team: ${tms.map(t => `${TEAM_EMOJI[t] || ''} ${t} ${TEAM_ZH[t] || ''}`.trim()).join(', ')}`);
+  sts.forEach(s => {
+    const i = KOG_STEPS.findIndex(k => k.en === s);
+    if (i >= 0) lines.push(`KOGCycle stage ${i + 1} of 9: ${KOG_STEPS[i].icon} ${s} ${KOG_STEPS[i].zh} (${KOG_STEPS[i].q} the Gospel)`);
+  });
+  if (tms.length || sts.length) lines.push('');
   tasks.forEach(c => {
     lines.push(`- ${c.title}`);
     if (c.notes) lines.push(`  (${c.notes})`);
@@ -1041,6 +1049,255 @@ function dueBadge(days) {
   return null;
 }
 
+// ── pictures for the reminder email ──────────────────────────────────────────
+// Two images drawn on a canvas and embedded in the email: a snapshot of the
+// G7 board with this person's team lit and their cards in place, and the
+// KOGCycle ring with the stage these items serve lit up. Plain-text channels
+// (WhatsApp, SMS, WeChat) get the same information as words instead.
+
+const TEAM_HEX = { Glorify:'#FF3131', Grow:'#7292C5', Giftedness:'#E7A9EC', Gregarious:'#F59471',
+                   Go:'#7F9990', Glue:'#FFB547', Governance:'#18C2DB' };
+const TEAM_BADGE = {   // same pastel badge colours as the cards on the board
+  Go:['#DDEEFF','#0A4070'], Glorify:['#FFECDB','#7A2C00'], Grow:['#D6F5E0','#1A6B35'],
+  Giftedness:['#EDE0FF','#5B2D8E'], Governance:['#D8E4F0','#1A3A5C'], Glue:['#D0F5F5','#0A5A5A'],
+  Gregarious:['#FFE0EE','#8B1A4A'] };
+const TEAM_ORDER = ['Glorify','Grow','Giftedness','Gregarious','Go','Glue','Governance'];
+const QUAD_HEX = { See:'#E8714A', Hear:'#C8962E', Believe:'#2D7B8C', Tell:'#2C3E50' };
+const KOG_STD = [
+  ['Go Team', 'ongoing, all year',     '差派團隊 · 全年持續'],
+  ['Welcomers', 'their first Sunday',  '迎新同工 · 第一個主日'],
+  ['Follow-up Team', 'within 48 hours','跟進團隊 · 48小時內'],
+  ['David & Jerry', 'within 4 weeks',  '牧師 · 4週內'],
+  ['The Life Course', 'as the Lord works', '生命課程 · 聖靈作工'],
+  ['Grow Team', 'growth group + 121',  '成長團隊 · 小組與一對一'],
+  ['Glorify Team', 'Word · prayer · table', '榮耀團隊 · 聖道 · 禱告 · 聖餐'],
+  ['Giftedness Team', 'gifts deployed','恩賜團隊 · 發揮恩賜'],
+  ['Go Team', 'the cycle restarts',    '差派團隊 · 循環再始'],
+];
+const PIC_FONT = "Georgia,'PingFang TC','Microsoft JhengHei','Noto Sans TC',serif";
+const PIC_SANS = "Arial,'PingFang TC','Microsoft JhengHei','Noto Sans TC',sans-serif";
+
+function mixHex(hex, pct) {            // pct of white mixed in (0..1)
+  const n = parseInt(hex.slice(1), 16);
+  const ch = s => Math.round(((n >> s) & 255) + (255 - ((n >> s) & 255)) * pct);
+  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+}
+function rrect(ctx, X, Y, W, H, r) {
+  ctx.beginPath(); ctx.moveTo(X + r, Y); ctx.arcTo(X + W, Y, X + W, Y + H, r);
+  ctx.arcTo(X + W, Y + H, X, Y + H, r); ctx.arcTo(X, Y + H, X, Y, r);
+  ctx.arcTo(X, Y, X + W, Y, r); ctx.closePath();
+}
+function wrapLines(ctx, text, maxW, maxLines) {
+  const words = String(text || '').match(/[　-鿿＀-￯]|[^\s　-鿿＀-￯]+/g) || [];
+  const lines = []; let cur = '';
+  words.forEach(w => {
+    const joiner = cur && !/[　-鿿]$/.test(cur) && !/^[　-鿿]/.test(w) ? ' ' : '';
+    const t = cur + joiner + w;
+    if (ctx.measureText(t).width <= maxW || !cur) cur = t; else { lines.push(cur); cur = w; }
+  });
+  if (cur) lines.push(cur);
+  if (lines.length > maxLines) {
+    const keep = lines.slice(0, maxLines);
+    let last = keep[maxLines - 1];
+    while (last.length > 1 && ctx.measureText(last + '…').width > maxW) last = last.slice(0, -1);
+    keep[maxLines - 1] = last + '…';
+    return keep;
+  }
+  return lines;
+}
+
+/* Snapshot of the G7 board: the seven G teams across the top with this
+   person's team lit, then the board columns with their cards in place. */
+function kanbanPicture(who, tasks) {
+  try {
+    const S = 2, W = 600;
+    const teams = [...new Set(tasks.map(t => t.team).filter(Boolean))];
+    const mine = new Set(tasks.map(t => t.id));
+    const colIds = ['backlog', 'awaiting', 'progress'];
+    tasks.forEach(t => { if (t.col && !colIds.includes(t.col)) colIds.push(t.col); });
+    const cols = colIds.map(id => COLS.find(c => c.id === id) || { id, label: id });
+    const COLTOP = { prayer:'#9B59B6', backlog:'#3A8FD0', awaiting:'#D9551A', progress:'#E8A020', done:'#27AE60' };
+
+    const cv = document.createElement('canvas');
+    const ctx = cv.getContext('2d');
+    const pad = 12, gap = 8, colW = (W - pad * 2 - gap * (cols.length - 1)) / cols.length;
+    const cardW = colW - 12, textW = cardW - 16;
+
+    // measure every card first so the picture is exactly as tall as it needs to be
+    ctx.font = `bold 11.5px ${PIC_FONT}`;
+    const layout = cols.map(c => {
+      const own = tasks.filter(t => t.col === c.id);
+      const others = (typeof cards !== 'undefined' ? cards : [])
+        .filter(k => k.col === c.id && !mine.has(k.id) && teams.includes(k.team)).length;
+      const items = own.map(t => {
+        const lines = wrapLines(ctx, t.title, textW, 3);
+        return { t, lines, h: 22 + lines.length * 15 + (t.due ? 16 : 0) + 8 };
+      });
+      return { c, items, others, h: 34 + items.reduce((a, i) => a + i.h + 6, 0) + (others ? 22 : 0) + 6 };
+    });
+    const colsH = Math.max(90, ...layout.map(l => l.h));
+    const top = 48 + 52 + 14;
+    const H = top + colsH + 30;
+
+    cv.width = W * S; cv.height = H * S; ctx.scale(S, S);
+    ctx.fillStyle = '#FFFAF6'; ctx.fillRect(0, 0, W, H);
+
+    // header, like the board's own
+    ctx.fillStyle = '#D9551A'; ctx.fillRect(0, 0, W, 40);
+    ctx.fillStyle = '#FFFFFF'; ctx.font = `bold 15px ${PIC_FONT}`; ctx.textBaseline = 'middle';
+    ctx.fillText('✝  G7 Kanban Board · St Paul\'s Kogarah', 14, 20);
+    ctx.font = `12px ${PIC_FONT}`; ctx.textAlign = 'right';
+    ctx.fillText(new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }), W - 14, 20);
+    ctx.textAlign = 'left';
+
+    // the seven G teams
+    const pw = (W - pad * 2 - 6 * 5) / 7;
+    TEAM_ORDER.forEach((tm, i) => {
+      const x = pad + i * (pw + 5), y = 48, on = teams.includes(tm);
+      rrect(ctx, x, y, pw, 44, 8);
+      ctx.fillStyle = on ? TEAM_BADGE[tm][0] : '#F3EEE8'; ctx.fill();
+      if (on) { ctx.lineWidth = 2.5; ctx.strokeStyle = TEAM_HEX[tm]; ctx.stroke(); }
+      ctx.globalAlpha = on ? 1 : 0.45;
+      ctx.textAlign = 'center';
+      ctx.font = `15px ${PIC_SANS}`; ctx.fillStyle = '#000';
+      ctx.fillText(TEAM_EMOJI[tm] || '', x + pw / 2, y + 14);
+      ctx.font = `${on ? 'bold ' : ''}10.5px ${PIC_FONT}`;
+      ctx.fillStyle = on ? TEAM_BADGE[tm][1] : '#9B7050';
+      ctx.fillText(tm, x + pw / 2, y + 33);
+      ctx.globalAlpha = 1; ctx.textAlign = 'left';
+    });
+    if (teams.length) {   // little pointer under each lit team
+      TEAM_ORDER.forEach((tm, i) => {
+        if (!teams.includes(tm)) return;
+        const cx = pad + i * (pw + 5) + pw / 2;
+        ctx.fillStyle = TEAM_HEX[tm];
+        ctx.beginPath(); ctx.moveTo(cx - 6, 95); ctx.lineTo(cx + 6, 95); ctx.lineTo(cx, 101); ctx.fill();
+      });
+    }
+
+    // the columns
+    layout.forEach((l, i) => {
+      const x = pad + i * (colW + gap), y = top;
+      rrect(ctx, x, y, colW, colsH, 10);
+      ctx.fillStyle = '#FFFFFF'; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = '#F0D5BC'; ctx.stroke();
+      ctx.fillStyle = COLTOP[l.c.id] || '#9B7050'; ctx.fillRect(x + 6, y, colW - 12, 3);
+      ctx.font = `bold 12px ${PIC_FONT}`; ctx.fillStyle = '#2C1508'; ctx.textBaseline = 'middle';
+      ctx.fillText(l.c.label, x + 9, y + 18);
+      let cy = y + 32;
+      l.items.forEach(({ t, lines, h }) => {
+        const tm = t.team, bc = TEAM_BADGE[tm] || ['#FFF0E4', '#C04010'];
+        rrect(ctx, x + 6, cy, cardW, h, 7);
+        ctx.fillStyle = '#FFFAF6'; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = TEAM_HEX[tm] || '#D9551A'; ctx.stroke();
+        // team badge
+        ctx.font = `bold 9.5px ${PIC_SANS}`;
+        const bt = `${TEAM_EMOJI[tm] || ''} ${tm || 'G7'}`, bw = ctx.measureText(bt).width + 12;
+        rrect(ctx, x + 13, cy + 7, bw, 15, 7); ctx.fillStyle = bc[0]; ctx.fill();
+        ctx.fillStyle = bc[1]; ctx.fillText(bt, x + 19, cy + 15);
+        // title
+        ctx.font = `bold 11.5px ${PIC_FONT}`; ctx.fillStyle = '#2C1508';
+        lines.forEach((ln, j) => ctx.fillText(ln, x + 14, cy + 34 + j * 15));
+        if (t.due) {
+          const d = dueDays(t.due);
+          ctx.font = `10.5px ${PIC_SANS}`;
+          ctx.fillStyle = d !== null && d < 0 ? '#C0392B' : '#9B7050';
+          ctx.fillText(`📅 ${dueLabelEn(t.due)}${d !== null && d < 0 ? ' · overdue' : ''}`, x + 14, cy + 34 + lines.length * 15 + 2);
+        }
+        cy += h + 6;
+      });
+      if (l.others) {
+        ctx.font = `italic 10.5px ${PIC_FONT}`; ctx.fillStyle = '#9B7050';
+        ctx.fillText(`+ ${l.others} more ${teams.length === 1 ? teams[0] : 'team'} ${l.others === 1 ? 'card' : 'cards'}`, x + 12, cy + 10);
+      }
+      if (!l.items.length && !l.others) {
+        ctx.font = `italic 10.5px ${PIC_FONT}`; ctx.fillStyle = '#C9B39C';
+        ctx.fillText('nothing here for you', x + 12, y + 46);
+      }
+    });
+
+    ctx.font = `italic 10.5px ${PIC_FONT}`; ctx.fillStyle = '#9B7050'; ctx.textBaseline = 'middle';
+    ctx.fillText(`Outlined: the items with ${who}. Team colours as on the board.`, pad, H - 14);
+    return cv.toDataURL('image/png');
+  } catch (e) { return ''; }
+}
+
+/* The KOGCycle ring with the stage(s) these items serve lit up. */
+function cyclePicture(stages) {
+  try {
+    const S = 2, W = 600, H = 300;
+    const cv = document.createElement('canvas');
+    cv.width = W * S; cv.height = H * S;
+    const ctx = cv.getContext('2d'); ctx.scale(S, S);
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+
+    const cx = 150, cy = 150, R = 128, r = 76, n = KOG_STEPS.length;
+    const lit = KOG_STEPS.map(k => stages.includes(k.en));
+    const seg = (Math.PI * 2) / n, gapA = 0.025;
+    KOG_STEPS.forEach((k, i) => {
+      const a0 = -Math.PI / 2 + i * seg + gapA, a1 = a0 + seg - gapA * 2;
+      const push = lit[i] ? 8 : 0, mid = (a0 + a1) / 2;
+      const ox = Math.cos(mid) * push, oy = Math.sin(mid) * push;
+      ctx.beginPath();
+      ctx.arc(cx + ox, cy + oy, R, a0, a1);
+      ctx.arc(cx + ox, cy + oy, r, a1, a0, true);
+      ctx.closePath();
+      ctx.fillStyle = lit[i] ? QUAD_HEX[k.q] : mixHex(QUAD_HEX[k.q], 0.78);
+      ctx.fill();
+      if (lit[i]) { ctx.lineWidth = 3; ctx.strokeStyle = '#1B2440'; ctx.stroke(); }
+      const mr = (R + r) / 2;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.globalAlpha = lit[i] ? 1 : 0.55;
+      ctx.font = `${lit[i] ? 20 : 16}px ${PIC_SANS}`; ctx.fillStyle = '#000';
+      ctx.fillText(k.icon, cx + ox + Math.cos(mid) * mr, cy + oy + Math.sin(mid) * mr - 5);
+      ctx.font = `bold 9px ${PIC_SANS}`; ctx.fillStyle = lit[i] ? '#FFFFFF' : '#5B6675';
+      ctx.fillText(String(i + 1), cx + ox + Math.cos(mid) * mr, cy + oy + Math.sin(mid) * mr + 13);
+      ctx.globalAlpha = 1;
+    });
+    // centre
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `bold 15px ${PIC_FONT}`; ctx.fillStyle = '#1B2440';
+    ctx.fillText('KOGCycle', cx, cy - 8);
+    ctx.font = `10px ${PIC_SANS}`; ctx.fillStyle = '#5B6675';
+    ctx.fillText('See · Hear · Believe · Tell', cx, cy + 10);
+
+    // right-hand legend
+    const idx = KOG_STEPS.map((k, i) => lit[i] ? i : -1).filter(i => i >= 0);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    let y = 52;
+    const X = 312;
+    if (!idx.length) {
+      ctx.font = `bold 17px ${PIC_FONT}`; ctx.fillStyle = '#1B2440';
+      ctx.fillText('No KOGCycle stage set', X, y + 60);
+      ctx.font = `13px ${PIC_FONT}`; ctx.fillStyle = '#5B6675';
+      ctx.fillText('These items are not yet mapped', X, y + 84);
+      ctx.fillText('to a stage on the board.', X, y + 102);
+    } else {
+      const show = idx.slice(0, 3);
+      const step = show.length === 1 ? 0 : 80;
+      if (show.length === 1) y = 92;
+      show.forEach(i => {
+        const k = KOG_STEPS[i], st = KOG_STD[i];
+        ctx.fillStyle = QUAD_HEX[k.q];
+        ctx.font = `bold 11px ${PIC_SANS}`;
+        ctx.fillText(`STAGE ${i + 1} OF 9 · ${k.q.toUpperCase()} THE GOSPEL ${k.qzh}`, X, y);
+        ctx.font = `bold 20px ${PIC_FONT}`; ctx.fillStyle = '#1B2440';
+        ctx.fillText(`${k.icon} ${k.en === 'Conversion/Baptism' ? 'Conversion & Baptism' : k.en}`, X, y + 26);
+        ctx.font = `15px ${PIC_FONT}`; ctx.fillStyle = '#1B2440';
+        ctx.fillText(k.zh, X, y + 46);
+        ctx.font = `12px ${PIC_SANS}`; ctx.fillStyle = '#5B6675';
+        ctx.fillText(`${st[0]} · ${st[1]}`, X, y + 64);
+        if (show.length === 1) ctx.fillText(st[2], X, y + 82);
+        y += step;
+      });
+      if (idx.length > 3) {
+        ctx.font = `italic 12px ${PIC_FONT}`; ctx.fillStyle = '#5B6675';
+        ctx.fillText(`and ${idx.length - 3} more`, X, y + 4);
+      }
+    }
+    return cv.toDataURL('image/png');
+  } catch (e) { return ''; }
+}
+
 function reminderHtml(who, tasks) {
   const teams  = [...new Set(tasks.map(t => t.team).filter(Boolean))];
   const stages = [...new Set(tasks.map(t => t.kog).filter(Boolean))];
@@ -1056,16 +1313,23 @@ function reminderHtml(who, tasks) {
     `font-family:Arial,sans-serif;font-size:12px;font-weight:bold;line-height:16px;padding:4px 10px;` +
     `border-radius:12px;margin:0 4px 6px 0;">${txt}</span>`;
 
+  const tHex = (team && TEAM_HEX[team]) || '#F59471';
+  const kanbanImg = kanbanPicture(who, tasks);
+  const cycleImg  = cyclePicture(stages);
+
   let chips = '';
-  if (team)  chips += chip('#F59471', '#1B2440', `${TEAM_EMOJI[team] || ''}&nbsp; ${esc(team)} ${TEAM_ZH[team] || ''}`);
+  if (teams.length) teams.forEach(tm => { chips += chip(TEAM_HEX[tm] || '#F59471', '#1B2440', `${TEAM_EMOJI[tm] || ''}&nbsp; ${esc(tm)} ${TEAM_ZH[tm] || ''}`); });
   else       chips += chip('#F59471', '#1B2440', '🗂&nbsp; G7');
-  if (step)  chips += chip('#E8714A', '#FFFFFF', `${step.icon}&nbsp; ${step.en} ${step.zh}`);
+  stages.forEach(sn => {
+    const k = KOG_STEPS.find(x => x.en === sn);
+    if (k) chips += chip(QUAD_HEX[k.q], '#FFFFFF', `${k.icon}&nbsp; KOGCycle ${KOG_STEPS.indexOf(k) + 1}: ${k.en} ${k.zh}`);
+  });
   if (badge) chips += chip('#FFFFFF', '#C8962E', `<span style="color:#C8962E">● ${badge}</span>`, '#C8962E');
 
   const strip = KOG_STEPS.map(k => {
     const on = stages.includes(k.en);
     return `<td width="11%" style="padding:0 2px;" align="center">` +
-      `<div style="height:6px;background:${on ? '#E8714A' : '#E9E3D8'};border-radius:3px;font-size:0;line-height:0;">&nbsp;</div>` +
+      `<div style="height:6px;background:${on ? QUAD_HEX[k.q] : '#E9E3D8'};border-radius:3px;font-size:0;line-height:0;">&nbsp;</div>` +
       `<div style="font-family:Arial,sans-serif;font-size:13px;line-height:20px;${on ? '' : 'opacity:.45;'}">${k.icon}</div></td>`;
   }).join('');
 
@@ -1075,7 +1339,8 @@ function reminderHtml(who, tasks) {
     const d = t.due
       ? `<div style="font-family:Arial,sans-serif;font-size:13px;color:#5B6675;margin-top:2px;">Due ${dueLabelEn(t.due)} · ${dueLabelZh(t.due)}到期</div>`
       : (t.notes ? `<div style="font-family:Arial,sans-serif;font-size:13px;color:#5B6675;margin-top:2px;">${esc(t.notes)}</div>` : '');
-    return `<tr><td style="border-left:5px solid #F59471;background:#FDE9E1;padding:10px 14px;">` +
+    const rh = TEAM_HEX[t.team] || tHex;
+    return `<tr><td style="border-left:5px solid ${rh};background:${mixHex(rh, 0.86)};padding:10px 14px;">` +
       `<div style="font-family:Palatino,'Palatino Linotype','Book Antiqua',Georgia,serif;font-size:16px;font-weight:bold;color:#1B2440;">${esc(t.title)}</div>` +
       `${d}</td></tr><tr><td style="height:8px;font-size:0;line-height:0;">&nbsp;</td></tr>`;
   }).join('');
@@ -1091,11 +1356,17 @@ function reminderHtml(who, tasks) {
 <tr><td align="center" style="padding:24px 12px;">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#FFFFFF;border-radius:8px;">
   <tr><td align="center" style="padding:24px 24px 14px;"><img src="${EMAIL_LOGO}" width="120" alt="St Paul's Kogarah Anglican Church" style="display:block;width:120px;height:auto;border:0;"></td></tr>
-  <tr><td style="height:4px;background:#F59471;font-size:0;line-height:0;">&nbsp;</td></tr>
+  <tr><td style="height:4px;background:${tHex};font-size:0;line-height:0;">&nbsp;</td></tr>
   <tr><td style="padding:18px 28px 6px;">${chips}</td></tr>
-  <tr><td style="padding:4px 26px 16px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${strip}</tr></table>
-    <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#E8714A;font-weight:bold;margin-top:4px;">KOGCycle · ${quad}</div>
+  ${kanbanImg ? `<tr><td style="padding:8px 20px 4px;">
+    <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:${team ? TEAM_BADGE[team][1] : '#1B2440'};font-weight:bold;margin:0 0 6px 4px;">On the G7 board · ${team ? `${esc(team)} ${TEAM_ZH[team] || ''}` : 'G7看板'}</div>
+    <img src="${kanbanImg}" width="560" alt="G7 Kanban board: ${esc(teams.join(', ') || 'G7')} items for ${esc(who)}" style="display:block;width:100%;max-width:560px;height:auto;border:1px solid #F0D5BC;border-radius:8px;">
+  </td></tr>` : ''}
+  <tr><td style="padding:12px 20px 16px;">
+    <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:${step ? QUAD_HEX[step.q] : '#E8714A'};font-weight:bold;margin:0 0 6px 4px;">KOGCycle · ${quad}</div>
+    ${cycleImg
+      ? `<img src="${cycleImg}" width="560" alt="KOGCycle ring with ${esc(stages.join(', ') || 'no stage')} highlighted" style="display:block;width:100%;max-width:560px;height:auto;border:1px solid #E9E3D8;border-radius:8px;">`
+      : `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${strip}</tr></table>`}
   </td></tr>
   <tr><td style="padding:6px 28px 4px;">
     <p style="${en}margin:0 0 12px;">Hi ${esc(who)},</p>
