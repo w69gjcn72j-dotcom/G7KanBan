@@ -160,6 +160,7 @@ dialog::backdrop{background:rgba(14,26,43,.55)}
   </div>
 
   <div id="modeBanner"></div>
+  <div id="statusBanner" aria-live="polite"></div>
   <div id="emptyState" class="banner hidden">No roster yet. Use <b>Import</b> to load the roster file Tim prepared (kept in OneDrive, never on this public page), or <b>+ Date</b> to start from scratch.</div>
 
   <div class="gridwrap" id="gridwrap"><table class="grid" id="grid"></table></div>
@@ -251,7 +252,7 @@ dialog::backdrop{background:rgba(14,26,43,.55)}
      roster/_sent     what the Administrator last received (for "What changed")
    No member names are written into this page; they come from the store.
    ===================================================================== */
-const PAGE_VERSION = "1.0 (27 Oct 2026)";
+const PAGE_VERSION = "1.1 (27 Oct 2026)";
 let SB = null, PASS = null, MODE = "none";             // MODE: shared | local
 const LOCAL_KEY = "kogroster.local.v1";
 const store = { docs: new Map(), loaded: false, stamp: null };
@@ -287,7 +288,8 @@ const ROWS = [
 ];
 const EXPORT_ROLES = ["preacher","hostEn","meet","hostCn","trans","desk","musEn","musCn","bibEn","bibCn","prEn","prCn","memory","interview","av","avChn","chairs","welcome","tea"];
 function roleCfg(k){ return (CFG?.roles || []).find(r => r.k === k); }
-function rowLabel(r){ return r.label || roleCfg(r.k)?.label || r.k; }
+const DEFAULT_LABELS = { hostEn:"Host En", hostCn:"Host Cn", trans:"Translator", desk:"Translation Desk", musEn:"Musicians En", musCn:"Musicians Cn", bibEn:"Bible Reading En", bibCn:"Bible Reading Cn", prEn:"Prayer En", prCn:"Prayer Cn", memory:"Memory Verse / drama", interview:"Interview (after sermon)", av:"AV En", avChn:"AV and Setup Chn", chairs:"SPCC Hall Chairs Put Back", welcome:"Welcome Collection Roll", tea:"Sunday Morning Tea" };
+function rowLabel(r){ return r.label || roleCfg(r.k)?.label || DEFAULT_LABELS[r.k] || r.k; }
 
 /* ---------- dates ---------- */
 const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -321,13 +323,25 @@ function extractBaseDays(src){
   return [];
 }
 async function rpc(fn, body){
-  const r = await fetch(SB.url + "/rest/v1/rpc/" + fn, { method:"POST", headers:{ apikey: SB.key, "Content-Type":"application/json" }, body: JSON.stringify(body) });
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 20000);
+  let r;
+  try { r = await fetch(SB.url + "/rest/v1/rpc/" + fn, { method:"POST", headers:{ apikey: SB.key, "Content-Type":"application/json" }, body: JSON.stringify(body), signal: ctl.signal }); }
+  catch (e) { const er = new Error(e.name === "AbortError" ? "The shared store did not answer within 20 seconds." : "Could not reach the shared store (" + e.message + ")."); er.code = "unavailable"; throw er; }
+  finally { clearTimeout(tm); }
   const txt = await r.text();
   if (!r.ok) { const e = new Error(txt || ("HTTP " + r.status)); e.code = /unauthorized/i.test(txt) ? "unauthorized" : "unavailable"; throw e; }
   return txt ? JSON.parse(txt) : null;
 }
+/* If the shared store only accepts the planner's own sections, roster and team
+   documents are kept in the "diary" section with ids like "roster~2026-12-06"
+   and "people~teams". The Term Diary ignores diary ids that aren't events. */
+const FALLBACK = "diary";
 function applyRemote(res){
-  const m = new Map(); (res?.docs || []).forEach(d => m.set(d.coll + "/" + d.id, d.data));
+  const m = new Map();
+  (res?.docs || []).forEach(d => {
+    if (d.coll === FALLBACK && /^(roster|people)~/.test(d.id)) { const i = d.id.indexOf("~"); const k = d.id.slice(0, i) + "/" + d.id.slice(i + 1); if (!m.has(k)) m.set(k, d.data); }
+    else m.set(d.coll + "/" + d.id, d.data);
+  });
   store.docs = m; store.stamp = res?.stamp; store.loaded = true;
 }
 function localLoad(){
@@ -335,15 +349,28 @@ function localLoad(){
   store.loaded = true;
 }
 function localPersist(){ try { localStorage.setItem(LOCAL_KEY, JSON.stringify(Object.fromEntries([...store.docs].filter(([k]) => k.startsWith("roster/"))))); } catch (e) { toast("This browser would not save the roster."); } }
+let USE_FALLBACK = false;
+async function putDoc(coll, id, data){
+  if (!USE_FALLBACK) {
+    try { await rpc("save_planner_doc", { pass: PASS, p_coll: coll, p_id: id, p_data: data, mode: "set" }); return; }
+    catch (e) { if (e.code === "unauthorized") throw e; if (/did not answer|Could not reach/.test(e.message)) throw e; USE_FALLBACK = true; }
+  }
+  await rpc("save_planner_doc", { pass: PASS, p_coll: FALLBACK, p_id: coll + "~" + id, p_data: data, mode: "set" });
+}
+function status(msg, kind){
+  const b = $("#statusBanner"); if (!b) return;
+  if (!msg) { b.innerHTML = ""; return; }
+  b.innerHTML = `<div class="banner ${kind || ""}">${esc(msg)} <button class="btn" type="button" onclick="this.parentNode.remove()" style="margin-left:8px">OK</button></div>`;
+}
 async function saveDoc(id, data){
   store.docs.set("roster/" + id, data);
   if (MODE === "local") { localPersist(); return true; }
   pill("Saving…");
-  try { await rpc("save_planner_doc", { pass: PASS, p_coll: "roster", p_id: id, p_data: data, mode: "set" }); pill("Shared · everyone sees your edits"); return true; }
+  try { await putDoc("roster", id, data); pill("Shared · everyone sees your edits"); return true; }
   catch (e) {
     if (e.code === "unauthorized") { lockNow(); return false; }
     pill("Not saved"); localPersist();
-    toast("Not saved to the shared store (" + (e.message || "error").slice(0, 80) + "). A copy is kept on this device.");
+    status("Not saved to the shared store: " + (e.message || "error").slice(0, 160) + " A copy is kept on this device.", "warn");
     return false;
   }
 }
@@ -351,16 +378,23 @@ async function saveMany(items){ // [{id,data}]
   items.forEach(it => store.docs.set("roster/" + it.id, it.data));
   if (MODE === "local") { localPersist(); return true; }
   pill("Saving…");
-  try { await rpc("import_planner", { pass: PASS, docs: items.map(it => ({ coll:"roster", id: it.id, data: it.data })) }); pill("Shared · everyone sees your edits"); return true; }
-  catch (e) {
-    // fall back to one at a time
-    let ok = true; for (const it of items) { ok = (await saveDoc(it.id, it.data)) && ok; } return ok;
+  let done = 0;
+  for (const it of items) {
+    try { await putDoc("roster", it.id, it.data); done++; pill("Saving… " + done + " of " + items.length); }
+    catch (e) {
+      if (e.code === "unauthorized") { lockNow(); return false; }
+      localPersist(); pill("Not saved");
+      status(`Saved ${done} of ${items.length}. The shared store said: ${(e.message || "error").slice(0, 160)}`, "warn");
+      return false;
+    }
   }
+  pill("Shared · everyone sees your edits"); return true;
 }
 async function deleteDoc(id){
   store.docs.delete("roster/" + id);
   if (MODE === "local") { localPersist(); return; }
-  try { await rpc("delete_planner_doc", { pass: PASS, p_coll: "roster", p_id: id }); } catch (e) { toast("Could not remove it from the shared store."); }
+  try { await rpc("delete_planner_doc", { pass: PASS, p_coll: "roster", p_id: id }); } catch (e) {}
+  try { await rpc("delete_planner_doc", { pass: PASS, p_coll: FALLBACK, p_id: "roster~" + id }); } catch (e) {}
 }
 async function pull(){
   if (MODE !== "shared" || document.activeElement?.isContentEditable) return;
@@ -716,10 +750,17 @@ async function exportDOCX(){
 async function importPeople(obj){
   const n = Object.values(obj.teams || {}).reduce((a, t) => a + (t || []).length, 0);
   if (!confirm(`Load ${n} G7 team entries (names and emails) into the shared store? The Term Diary will show them to leaders who have the passcode.`)) return;
-  store.docs.set("people/teams", obj.teams);
-  if (MODE === "local") { toast("Team names are only shared when the roster is opened with the passcode."); return; }
-  try { await rpc("save_planner_doc", { pass: PASS, p_coll: "people", p_id: "teams", p_data: obj.teams, mode: "set" }); toast("G7 team names saved behind the passcode."); }
-  catch (e) { toast("The shared store would not accept the team names (" + String(e.message || "").slice(0, 60) + ")."); }
+  if (MODE === "local") { status("Team names can only be shared when the roster is opened with the G7 passcode.", "warn"); return; }
+  status("Saving the team names…");
+  try {
+    await putDoc("people", "teams", obj.teams);
+    const back = await rpc("get_planner", { pass: PASS }); applyRemote(back); readStore();
+    if (store.docs.get("people/teams")) status(`Saved ${n} team entries behind the passcode. Open the Term Diary (refresh it) to see them under "Who is responsible".`, "ok");
+    else status("Saved, but the shared store didn't send the names back. Tell Tim: the store's get_planner function may need the new section added.", "warn");
+  } catch (e) {
+    if (e.code === "unauthorized") return lockNow();
+    status("The shared store would not accept the team names: " + String(e.message || "error").slice(0, 200), "warn");
+  }
 }
 async function importSeed(obj){
   if (obj && obj.kind === "kog-people" && obj.teams) return importPeople(obj);
@@ -727,7 +768,13 @@ async function importSeed(obj){
   const overlap = obj.days.filter(d => dayOf(d.d)).length;
   if (overlap && !confirm(`This file has ${obj.days.length} dates; ${overlap} already exist here and will be replaced. Continue?`)) return;
   const items = [{ id: "_config", data: obj.config }, ...obj.days.map(d => ({ id: d.d, data: d }))];
-  await saveMany(items); readStore(); FILTER = "all"; render(); toast(`Imported ${obj.days.length} dates.`);
+  status(`Importing ${obj.days.length} dates…`);
+  const ok = await saveMany(items);
+  if (MODE === "shared" && ok) { try { applyRemote(await rpc("get_planner", { pass: PASS })); } catch (e) {} }
+  readStore(); FILTER = "all"; render();
+  if (!ok) return;
+  if (MODE === "shared" && !store.docs.get("roster/_config")) status("Saved, but the shared store didn't send the roster back. Tell Tim: the store's get_planner function may need the new section added.", "warn");
+  else status(`Imported ${obj.days.length} dates${MODE === "shared" ? " into the shared store" : " on this device"}.`, "ok");
 }
 
 /* ---------- wire up ---------- */

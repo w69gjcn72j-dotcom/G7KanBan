@@ -1204,7 +1204,7 @@ function buildDays(){
 }
 /* Team members' names and emails live in the shared store (people/teams), not in this public file. */
 function mergePeople(){
-  const t = store.docs.get("people/teams");
+  const t = store.docs.get("people/teams") || store.docs.get("diary/people~teams");
   if (!t) return;
   Object.keys(t).forEach(k => { if (TEAMS[k] && Array.isArray(t[k])) TEAMS[k].people = t[k]; });
 }
