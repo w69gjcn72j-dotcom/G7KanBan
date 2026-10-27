@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kogarah Roster — St Paul's Kogarah</title>
+<link rel="icon" href="roster-icon.svg" type="image/svg+xml">
+<link rel="icon" href="roster-icon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="roster-icon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="roster-icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="roster-icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Roster">
+<meta name="theme-color" content="#0E1A2B">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+SC:wght@400;600&family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* St Paul's June booklet palette, set out as in the Term Diary */
+:root{
+  --ground:#FDF6EC; --surface:#FFFFFF; --ink:#1B2440; --navy:#2C3E50; --night:#0E1A2B;
+  --teal:#2D7B8C; --coral:#E8714A; --gold:#C8962E; --gold2:#D4A253; --line:#E6D9C3; --faint:#7A7F8C;
+  --tint:#FBF8F2; --coralTint:#FBE3D9; --tealTint:#DCEEF1; --goldTint:#F5E9CF;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:14px/1.45 "Public Sans","Noto Sans SC",-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1400px;margin:0 auto;padding:22px 16px 60px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--coral);font-weight:600}
+h1{font-family:"Palatino Linotype","Book Antiqua",Palatino,"EB Garamond",serif;font-weight:600;font-size:40px;line-height:1.1;margin:6px 0 8px;color:var(--night)}
+.lede{font-family:"Palatino Linotype","Book Antiqua",Palatino,"EB Garamond",serif;font-style:italic;font-size:17px;color:var(--navy);max-width:760px;margin:0 0 14px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+.nav a,.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;
+  font:600 11px/1 "Public Sans",sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;border-radius:6px;cursor:pointer}
+.nav a:hover,.btn:hover{border-color:var(--teal);color:var(--teal)}
+.nav a.here{background:var(--night);color:#F5EAD4;border-color:var(--night)}
+.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn.primary:hover{background:#246878;color:#fff}
+.btn.tim{background:var(--coral);color:#fff;border-color:var(--coral)}
+.btn.tim:hover{background:#d4603b;color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-top:2px solid var(--gold);border-bottom:1px solid var(--line);padding:10px 0;margin:6px 0 14px}
+.bar .sp{flex:1}
+.pill{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.pill b{color:var(--teal)}
+select,input[type=date],input[type=text],textarea{font:inherit;border:1px solid var(--line);border-radius:6px;padding:7px 9px;background:#fff;color:var(--ink)}
+.banner{border-left:4px solid var(--gold);background:var(--goldTint);padding:10px 12px;border-radius:4px;margin:0 0 12px;font-size:13px}
+.banner.warn{border-color:var(--coral);background:var(--coralTint)}
+.banner.ok{border-color:var(--teal);background:var(--tealTint)}
+h2{font-family:"Palatino Linotype","Book Antiqua",Palatino,"EB Garamond",serif;font-weight:600;font-size:26px;margin:26px 0 8px;color:var(--night)}
+h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin:18px 0 6px}
+/* grid */
+.gridwrap{overflow:auto;border:1px solid var(--line);border-radius:8px;background:#fff;max-height:78vh}
+table.grid{border-collapse:separate;border-spacing:0;min-width:100%}
+.grid th,.grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;padding:6px 8px;font-size:12.5px}
+.grid thead th{position:sticky;top:0;z-index:3;background:var(--teal);color:#fff;font-size:12px;letter-spacing:.06em;text-align:left;min-width:150px;cursor:pointer}
+.grid thead th.comb{background:var(--coral)}
+.grid thead th.none{background:var(--gold)}
+.grid thead th small{display:block;font-weight:400;opacity:.9;letter-spacing:0;text-transform:none}
+.grid th.role{position:sticky;left:0;z-index:2;background:var(--ground);color:var(--navy);font-weight:700;min-width:170px;max-width:190px;text-align:left}
+.grid thead th.role{z-index:4;background:var(--night);color:#F5EAD4}
+.grid tr.meta td{background:var(--tint);font-weight:600}
+.grid td{min-width:150px;max-width:230px;white-space:pre-wrap;position:relative}
+.grid td .cv{min-height:18px;outline:none}
+.grid td:focus-within{outline:2px solid var(--teal);outline-offset:-2px;background:#F3FAFB}
+.grid td.ro{color:var(--faint);background:#FAFAF7}
+.grid td.todo{color:var(--coral)}
+.grid td.clash{box-shadow:inset 0 0 0 2px var(--coral)}
+.grid td.locked::after{content:"🔒";position:absolute;right:3px;top:2px;font-size:10px;opacity:.75}
+.grid td.timnew{background:#FFF4E8}
+.grid td.empty{background:#fff}
+.lockbtn{position:absolute;right:2px;bottom:2px;border:0;background:none;font-size:10px;cursor:pointer;opacity:0;padding:2px}
+.grid td:hover .lockbtn,.grid td:focus-within .lockbtn{opacity:.8}
+/* panels */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:820px){.two{grid-template-columns:1fr} h1{font-size:32px}}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.card ul{margin:6px 0;padding-left:18px}
+.card li{margin:3px 0}
+.edit{white-space:pre-wrap}
+.edit[contenteditable=true]:focus{outline:2px solid var(--teal);border-radius:3px}
+table.std{border-collapse:collapse;width:100%;font-size:12.5px}
+.std th,.std td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+.std th{background:var(--navy);color:#fff;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.std td:first-child{font-weight:700;color:var(--navy);background:var(--tint);width:24%}
+.std td.vac{color:var(--coral)}
+.warnlist{list-style:none;padding:0;margin:0}
+.warnlist li{display:flex;gap:8px;align-items:flex-start;border-bottom:1px solid var(--line);padding:6px 0;font-size:13px}
+.warnlist .src{flex:0 0 auto;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-radius:3px;padding:2px 6px;color:#fff;background:var(--teal)}
+.warnlist .src.pg{background:var(--gold)}
+.warnlist .src.ro{background:var(--coral)}
+.warnlist .msg{flex:1}
+.warnlist button{font-size:11px}
+/* dialogs */
+dialog{border:0;border-radius:10px;padding:0;max-width:min(860px,94vw);width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(14,26,43,.55)}
+.dh{background:var(--night);color:#F5EAD4;padding:14px 18px;font-family:"Palatino Linotype",Palatino,"EB Garamond",serif;font-size:22px}
+.db{padding:16px 18px;max-height:70vh;overflow:auto}
+.df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.db label{display:block;font-size:12px;font-weight:600;color:var(--navy);margin:10px 0 4px}
+.db textarea{width:100%;min-height:70px}
+.rolegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.small{font-size:12px;color:var(--faint)}
+/* gate */
+.gate{position:fixed;inset:0;z-index:100;background:var(--ground);display:flex;align-items:center;justify-content:center;padding:20px}
+.gate-card{max-width:420px;width:100%;background:#fff;border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:10px;padding:22px}
+.gate-card h2{margin:6px 0 8px}
+.gate-card input[type=password]{width:100%;margin:10px 0 8px}
+.gate-err{color:var(--coral);font-size:13px;min-height:18px;margin-top:6px}
+.hidden{display:none!important}
+.foot{margin-top:40px;border-top:1px solid var(--line);padding-top:12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--night);color:#F5EAD4;padding:10px 16px;border-radius:8px;font-size:13px;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+@media print{.nav,.bar,.noprint,.gate{display:none!important}.gridwrap{max-height:none;overflow:visible}}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="eyebrow">St Paul's Anglican Church Kogarah</div>
+    <h2>Kogarah Roster</h2>
+    <p>For G7 leaders at St Paul's Kogarah. Enter the G7 passcode to open the roster.<br><span class="small">供高嘉華聖保羅堂 G7 領袖使用。請輸入 G7 密碼。</span></p>
+    <input type="password" id="gatePw" placeholder="Passcode" autocomplete="current-password" aria-label="Passcode">
+    <label class="small"><input type="checkbox" id="gateRemember"> Remember on this device</label>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn primary" id="gateBtn" type="button">Open the roster</button>
+      <button class="btn" id="gateLocal" type="button" title="Keeps everything in this browser only">Use on this device only</button>
+    </div>
+    <div class="gate-err" id="gateErr" role="alert"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="eyebrow">St Paul's Anglican Church Kogarah · 57 Princes Highway</div>
+  <h1>Kogarah Roster</h1>
+  <p class="lede" id="lede">Every Sunday's roster in one place. Click any cell to change it; Tim can fill the gaps, and the roster exports to Word, Excel and CSV for the Administrator.</p>
+  <nav class="nav">
+    <a href="index.html"><span>◻</span>G7 Kanban Board</a>
+    <a href="cycle.html"><span>◎</span>KOGCycle</a>
+    <a href="calendar.html"><span>▤</span>Term Diary</a>
+    <a href="planner.html"><span>▦</span>Year Planner</a>
+    <a href="roster.html" class="here"><span>☷</span>Roster</a>
+    <a href="https://glorify.kogarah.church/"><span>♫</span>Praise &amp; Glorify Music</a>
+  </nav>
+
+  <div class="bar noprint">
+    <button class="btn tim" id="bTim" type="button">✦ Tim assigns</button>
+    <span class="sp"></span>
+    <label class="pill" for="fMonth">Show</label>
+    <select id="fMonth"></select>
+    <button class="btn" id="bAddDate" type="button">+ Date</button>
+    <button class="btn" id="bPeople" type="button">People &amp; rules</button>
+    <button class="btn" id="bCsv" type="button">CSV</button>
+    <button class="btn" id="bXlsx" type="button">Excel</button>
+    <button class="btn" id="bDocx" type="button">Word</button>
+    <button class="btn" id="bSent" type="button" title="Records what the Administrator has, so the next export lists only the changes">Mark as sent</button>
+    <button class="btn" id="bImport" type="button">Import</button>
+    <button class="btn" id="bLock" type="button">⚿ Lock</button>
+    <span class="pill" id="sync">Not loaded</span>
+  </div>
+
+  <div id="modeBanner"></div>
+  <div id="emptyState" class="banner hidden">No roster yet. Use <b>Import</b> to load the roster file Tim prepared (kept in OneDrive, never on this public page), or <b>+ Date</b> to start from scratch.</div>
+
+  <div class="gridwrap" id="gridwrap"><table class="grid" id="grid"></table></div>
+  <p class="small noprint">Coral dates are combined services, teal are parallel, gold have no roles. 🔒 marks a cell you set by hand; Tim never changes it. Cells in orange were filled by Tim and not yet saved over.</p>
+
+  <h2>Alignment</h2>
+  <p class="small">Checked against the Year Planner and Term Diary (shared store), Praise &amp; Glorify's song sets, and the roster itself.</p>
+  <div class="card"><ul class="warnlist" id="warns"><li>Loading…</li></ul></div>
+
+  <div class="two">
+    <div>
+      <h2>Standing roles</h2>
+      <div class="card"><table class="std" id="std"></table></div>
+    </div>
+    <div>
+      <h2>Every week</h2>
+      <div class="card">
+        <h3>Announcements</h3><ol id="wAnn" class="edit"></ol>
+        <h3>Prayer points</h3><ul id="wPray" class="edit"></ul>
+        <p class="small">Click to edit. One item per line.</p>
+      </div>
+      <h2>Notes</h2>
+      <div class="card"><ul id="notes" class="edit"></ul></div>
+    </div>
+  </div>
+
+  <div class="foot"><span>God gathers us to build his house of prayer</span><span id="footState">Roster</span></div>
+</div>
+
+<!-- Tim assigns -->
+<dialog id="dTim">
+  <div class="dh">Tim assigns</div>
+  <div class="db">
+    <p>Tim fills the roster from the people and rules you've set, keeping everyone's load even and never putting one person in two places in the same service.</p>
+    <label>From</label><select id="tFrom"></select>
+    <label>To</label><select id="tTo"></select>
+    <label>What to fill</label>
+    <div><label style="font-weight:400"><input type="radio" name="tMode" value="blanks" checked> Empty cells only (keeps everything already there)</label>
+    <label style="font-weight:400"><input type="radio" name="tMode" value="unlocked"> Everything not locked 🔒 (re-rolls Tim's earlier choices)</label></div>
+    <div id="tPreview" class="small" style="margin-top:10px"></div>
+  </div>
+  <div class="df"><button class="btn" value="cancel" id="tCancel" type="button">Cancel</button><button class="btn tim" id="tGo" type="button">✦ Assign</button></div>
+</dialog>
+
+<!-- People and rules -->
+<dialog id="dPeople">
+  <div class="dh">People &amp; rules</div>
+  <div class="db">
+    <p class="small">One name per line. Use the same spelling everywhere so the Administrator's records match (for example "Jiawu Chen 陈家戊"). Names live in the shared store behind the passcode, not on this page.</p>
+    <div class="rolegrid" id="pRoles"></div>
+    <label>Away (one per line: Name | from yyyy-mm-dd | to yyyy-mm-dd | note)</label>
+    <textarea id="pAway"></textarea>
+    <label>Fixed assignments (one per line: role key | Name | week of month 1-5 | note)</label>
+    <textarea id="pFixed"></textarea>
+    <p class="small">Role keys: <span id="pKeys"></span></p>
+  </div>
+  <div class="df"><button class="btn" id="pCancel" type="button">Cancel</button><button class="btn primary" id="pSave" type="button">Save</button></div>
+</dialog>
+
+<!-- Date header menu -->
+<dialog id="dDay">
+  <div class="dh" id="dayTitle">Date</div>
+  <div class="db">
+    <label>Date</label><input type="date" id="dyDate">
+    <label>Service type (include "Combined" or "Parallel")</label><input type="text" id="dyType" style="width:100%">
+    <label>Church calendar</label><input type="text" id="dyCal" style="width:100%">
+    <label>Bible passage</label><input type="text" id="dyPassage" style="width:100%">
+    <label>Preacher</label><input type="text" id="dyPreacher" style="width:100%">
+    <label>Sermon language</label><select id="dyLang"><option>Eng</option><option>Chn</option><option value="">(none)</option></select>
+    <div style="margin-top:10px">
+      <label style="font-weight:400"><input type="checkbox" id="dyFest"> Festival service (larger music team)</label>
+      <label style="font-weight:400"><input type="checkbox" id="dyOut"> Outreach Sunday (extra visitor receivers)</label>
+      <label style="font-weight:400"><input type="checkbox" id="dyNone"> No roles this day (for example a drama)</label>
+    </div>
+  </div>
+  <div class="df"><button class="btn" id="dyDel" type="button" style="margin-right:auto;color:var(--coral)">Remove date</button><button class="btn" id="dyCancel" type="button">Cancel</button><button class="btn primary" id="dySave" type="button">Save</button></div>
+</dialog>
+
+<input type="file" id="fileIn" accept=".json,application/json" class="hidden">
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Kogarah Roster. Same shared store as the Term Diary and Year Planner
+   (g7_planner, passcode-checked functions). Roster documents:
+     roster/_config   people, roles, rules, standing roles, weekly lists
+     roster/<date>    one per service date (cells, locks, notices)
+     roster/_sent     what the Administrator last received (for "What changed")
+   No member names are written into this page; they come from the store.
+   ===================================================================== */
+const PAGE_VERSION = "1.0 (27 Oct 2026)";
+let SB = null, PASS = null, MODE = "none";             // MODE: shared | local
+const LOCAL_KEY = "kogroster.local.v1";
+const store = { docs: new Map(), loaded: false, stamp: null };
+let CFG = null;           // roster/_config data
+let DAYS = [];            // sorted roster day docs
+let BASE_DAYS = [];       // Term Diary base days (from calendar.html)
+let PG = null;            // Praise & Glorify data
+let FILTER = "all";
+const TIMNEW = new Set(); // "date|key" filled by Tim this session
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){ const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("on"), 2600); }
+function pill(t){ $("#sync").textContent = t; }
+
+/* ---------- display rows ---------- */
+const ROWS = [
+  { k:"type", label:"Service Type", meta:1 },
+  { k:"cal", label:"Church Calendar", meta:1 },
+  { k:"passage", label:"Bible Passage", meta:1 },
+  { k:"preacher", label:"Preacher (Lang)", meta:1 },
+  { k:"hostEn" }, { k:"hostCn" }, { k:"trans" },
+  { k:"tp", label:"Translation Plan", auto:1 },
+  { k:"desk" }, { k:"musEn" },
+  { k:"songsEn", label:"Songs En", pg:1 },
+  { k:"musCn" },
+  { k:"songsCn", label:"Songs Cn", pg:1 },
+  { k:"bibEn" }, { k:"bibCn" }, { k:"prEn" }, { k:"prCn" },
+  { k:"ann", label:"Announcements (this week)", text:1 },
+  { k:"pray", label:"Prayer Points (this week)", text:1 },
+  { k:"meet", label:"Meet and Greet", derived:"hostEn" },
+  { k:"memory" }, { k:"interview" }, { k:"av" }, { k:"avChn" }, { k:"chairs" }, { k:"welcome" }, { k:"tea" },
+];
+const EXPORT_ROLES = ["preacher","hostEn","meet","hostCn","trans","desk","musEn","musCn","bibEn","bibCn","prEn","prCn","memory","interview","av","avChn","chairs","welcome","tea"];
+function roleCfg(k){ return (CFG?.roles || []).find(r => r.k === k); }
+function rowLabel(r){ return r.label || roleCfg(r.k)?.label || r.k; }
+
+/* ---------- dates ---------- */
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+function dmy(d){ const [y,m,dd] = d.split("-"); return dd + "/" + m; }
+function dayName(d){ return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date(d + "T00:00:00").getDay()]; }
+function weekOfMonth(d){ return Math.ceil(+d.slice(8,10) / 7); }
+function isSunday(d){ return new Date(d + "T00:00:00").getDay() === 0; }
+function isComb(day){ return /combined/i.test(day.type || ""); }
+
+/* ---------- shared store ---------- */
+async function findSB(){
+  try {
+    const t = await fetch("calendar.html", { cache: "no-store" }).then(r => r.ok ? r.text() : "");
+    const m = t.match(/const\s+SB\s*=\s*\{\s*url\s*:\s*["']([^"']+)["']\s*,\s*key\s*:\s*["']([^"']+)["']/);
+    if (m) SB = { url: m[1], key: m[2] };
+    BASE_DAYS = extractBaseDays(t);
+  } catch (e) { /* offline or opened as a file */ }
+}
+function extractBaseDays(src){
+  try {
+    const i = src.search(/BASE_DAYS\s*=\s*\[/); if (i < 0) return [];
+    let j = src.indexOf("[", i), depth = 0, q = null;
+    for (let k = j; k < src.length; k++) {
+      const c = src[k];
+      if (q) { if (c === "\\") { k++; continue; } if (c === q) q = null; continue; }
+      if (c === '"' || c === "'" || c === "`") { q = c; continue; }
+      if (c === "[") depth++; else if (c === "]") { depth--; if (depth === 0) { return (new Function("return " + src.slice(j, k + 1)))(); } }
+    }
+  } catch (e) {}
+  return [];
+}
+async function rpc(fn, body){
+  const r = await fetch(SB.url + "/rest/v1/rpc/" + fn, { method:"POST", headers:{ apikey: SB.key, "Content-Type":"application/json" }, body: JSON.stringify(body) });
+  const txt = await r.text();
+  if (!r.ok) { const e = new Error(txt || ("HTTP " + r.status)); e.code = /unauthorized/i.test(txt) ? "unauthorized" : "unavailable"; throw e; }
+  return txt ? JSON.parse(txt) : null;
+}
+function applyRemote(res){
+  const m = new Map(); (res?.docs || []).forEach(d => m.set(d.coll + "/" + d.id, d.data));
+  store.docs = m; store.stamp = res?.stamp; store.loaded = true;
+}
+function localLoad(){
+  try { const j = JSON.parse(localStorage.getItem(LOCAL_KEY) || "{}"); store.docs = new Map(Object.entries(j)); } catch (e) { store.docs = new Map(); }
+  store.loaded = true;
+}
+function localPersist(){ try { localStorage.setItem(LOCAL_KEY, JSON.stringify(Object.fromEntries([...store.docs].filter(([k]) => k.startsWith("roster/"))))); } catch (e) { toast("This browser would not save the roster."); } }
+async function saveDoc(id, data){
+  store.docs.set("roster/" + id, data);
+  if (MODE === "local") { localPersist(); return true; }
+  pill("Saving…");
+  try { await rpc("save_planner_doc", { pass: PASS, p_coll: "roster", p_id: id, p_data: data, mode: "set" }); pill("Shared · everyone sees your edits"); return true; }
+  catch (e) {
+    if (e.code === "unauthorized") { lockNow(); return false; }
+    pill("Not saved"); localPersist();
+    toast("Not saved to the shared store (" + (e.message || "error").slice(0, 80) + "). A copy is kept on this device.");
+    return false;
+  }
+}
+async function saveMany(items){ // [{id,data}]
+  items.forEach(it => store.docs.set("roster/" + it.id, it.data));
+  if (MODE === "local") { localPersist(); return true; }
+  pill("Saving…");
+  try { await rpc("import_planner", { pass: PASS, docs: items.map(it => ({ coll:"roster", id: it.id, data: it.data })) }); pill("Shared · everyone sees your edits"); return true; }
+  catch (e) {
+    // fall back to one at a time
+    let ok = true; for (const it of items) { ok = (await saveDoc(it.id, it.data)) && ok; } return ok;
+  }
+}
+async function deleteDoc(id){
+  store.docs.delete("roster/" + id);
+  if (MODE === "local") { localPersist(); return; }
+  try { await rpc("delete_planner_doc", { pass: PASS, p_coll: "roster", p_id: id }); } catch (e) { toast("Could not remove it from the shared store."); }
+}
+async function pull(){
+  if (MODE !== "shared" || document.activeElement?.isContentEditable) return;
+  try { const res = await rpc("get_planner", { pass: PASS }); if (res?.stamp !== store.stamp) { applyRemote(res); readStore(); render(); } pill("Shared · everyone sees your edits"); }
+  catch (e) { if (e.code === "unauthorized") return lockNow(); pill("Offline · showing the last copy"); }
+}
+
+/* ---------- gate ---------- */
+function getSavedPass(){ try { return localStorage.getItem("g7_pass") || sessionStorage.getItem("g7_roster_pass"); } catch (e) { return null; } }
+async function gateUnlock(pw, remember){
+  const err = $("#gateErr"); err.textContent = "";
+  if (!SB) { err.textContent = "Could not find the shared store from here. Open this page on the G7 site, or use it on this device only."; return; }
+  if (!pw) { err.textContent = "Enter the passcode."; return; }
+  $("#gateBtn").disabled = true; $("#gateBtn").textContent = "Checking…";
+  try {
+    const res = await rpc("get_planner", { pass: pw });
+    PASS = pw; MODE = "shared"; applyRemote(res);
+    try { if (remember) localStorage.setItem("g7_pass", pw); else sessionStorage.setItem("g7_roster_pass", pw); } catch (e) {}
+    $("#gate").classList.add("hidden"); start();
+  } catch (e) {
+    err.textContent = e.code === "unauthorized" ? "Incorrect passcode. Please try again." : "Could not reach the roster. Check the connection.";
+  } finally { $("#gateBtn").disabled = false; $("#gateBtn").textContent = "Open the roster"; }
+}
+function useLocal(){ MODE = "local"; localLoad(); $("#gate").classList.add("hidden"); start(); }
+function lockNow(){
+  try { localStorage.removeItem("g7_pass"); sessionStorage.removeItem("g7_roster_pass"); } catch (e) {}
+  PASS = null; MODE = "none"; store.docs = new Map(); CFG = null; DAYS = [];
+  $("#grid").innerHTML = ""; $("#gate").classList.remove("hidden");
+}
+
+/* ---------- reading the store ---------- */
+function readStore(){
+  CFG = store.docs.get("roster/_config") || null;
+  DAYS = [...store.docs].filter(([k]) => /^roster\/\d{4}-\d\d-\d\d$/.test(k)).map(([, v]) => v).sort((a, b) => a.d.localeCompare(b.d));
+}
+function plannerDay(d){
+  const base = BASE_DAYS.find(x => x.d === d) || null;
+  const doc = store.docs.get("services/" + d) || null;
+  if (!base && !doc) return null;
+  return Object.assign({}, base || {}, doc || {});
+}
+
+/* ---------- cell values ---------- */
+function cellVal(day, k){
+  if (k === "type" || k === "cal" || k === "passage") return day[k] || "";
+  if (k === "preacher") return day.noRoles ? "" : (day.preacher ? day.preacher + (day.lang ? " (" + day.lang + ")" : "") : "");
+  if (day.noRoles) return "";
+  if (k === "ann") return day.ann ? "4. " + day.ann + (day.g7 ? "\n5. Thank God for the " + day.g7[0] + " team: " + day.g7[1] : "") : "";
+  if (k === "pray") return (day.pray || []).map(p => "• " + p).join("\n");
+  if (k === "meet") return day.cells?.hostEn || "";
+  if (k === "tp") return day.cells?.tp || autoTP(day);
+  if (k === "songsEn" || k === "songsCn") return day.cells?.[k] || pgSongs(day.d, k === "songsEn" ? "en" : "cn") || (k === "songsCn" && isComb(day) ? "(Combined)" : "Music team to fill");
+  return day.cells?.[k] || "";
+}
+function autoTP(day){
+  if (day.noRoles) return "";
+  const extra = day.outreach ? " Outreach Sunday: extra visitor receivers ready." : "";
+  if (isComb(day)) return (day.lang === "Chn" ? "COMBINED: Jerry preaches Mandarin, so live interpreter to ENGLISH on Auracast." : "COMBINED: live interpreter to Mandarin on Auracast.") + extra;
+  return (day.lang === "Chn" ? "PARALLEL: sermon relay, live English voice." : "PARALLEL: sermon relay, live Chinese voice.") + extra;
+}
+function people(v){
+  if (!v || /^\(|TBC|to fill|to confirm/i.test(v)) return [];
+  return v.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+}
+function personKey(n){ // compare "Range Zhu 朱仁杰" with "Range" or "朱仁杰"
+  return String(n).toLowerCase().replace(/\(.*?\)/g, " ").replace(/\s+/g, " ").trim();
+}
+function samePerson(a, b){
+  const A = personKey(a), B = personKey(b); if (!A || !B) return false;
+  if (A === B) return true;
+  const ta = A.split(" "), tb = B.split(" ");
+  return ta.some(t => t.length > 1 && tb.includes(t)) && (ta.length === 1 || tb.length === 1 || ta[0] === tb[0]);
+}
+
+/* ---------- Praise & Glorify ---------- */
+function loadPG(){
+  return new Promise(res => {
+    const s = document.createElement("script"); s.src = "https://glorify.kogarah.church/data.js";
+    s.onload = () => { PG = window.PG || null; res(); }; s.onerror = () => res(); document.head.appendChild(s);
+    setTimeout(res, 6000);
+  });
+}
+function pgDay(d){ return PG?.SCHEDULE?.find(x => x.d === d) || null; }
+function pgSongs(d, lang){
+  const s = pgDay(d); if (!s || !(s[lang] || []).length) return "";
+  const title = id => { const so = PG.SONGS?.find(x => x.id === id); return so ? so.en + (so.zh ? " " + so.zh : "") : id; };
+  return s[lang].map((id, i) => (i + 1) + ". " + title(id)).join("\n");
+}
+
+/* ---------- render ---------- */
+function visibleDays(){ return FILTER === "all" ? DAYS : DAYS.filter(d => d.d.slice(0, 7) === FILTER); }
+function clashSet(day){
+  const seen = new Map(), bad = new Set();
+  (CFG?.roles || []).filter(r => !r.outside).forEach(r => people(day.cells?.[r.k]).forEach(p => {
+    const hit = [...seen.keys()].find(q => samePerson(q, p));
+    if (hit && seen.get(hit) !== r.k) { bad.add(r.k); bad.add(seen.get(hit)); } else seen.set(p, r.k);
+  }));
+  return bad;
+}
+function render(){
+  $("#emptyState").classList.toggle("hidden", DAYS.length > 0);
+  if (CFG?.title) { $("#lede").textContent = CFG.title + " · " + (CFG.service || "") + ". Click any cell to change it; Tim can fill the gaps, and the roster exports to Word, Excel and CSV for the Administrator."; }
+  // month filter
+  const months = [...new Set(DAYS.map(d => d.d.slice(0, 7)))];
+  $("#fMonth").innerHTML = '<option value="all">All dates</option>' + months.map(m => `<option value="${m}" ${FILTER === m ? "selected" : ""}>${MONTHS[+m.slice(5) - 1]} ${m.slice(0, 4)}</option>`).join("");
+  const vd = visibleDays();
+  let h = '<thead><tr><th class="role">Role</th>';
+  vd.forEach(d => { h += `<th class="${d.noRoles ? "none" : isComb(d) ? "comb" : ""}" data-day="${d.d}" title="Edit this date">${dayName(d.d)} ${dmy(d.d)}<small>${esc(d.cal || "")}</small></th>`; });
+  h += "</tr></thead><tbody>";
+  const clashes = Object.fromEntries(vd.map(d => [d.d, clashSet(d)]));
+  ROWS.forEach(r => {
+    h += `<tr class="${r.meta ? "meta" : ""}"><th class="role">${esc(rowLabel(r))}</th>`;
+    vd.forEach(d => {
+      const v = cellVal(d, r.k);
+      const ro = r.derived || r.pg && !d.cells?.[r.k] && pgDay(d.d) || d.noRoles && r.k !== "type" || r.k === "preacher";
+      const cls = [ro ? "ro" : "", /TBC|to fill|to confirm/i.test(v) ? "todo" : "", clashes[d.d].has(r.k) ? "clash" : "",
+                   d.locked?.[r.k] ? "locked" : "", TIMNEW.has(d.d + "|" + r.k) ? "timnew" : ""].join(" ");
+      h += `<td class="${cls}" data-d="${d.d}" data-k="${r.k}"><div class="cv" ${ro ? "" : 'contenteditable="true" spellcheck="false"'}>${esc(v)}</div>${!ro && roleCfg(r.k) ? '<button class="lockbtn" type="button" tabindex="-1" title="Lock or unlock for Tim">🔒</button>' : ""}</td>`;
+    });
+    h += "</tr>";
+  });
+  $("#grid").innerHTML = h + "</tbody>";
+  renderPanels(); renderWarnings();
+  $("#footState").textContent = (MODE === "shared" ? "Shared store" : "This device only") + " · " + DAYS.length + " dates · v" + PAGE_VERSION;
+  $("#modeBanner").innerHTML = MODE === "local" ? '<div class="banner warn">Using this device only: changes stay in this browser. Open the roster on the G7 site with the passcode to share them.</div>' : "";
+}
+function renderPanels(){
+  const std = CFG?.standing || [];
+  $("#std").innerHTML = "<tr><th>Role</th><th>Serving</th><th>Vacant</th></tr>" + std.map((r, i) => `<tr><td>${esc(r[0])}</td><td class="edit" contenteditable="true" data-std="${i}" data-c="1">${esc(r[1])}</td><td class="edit vac" contenteditable="true" data-std="${i}" data-c="2">${esc(r[2])}</td></tr>`).join("");
+  $("#wAnn").innerHTML = (CFG?.weeklyAnn || []).map(t => `<li>${esc(t)}</li>`).join("");
+  $("#wPray").innerHTML = (CFG?.weeklyPray || []).map(t => `<li>${esc(t)}</li>`).join("");
+  $("#notes").innerHTML = (CFG?.notes || []).map(t => `<li>${esc(t)}</li>`).join("");
+  ["#wAnn", "#wPray", "#notes"].forEach(s => $(s).setAttribute("contenteditable", CFG ? "true" : "false"));
+}
+
+/* ---------- alignment ---------- */
+function normPreacher(s){ s = String(s || "").toLowerCase(); if (/jerry/.test(s)) return "jerry"; if (/david|\bdy\b/.test(s)) return "david"; if (/stead|bishop/.test(s)) return "bishop"; if (/drama/.test(s)) return "drama"; return s.trim(); }
+function normPassage(s){ return String(s || "").toLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, "").replace(/[()]/g, ""); }
+function renderWarnings(){
+  const W = [];
+  if (!CFG) { $("#warns").innerHTML = "<li>No roster loaded yet.</li>"; return; }
+  const from = DAYS[0]?.d, to = DAYS[DAYS.length - 1]?.d;
+  DAYS.forEach(day => {
+    const p = plannerDay(day.d);
+    if (p && !day.noRoles) {
+      if (p.preacher && day.preacher && normPreacher(p.preacher) !== normPreacher(day.preacher) && !/confirm/i.test(p.preacher))
+        W.push({ src:"Planner", d:day.d, msg:`Preacher: roster has ${day.preacher}, Year Planner / Term Diary has ${p.preacher}.`, fix:{ preacher: p.preacher } });
+      if (p.passage && day.passage && normPassage(p.passage) !== normPassage(day.passage) && !/confirm/i.test(p.passage + day.passage))
+        W.push({ src:"Planner", d:day.d, msg:`Passage: roster has ${day.passage}, Year Planner / Term Diary has ${p.passage}.`, fix:{ passage: p.passage } });
+    }
+    const g = pgDay(day.d);
+    if (g && !day.noRoles) {
+      const gc = /combined/i.test(g.type || ""), rc = isComb(day);
+      if (gc !== rc) W.push({ src:"P&G", d:day.d, msg:`Service type: roster says ${rc ? "Combined" : "Parallel"}, Praise & Glorify says ${g.type}.` });
+      if (g.passage && day.passage && normPassage(g.passage) !== normPassage(day.passage)) W.push({ src:"P&G", d:day.d, msg:`Passage: Praise & Glorify has ${g.passage}.` });
+      const rm = people(day.cells?.musEn), gm = people(g.mEn);
+      if (gm.length && rm.length && (gm.length !== rm.length || !gm.every(x => rm.some(y => samePerson(x, y)))))
+        W.push({ src:"P&G", d:day.d, msg:`Musicians En: roster has ${rm.join(", ")}; Praise & Glorify has ${gm.join(", ")}.` });
+    }
+    if (!day.noRoles) {
+      const c = clashSet(day); if (c.size) W.push({ src:"Roster", d:day.d, msg:"Same person in two roles: " + [...c].map(k => roleCfg(k)?.label || k).join(", ") + "." });
+      (CFG.roles || []).filter(r => !r.outside && (r.pool || r.fixed)).forEach(r => {
+        const v = day.cells?.[r.k] || ""; if (!v && !(r.parallelOnly && isComb(day))) W.push({ src:"Roster", d:day.d, msg:`${r.label} is empty.` });
+      });
+      (CFG.rules?.away || []).forEach(a => {
+        if (day.d >= a.from && day.d <= a.to) (CFG.roles || []).forEach(r => { if (people(day.cells?.[r.k]).some(p => samePerson(p, a.person))) W.push({ src:"Roster", d:day.d, msg:`${a.person} is away (${a.note || "away"}) but is rostered on ${r.label}.` }); });
+      });
+    }
+  });
+  // dates the planner has that the roster doesn't
+  const pdates = new Set([...BASE_DAYS.map(x => x.d), ...[...store.docs.keys()].filter(k => k.startsWith("services/")).map(k => k.slice(9))]);
+  [...pdates].filter(d => from && d >= from && d <= to && !DAYS.find(x => x.d === d)).sort().forEach(d => {
+    const p = plannerDay(d); if (p && (p.kind === "sunday" || isSunday(d))) W.push({ src:"Planner", d, msg:`The Year Planner / Term Diary has ${p.lit || "a service"} on this date; the roster doesn't.`, add:p });
+  });
+  if (!BASE_DAYS.length && MODE === "shared") W.unshift({ src:"Planner", d:"", msg:"Could not read the Term Diary's dates; only edits saved in the shared store were checked." });
+  if (!PG) W.unshift({ src:"P&G", d:"", msg:"Could not reach Praise & Glorify, so songs and musicians weren't checked." });
+  $("#warns").innerHTML = W.length ? W.map((w, i) => `<li><span class="src ${w.src === "P&G" ? "pg" : w.src === "Roster" ? "ro" : ""}">${w.src}</span><span class="msg">${w.d ? "<b>" + dayName(w.d) + " " + dmy(w.d) + "</b> · " : ""}${esc(w.msg)}</span>${w.fix ? `<button class="btn" data-fix="${i}">Use planner</button>` : w.add ? `<button class="btn" data-add="${i}">Add date</button>` : ""}</li>`).join("") : '<li>Everything lines up with the Year Planner, Term Diary and Praise &amp; Glorify.</li>';
+  renderWarnings.list = W;
+}
+
+/* ---------- editing ---------- */
+function dayOf(d){ return DAYS.find(x => x.d === d); }
+async function commitCell(td){
+  const d = td.dataset.d, k = td.dataset.k, day = dayOf(d); if (!day) return;
+  const v = td.querySelector(".cv").innerText.replace(/\u00a0/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  if (v === cellVal(day, k).trim()) return;
+  if (k === "type" || k === "cal" || k === "passage") day[k] = v;
+  else if (k === "ann") { const m = v.split(/\n?5\. Thank God for the /); day.ann = m[0].replace(/^4\.\s*/, ""); if (m[1]) { const i = m[1].indexOf(" team: "); day.g7 = i > 0 ? [m[1].slice(0, i), m[1].slice(i + 7)] : day.g7; } }
+  else if (k === "pray") day.pray = v.split("\n").map(s => s.replace(/^[•\-*]\s*/, "").trim()).filter(Boolean);
+  else { day.cells = day.cells || {}; day.cells[k] = v; day.locked = day.locked || {}; if (roleCfg(k)) day.locked[k] = !!v; TIMNEW.delete(d + "|" + k); }
+  await saveDoc(d, day); render();
+}
+async function commitList(sel, field){
+  if (!CFG) return;
+  const items = [...$(sel).querySelectorAll("li")].map(li => li.innerText.trim()).filter(Boolean);
+  const extra = $(sel).innerText.split("\n").map(s => s.trim()).filter(Boolean);
+  CFG[field] = items.length >= extra.length ? items : extra;
+  await saveDoc("_config", CFG); renderPanels();
+}
+
+/* ---------- Tim assigns ---------- */
+function timAssign(fromD, toD, mode){
+  const targets = DAYS.filter(d => d.d >= fromD && d.d <= toD && !d.noRoles);
+  const roles = CFG.roles || [];
+  const keep = (day, k) => mode === "blanks" ? !!(day.cells?.[k]) : !!(day.locked?.[k]);
+  // load counts from everything Tim will not touch
+  const roleUse = {}, use = {};
+  const bump = (k, p) => { roleUse[k] = roleUse[k] || {}; roleUse[k][p] = (roleUse[k][p] || 0) + 1; use[p] = (use[p] || 0) + 1; };
+  DAYS.forEach(day => roles.forEach(r => { if (targets.includes(day) && !keep(day, r.k)) return; people(day.cells?.[r.k]).forEach(p => bump(r.k, p)); }));
+  let filled = 0;
+  const altIndex = {};
+  targets.forEach(day => {
+    day.cells = day.cells || {};
+    const comb = isComb(day);
+    const busy = [];
+    const isBusy = p => busy.some(b => samePerson(b, p));
+    if (day.preacher) busy.push(day.preacher);
+    (CFG.rules?.away || []).forEach(a => { if (day.d >= a.from && day.d <= a.to) busy.push(a.person); });
+    roles.filter(r => !r.outside && keep(day, r.k)).forEach(r => people(day.cells[r.k]).forEach(p => busy.push(p)));
+    // fixed rules first
+    const fixedFor = {};
+    (CFG.rules?.fixed || []).forEach(f => { if (isSunday(day.d) && weekOfMonth(day.d) === +f.week) { fixedFor[f.role] = f.person; } });
+    Object.values(fixedFor).forEach(p => { if (!isBusy(p)) busy.push(p); });
+    roles.forEach(r => {
+      if (keep(day, r.k)) return;
+      let val = "";
+      if (fixedFor[r.k]) val = fixedFor[r.k];
+      else if (r.fixed) { val = r.parallelOnly && comb ? (r.combinedText || "") : r.fixed; }
+      else if (r.alternate) { altIndex[r.k] = (altIndex[r.k] ?? DAYS.indexOf(day)) ; val = r.alternate[DAYS.indexOf(day) % r.alternate.length]; }
+      else if (r.pool) {
+        const n = (day.festival && r.countFestival) || (comb && r.countCombined) || r.count || 1;
+        const ru = roleUse[r.k] || {};
+        const cand = r.pool.filter(p => !isBusy(p)).sort((a, b) => ((ru[a] || 0) - (ru[b] || 0)) || ((use[a] || 0) - (use[b] || 0)) || (r.pool.indexOf(a) - r.pool.indexOf(b)));
+        const pick = cand.slice(0, n);
+        val = [...(r.always || []), ...pick].join(", ") || "TBC";
+        pick.forEach(p => bump(r.k, p));
+      }
+      if (!r.outside) people(val).forEach(p => busy.push(p));
+      if (r.parallelOnly && !comb && r.fixed) busy.push(r.fixed);
+      if ((day.cells[r.k] || "") !== val) { day.cells[r.k] = val; TIMNEW.add(day.d + "|" + r.k); filled++; }
+    });
+  });
+  return { targets, filled };
+}
+
+/* ---------- exports ---------- */
+function flatRows(){
+  const rows = [];
+  DAYS.forEach(day => {
+    if (day.noRoles) return;
+    const svc = isSunday(day.d) ? "9:15am Sunday" : (day.cal || day.type);
+    EXPORT_ROLES.forEach(k => {
+      const label = k === "preacher" ? "Preacher" : k === "meet" ? "Meet and Greet" : (roleCfg(k)?.label || k);
+      const v = k === "preacher" ? day.preacher : k === "meet" ? day.cells?.hostEn : day.cells?.[k];
+      people(v).forEach(p => rows.push({ date: day.d, day: dayName(day.d), service: svc, stype: isComb(day) ? "Combined" : "Parallel", role: label, person: p }));
+    });
+  });
+  return rows;
+}
+function diffRows(){
+  const sent = store.docs.get("roster/_sent");
+  if (!sent?.rows) return null;
+  const key = r => r.date + "|" + r.role;
+  const group = rs => { const m = new Map(); rs.forEach(r => { const k = key(r); if (!m.has(k)) m.set(k, []); m.get(k).push(r.person); }); return m; };
+  const A = group(sent.rows), B = group(flatRows()); const out = [];
+  [...new Set([...A.keys(), ...B.keys()])].sort().forEach(k => {
+    const a = (A.get(k) || []).slice().sort().join(", "), b = (B.get(k) || []).slice().sort().join(", ");
+    if (a !== b) { const [d, role] = k.split("|"); out.push({ date: d, role, was: a || "(none)", now: b || "(none)" }); }
+  });
+  return { at: sent.at, rows: out };
+}
+function download(name, blob){ const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+function fileStem(){ const a = DAYS[0]?.d, b = DAYS[DAYS.length - 1]?.d; return "Roster " + (a ? MON[+a.slice(5, 7) - 1] + " " + a.slice(0, 4) : "") + " - " + (b ? MON[+b.slice(5, 7) - 1] + " " + b.slice(0, 4) : ""); }
+function auDate(d){ const [y, m, dd] = d.split("-"); return dd + "/" + m + "/" + y; }
+function exportCSV(){
+  const q = s => '"' + String(s ?? "").replace(/"/g, '""') + '"';
+  const lines = [["Date","Day","Service","Service Type","Role","Person"].map(q).join(",")].concat(flatRows().map(r => [auDate(r.date), r.day, r.service, r.stype, r.role, r.person].map(q).join(",")));
+  download(fileStem() + ".csv", new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" }));
+}
+function loadScript(src, globalName){
+  return new Promise((res, rej) => { if (window[globalName]) return res(); const s = document.createElement("script"); s.src = src; s.onload = () => window[globalName] ? res() : rej(new Error("load")); s.onerror = () => rej(new Error("load")); document.head.appendChild(s); });
+}
+async function exportXLSX(){
+  try { await loadScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js", "XLSX"); } catch (e) { return toast("Couldn't load the Excel tool. Check the connection."); }
+  const wb = XLSX.utils.book_new();
+  const diff = diffRows();
+  const readme = [["St Paul's Kogarah: roster export"], [(CFG?.title || "") + " · exported " + new Date().toLocaleDateString("en-AU")], [],
+    ["1. Assignments: one line per person per role per service (Date, Day, Service, Service Type, Role, Person)."],
+    ["2. What changed: only the lines that differ from what was last marked as sent" + (diff ? " (" + new Date(diff.at).toLocaleDateString("en-AU") + ")." : ". Nothing has been marked as sent yet, so everything is new.")],
+    ["3. Grid: the roster as people read it, one column per date."], [],
+    ["This file contains members' names. Keep it in the St Paul's OneDrive and share it only with named people."]];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(readme), "Read me");
+  const fr = flatRows();
+  const ws = XLSX.utils.aoa_to_sheet([["Date","Day","Service","Service Type","Role","Person"], ...fr.map(r => [new Date(r.date + "T00:00:00"), r.day, r.service, r.stype, r.role, r.person])], { cellDates: true, dateNF: "dd/mm/yyyy" });
+  ws["!cols"] = [{ wch: 12 }, { wch: 6 }, { wch: 16 }, { wch: 13 }, { wch: 26 }, { wch: 28 }]; ws["!autofilter"] = { ref: "A1:F" + (fr.length + 1) };
+  XLSX.utils.book_append_sheet(wb, ws, "Assignments");
+  const ch = diff ? [["Date","Role","Was","Now"], ...diff.rows.map(r => [new Date(r.date + "T00:00:00"), r.role, r.was, r.now])] : [["First export: everything in Assignments is new. Use \"Mark as sent\" after giving it to the Administrator."]];
+  if (diff && !diff.rows.length) ch.push(["No changes since it was last marked as sent."]);
+  const wc = XLSX.utils.aoa_to_sheet(ch, { cellDates: true, dateNF: "dd/mm/yyyy" }); wc["!cols"] = [{ wch: 12 }, { wch: 26 }, { wch: 34 }, { wch: 34 }];
+  XLSX.utils.book_append_sheet(wb, wc, "What changed");
+  const g = [["Role", ...DAYS.map(d => dayName(d.d) + " " + dmy(d.d))], ...ROWS.map(r => [rowLabel(r), ...DAYS.map(d => cellVal(d, r.k))])];
+  const wg = XLSX.utils.aoa_to_sheet(g); wg["!cols"] = [{ wch: 24 }, ...DAYS.map(() => ({ wch: 26 }))];
+  XLSX.utils.book_append_sheet(wb, wg, "Grid");
+  XLSX.writeFile(wb, fileStem() + ".xlsx");
+}
+async function exportDOCX(){
+  try { await loadScript("https://cdn.jsdelivr.net/npm/docx@9.8.1/dist/index.iife.js", "docx"); } catch (e) { return toast("Couldn't load the Word tool. Check the connection."); }
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType, AlignmentType, PageOrientation, BorderStyle, Footer, PageNumber, LevelFormat } = docx;
+  const C = { coral:"E8714A", cream:"FDF6EC", teal:"2D7B8C", gold:"C8962E", navy:"2C3E50", city:"1B2440", white:"FFFFFF", line:"D9CBB5" };
+  const FONT = { ascii:"Palatino Linotype", hAnsi:"Palatino Linotype", eastAsia:"Noto Sans SC", cs:"Palatino Linotype" };
+  const run = (t, o = {}) => new TextRun({ text: t, font: FONT, size: o.size || 15, bold: o.bold, color: o.color || C.city, italics: o.italics });
+  const paras = (t, o = {}) => String(t ?? "").split("\n").map(l => new Paragraph({ spacing: { before: 0, after: 20 }, alignment: o.align, children: [run(l, o)] }));
+  const bd = { style: BorderStyle.SINGLE, size: 4, color: C.line }, borders = { top: bd, bottom: bd, left: bd, right: bd };
+  const cell = (t, w, o = {}) => new TableCell({ width: { size: w, type: WidthType.DXA }, borders, shading: o.fill ? { type: ShadingType.CLEAR, color: "auto", fill: o.fill } : undefined, margins: { top: 50, bottom: 50, left: 70, right: 70 }, children: paras(t, o) });
+  const TW = 16838 - 1440;
+  const heading = t => new Paragraph({ spacing: { before: 120, after: 80 }, border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: C.gold, space: 2 } }, children: [new TextRun({ text: t, font: FONT, size: 30, bold: true, color: C.navy })] });
+  const sub = t => new Paragraph({ spacing: { before: 100, after: 60 }, children: [new TextRun({ text: t, font: FONT, size: 22, bold: true, color: C.teal })] });
+  const bullet = t => new Paragraph({ numbering: { reference: "b", level: 0 }, spacing: { after: 40 }, children: [run(t, { size: 18 })] });
+  const ch = [];
+  ch.push(new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: CFG?.title || "Roster", font: FONT, size: 40, bold: true, color: C.navy })] }));
+  ch.push(new Paragraph({ spacing: { after: 120 }, border: { bottom: { style: BorderStyle.SINGLE, size: 18, color: C.coral, space: 4 } }, children: [new TextRun({ text: "St Paul's Anglican Church Kogarah  •  " + (CFG?.service || ""), font: FONT, size: 22, color: C.teal })] }));
+  if ((CFG?.standing || []).length) {
+    ch.push(sub("Standing roles"));
+    const w = [3400, 7800, TW - 11200];
+    ch.push(new Table({ width: { size: TW, type: WidthType.DXA }, columnWidths: w, rows: [new TableRow({ tableHeader: true, children: ["Role", "Serving", "Vacant Ministry Positions"].map((h, i) => cell(h, w[i], { fill: C.navy, color: C.white, bold: true, size: 17 })) }),
+      ...CFG.standing.map((r, k) => new TableRow({ cantSplit: true, children: r.map((t, i) => cell(t, w[i], { fill: i === 0 ? C.cream : (k % 2 ? "FFFFFF" : "FBF8F2"), bold: i === 0, color: i === 2 ? C.coral : C.city, size: 16 })) }))] }));
+  }
+  ch.push(new Paragraph({ pageBreakBefore: true, children: [] }));
+  ch.push(sub("Announcements every week"));
+  (CFG?.weeklyAnn || []).forEach((t, i) => ch.push(new Paragraph({ spacing: { after: 50 }, children: [run((i + 1) + ". " + t, { size: 18 })] })));
+  ch.push(sub("Prayer points every week"));
+  (CFG?.weeklyPray || []).forEach(t => ch.push(bullet(t)));
+  const groups = []; DAYS.forEach(d => { const m = d.d.slice(0, 7); if (!groups.length || groups[groups.length - 1].m !== m) groups.push({ m, items: [] }); groups[groups.length - 1].items.push(d); });
+  groups.forEach((g, gi) => {
+    ch.push(new Paragraph({ pageBreakBefore: true, children: [] }));
+    ch.push(heading(`Weekly roster: Part ${gi + 1}, ${MONTHS[+g.m.slice(5) - 1]} ${g.m.slice(0, 4)}`));
+    const labelW = 2100, colW = Math.floor((TW - labelW) / g.items.length), w = [labelW, ...g.items.map(() => colW)];
+    const rows = [new TableRow({ tableHeader: true, children: [cell("Role", labelW, { fill: C.navy, color: C.white, bold: true, size: 17 }), ...g.items.map(d => cell(dmy(d.d), colW, { fill: d.noRoles ? C.gold : isComb(d) ? C.coral : C.teal, color: C.white, bold: true, size: 18, align: AlignmentType.CENTER }))] })];
+    ROWS.forEach((r, k) => rows.push(new TableRow({ cantSplit: true, children: [cell(rowLabel(r), labelW, { fill: C.cream, bold: true, size: 15, color: C.navy }), ...g.items.map(d => { const t = cellVal(d, r.k); return cell(t, colW, { fill: k % 2 ? "FFFFFF" : "FBF8F2", size: 14, color: /TBC|to confirm|to fill/i.test(t) ? C.coral : C.city, bold: r.k === "type" }); })] })));
+    ch.push(new Table({ width: { size: w.reduce((a, b) => a + b, 0), type: WidthType.DXA }, columnWidths: w, rows }));
+  });
+  if ((CFG?.notes || []).length) { ch.push(new Paragraph({ pageBreakBefore: true, children: [] })); ch.push(heading("Notes on this roster")); CFG.notes.forEach(n => ch.push(bullet(n))); }
+  const doc = new Document({ creator: "St Paul's Kogarah", title: CFG?.title || "Roster",
+    styles: { default: { document: { run: { font: FONT, size: 18, color: C.city } } } },
+    numbering: { config: [{ reference: "b", levels: [{ level: 0, format: LevelFormat.BULLET, text: "•", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 360, hanging: 240 } } } }] }] },
+    sections: [{ properties: { page: { size: { width: 11906, height: 16838, orientation: PageOrientation.LANDSCAPE }, margin: { top: 620, bottom: 620, left: 720, right: 720 } } },
+      footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, border: { top: { style: BorderStyle.SINGLE, size: 6, color: C.gold, space: 4 } }, children: [new TextRun({ text: "St Paul's Anglican Church Kogarah  •  Roster  •  Page ", font: FONT, size: 15, color: C.teal }), new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 15, color: C.teal })] })] }) },
+      children: ch }] });
+  download(fileStem() + ".docx", await Packer.toBlob(doc));
+}
+
+/* ---------- import ---------- */
+async function importPeople(obj){
+  const n = Object.values(obj.teams || {}).reduce((a, t) => a + (t || []).length, 0);
+  if (!confirm(`Load ${n} G7 team entries (names and emails) into the shared store? The Term Diary will show them to leaders who have the passcode.`)) return;
+  store.docs.set("people/teams", obj.teams);
+  if (MODE === "local") { toast("Team names are only shared when the roster is opened with the passcode."); return; }
+  try { await rpc("save_planner_doc", { pass: PASS, p_coll: "people", p_id: "teams", p_data: obj.teams, mode: "set" }); toast("G7 team names saved behind the passcode."); }
+  catch (e) { toast("The shared store would not accept the team names (" + String(e.message || "").slice(0, 60) + ")."); }
+}
+async function importSeed(obj){
+  if (obj && obj.kind === "kog-people" && obj.teams) return importPeople(obj);
+  if (!obj || obj.kind !== "kogroster-seed" || !obj.config || !Array.isArray(obj.days)) { toast("That isn't a roster file from Tim."); return; }
+  const overlap = obj.days.filter(d => dayOf(d.d)).length;
+  if (overlap && !confirm(`This file has ${obj.days.length} dates; ${overlap} already exist here and will be replaced. Continue?`)) return;
+  const items = [{ id: "_config", data: obj.config }, ...obj.days.map(d => ({ id: d.d, data: d }))];
+  await saveMany(items); readStore(); FILTER = "all"; render(); toast(`Imported ${obj.days.length} dates.`);
+}
+
+/* ---------- wire up ---------- */
+function fillRangeSelects(){
+  const opts = DAYS.filter(d => !d.noRoles).map(d => `<option value="${d.d}">${dayName(d.d)} ${dmy(d.d)}/${d.d.slice(0, 4)}</option>`).join("");
+  $("#tFrom").innerHTML = opts; $("#tTo").innerHTML = opts;
+  const vd = visibleDays().filter(d => !d.noRoles);
+  if (vd.length) { $("#tFrom").value = vd[0].d; $("#tTo").value = vd[vd.length - 1].d; }
+  const prev = () => { const f = $("#tFrom").value, t = $("#tTo").value, mode = document.querySelector("input[name=tMode]:checked").value;
+    const n = DAYS.filter(d => d.d >= f && d.d <= t && !d.noRoles).length;
+    $("#tPreview").textContent = `${n} services. ${mode === "blanks" ? "Only empty cells will be filled." : "Cells without a 🔒 may change."} Rules: ` + (CFG.rules?.fixed || []).map(x => x.note || (x.person + " on " + x.role)).concat((CFG.rules?.away || []).map(a => a.person + " away " + auDate(a.from) + " to " + auDate(a.to))).join("; ") + "."; };
+  ["#tFrom", "#tTo"].forEach(s => $(s).onchange = prev); document.querySelectorAll("input[name=tMode]").forEach(r => r.onchange = prev); prev();
+}
+function openPeople(){
+  const roles = CFG.roles || [];
+  $("#pRoles").innerHTML = roles.map(r => `<div><label>${esc(r.label)} <span class="small">(${r.k})</span></label><textarea data-role="${r.k}" ${r.pool ? "" : "disabled"} title="${r.pool ? "" : "Set as a fixed value"}">${esc((r.pool || [r.fixed || (r.alternate || []).join(" / ")]).join("\n"))}</textarea></div>`).join("");
+  $("#pAway").value = (CFG.rules?.away || []).map(a => [a.person, a.from, a.to, a.note || ""].join(" | ")).join("\n");
+  $("#pFixed").value = (CFG.rules?.fixed || []).map(f => [f.role, f.person, f.week, f.note || ""].join(" | ")).join("\n");
+  $("#pKeys").textContent = roles.map(r => r.k).join(", ");
+  $("#dPeople").showModal();
+}
+async function savePeople(){
+  document.querySelectorAll("#pRoles textarea[data-role]:not([disabled])").forEach(t => { const r = roleCfg(t.dataset.role); r.pool = t.value.split("\n").map(s => s.trim()).filter(Boolean); });
+  CFG.rules = CFG.rules || {};
+  CFG.rules.away = $("#pAway").value.split("\n").map(l => l.split("|").map(s => s.trim())).filter(a => a[0] && /^\d{4}-\d\d-\d\d$/.test(a[1]) && /^\d{4}-\d\d-\d\d$/.test(a[2])).map(a => ({ person: a[0], from: a[1], to: a[2], note: a[3] || "" }));
+  CFG.rules.fixed = $("#pFixed").value.split("\n").map(l => l.split("|").map(s => s.trim())).filter(a => a[0] && a[1] && /^[1-5]$/.test(a[2])).map(a => ({ role: a[0], person: a[1], week: +a[2], note: a[3] || "" }));
+  await saveDoc("_config", CFG); $("#dPeople").close(); render(); toast("People and rules saved.");
+}
+let EDIT_DAY = null;
+function openDay(d){
+  EDIT_DAY = d ? dayOf(d) : null; const x = EDIT_DAY || {};
+  $("#dayTitle").textContent = EDIT_DAY ? dayName(x.d) + " " + dmy(x.d) : "Add a date";
+  $("#dyDate").value = x.d || ""; $("#dyDate").disabled = !!EDIT_DAY;
+  $("#dyType").value = x.type || "Combined"; $("#dyCal").value = x.cal || ""; $("#dyPassage").value = x.passage || ""; $("#dyPreacher").value = x.preacher || ""; $("#dyLang").value = x.lang ?? "Eng";
+  $("#dyFest").checked = !!x.festival; $("#dyOut").checked = !!x.outreach; $("#dyNone").checked = !!x.noRoles;
+  $("#dyDel").classList.toggle("hidden", !EDIT_DAY);
+  $("#dDay").showModal();
+}
+async function saveDay(){
+  const d = EDIT_DAY ? EDIT_DAY.d : $("#dyDate").value;
+  if (!/^\d{4}-\d\d-\d\d$/.test(d)) return toast("Choose a date.");
+  if (!EDIT_DAY && dayOf(d)) return toast("That date is already on the roster.");
+  const day = EDIT_DAY || { d, cells: {}, locked: {}, ann: "", pray: [], g7: null };
+  Object.assign(day, { type: $("#dyType").value.trim(), cal: $("#dyCal").value.trim(), passage: $("#dyPassage").value.trim(), preacher: $("#dyPreacher").value.trim(), lang: $("#dyLang").value, festival: $("#dyFest").checked, outreach: $("#dyOut").checked, noRoles: $("#dyNone").checked });
+  if (!EDIT_DAY) { const p = plannerDay(d); if (p) { day.cal = day.cal || p.lit || ""; day.passage = day.passage || p.passage || ""; day.preacher = day.preacher || p.preacher || ""; } }
+  if (!CFG) { CFG = { title: "Roster", service: "9:15am English / Chinese", roles: [], rules: { fixed: [], away: [] }, standing: [], weeklyAnn: [], weeklyPray: [], notes: [] }; await saveDoc("_config", CFG); }
+  await saveDoc(d, day); readStore(); $("#dDay").close(); render();
+}
+function bind(){
+  $("#gateBtn").onclick = () => gateUnlock($("#gatePw").value, $("#gateRemember").checked);
+  $("#gatePw").onkeydown = e => { if (e.key === "Enter") $("#gateBtn").click(); };
+  $("#gateLocal").onclick = useLocal;
+  $("#bLock").onclick = lockNow;
+  $("#fMonth").onchange = e => { FILTER = e.target.value; render(); };
+  $("#grid").addEventListener("focusout", e => { if (e.target.matches && e.target.matches(".cv[contenteditable=true]")) commitCell(e.target.closest("td")); });
+  $("#grid").addEventListener("click", async e => {
+    const lb = e.target.closest(".lockbtn");
+    if (lb) { e.preventDefault(); const td = lb.closest("td"), day = dayOf(td.dataset.d), k = td.dataset.k; day.locked = day.locked || {}; day.locked[k] = !day.locked[k]; await saveDoc(day.d, day); render(); toast(day.locked[k] ? "Locked: Tim will leave it." : "Unlocked: Tim may change it."); return; }
+    const th = e.target.closest("th[data-day]"); if (th) openDay(th.dataset.day);
+  });
+  $("#grid").addEventListener("keydown", e => { if (e.key === "Escape") { e.target.blur(); } });
+  ["#wAnn:weeklyAnn", "#wPray:weeklyPray", "#notes:notes"].forEach(p => { const [s, f] = p.split(":"); $(s).addEventListener("focusout", () => commitList(s, f)); });
+  $("#std").addEventListener("focusout", async e => { const td = e.target.closest("td[data-std]"); if (!td || !CFG) return; CFG.standing[+td.dataset.std][+td.dataset.c] = td.innerText.trim(); await saveDoc("_config", CFG); });
+  $("#warns").addEventListener("click", async e => {
+    const W = renderWarnings.list || [];
+    const fb = e.target.closest("[data-fix]"); if (fb) { const w = W[+fb.dataset.fix], day = dayOf(w.d); Object.assign(day, w.fix); await saveDoc(day.d, day); render(); toast("Updated from the planner."); }
+    const ab = e.target.closest("[data-add]"); if (ab) { const w = W[+ab.dataset.add]; EDIT_DAY = null; openDay(null); $("#dyDate").value = w.d; $("#dyCal").value = w.add.lit || ""; $("#dyPassage").value = w.add.passage || ""; $("#dyPreacher").value = w.add.preacher || ""; }
+  });
+  $("#bTim").onclick = () => { if (!CFG || !DAYS.length) return toast("Import or add a roster first."); fillRangeSelects(); $("#dTim").showModal(); };
+  $("#tCancel").onclick = () => $("#dTim").close();
+  $("#tGo").onclick = async () => {
+    const mode = document.querySelector("input[name=tMode]:checked").value;
+    const { targets, filled } = timAssign($("#tFrom").value, $("#tTo").value, mode);
+    $("#dTim").close();
+    await saveMany(targets.map(d => ({ id: d.d, data: d }))); render();
+    toast(filled ? `Tim filled ${filled} cell${filled === 1 ? "" : "s"}. They're in orange; check them, then lock any you want kept.` : "Nothing to fill: every cell already has someone.");
+  };
+  $("#bPeople").onclick = () => CFG ? openPeople() : toast("Import or add a roster first.");
+  $("#pCancel").onclick = () => $("#dPeople").close(); $("#pSave").onclick = savePeople;
+  $("#bAddDate").onclick = () => openDay(null);
+  $("#dyCancel").onclick = () => $("#dDay").close(); $("#dySave").onclick = saveDay;
+  $("#dyDel").onclick = async () => { if (EDIT_DAY && confirm("Remove " + dmy(EDIT_DAY.d) + " from the roster?")) { await deleteDoc(EDIT_DAY.d); readStore(); $("#dDay").close(); render(); } };
+  $("#bCsv").onclick = () => DAYS.length ? exportCSV() : toast("Nothing to export yet.");
+  $("#bXlsx").onclick = () => DAYS.length ? exportXLSX() : toast("Nothing to export yet.");
+  $("#bDocx").onclick = () => DAYS.length ? exportDOCX() : toast("Nothing to export yet.");
+  $("#bSent").onclick = async () => { if (!DAYS.length) return; if (!confirm("Record this roster as what the Administrator now has? The next Excel export will list only changes from here.")) return; await saveDoc("_sent", { at: new Date().toISOString(), rows: flatRows() }); toast("Marked as sent."); };
+  $("#bImport").onclick = () => $("#fileIn").click();
+  $("#fileIn").onchange = async e => { const f = e.target.files[0]; if (!f) return; try { await importSeed(JSON.parse(await f.text())); } catch (err) { toast("Couldn't read that file."); } e.target.value = ""; };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); });
+}
+async function start(){
+  readStore(); render(); pill(MODE === "shared" ? "Shared · everyone sees your edits" : "This device only");
+  await loadPG(); render();
+  if (MODE === "shared") setInterval(pull, 60000);
+}
+(async function boot(){
+  bind();
+  await findSB();
+  const saved = getSavedPass();
+  if (!SB) { $("#gateErr").textContent = location.protocol === "file:" ? "Opened as a file: use it on this device only, or open it from the G7 site." : ""; return; }
+  if (saved) { await gateUnlock(saved, !!localStorage.getItem("g7_pass")); }
+})();
+</script>
+</body>
+</html>
