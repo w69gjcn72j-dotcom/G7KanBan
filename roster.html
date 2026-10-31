@@ -152,6 +152,7 @@ dialog::backdrop{background:rgba(14,26,43,.55)}
     <button class="btn" id="bPeople" type="button">People &amp; rules</button>
     <button class="btn" id="bCsv" type="button">CSV</button>
     <button class="btn" id="bXlsx" type="button">Excel</button>
+    <button class="btn" id="bB44" type="button" title="Excel file laid out for the church management system (spck1869.app). Exports the dates shown.">Base44</button>
     <button class="btn" id="bDocx" type="button">Word</button>
     <button class="btn" id="bSent" type="button" title="Records what the Administrator has, so the next export lists only the changes">Mark as sent</button>
     <button class="btn" id="bImport" type="button">Import</button>
@@ -252,7 +253,7 @@ dialog::backdrop{background:rgba(14,26,43,.55)}
      roster/_sent     what the Administrator last received (for "What changed")
    No member names are written into this page; they come from the store.
    ===================================================================== */
-const PAGE_VERSION = "1.1 (27 Oct 2026)";
+const PAGE_VERSION = "1.2 (31 Oct 2026)";
 let SB = null, PASS = null, MODE = "none";             // MODE: shared | local
 const LOCAL_KEY = "kogroster.local.v1";
 const store = { docs: new Map(), loaded: false, stamp: null };
@@ -700,6 +701,82 @@ async function exportXLSX(){
   XLSX.utils.book_append_sheet(wb, wg, "Grid");
   XLSX.writeFile(wb, fileStem() + ".xlsx");
 }
+/* ---------- Base44 export (church management system at spck1869.app) ----------
+   Lays the roster out exactly as Base44's own "roster-new" export: sheet "Roster",
+   one row per role, one column per date (YYYY-MM-DD). Names are rewritten to the
+   spellings Base44 uses, and Chinese notices are filled from a phrase list; both
+   lists live in the shared store (roster/_config → base44), never in this page. */
+const B44_ROWS = ["Label","Chinese Church Notice","English Church Notice","Chinese Prayer Items","English Prayer Items","English Scripture","Chinese Scripture","English Songs","Chinese Songs","Church Notice","Prayer Points","Preacher En","Preacher Cn","Translator","Host En","Host Cn","Musicians En","New role","Bible Reader En","Bible Reader Cn","Prayer En","Prayer Cn","Welcome En","Welcome Cn / Collection / Count","Meet and Greet","Memory Verse / drama","Interview (after sermon)","AV En","SPCC Hall AV Setup","SPCC Hall Chairs Put Back","Sunday Morning Tea","SPCC Hall Table Chair Setup","Sunday Cn New Friends Lead","Sunday En New Friends Lead","Sunday Cn Sisters Bible Study","Sunday En Sisters Bible Study","KOG Primary","KOG Mini","KOG Youth","G7 Glorify Members","G7 Giftedness Members","G7 Governance Members","G7 Gregarious Members","Go Team Members","Glue Team Members","Grow Team Members"];
+// Base44 candidate row -> standing-roles row in this roster
+const B44_CAND = [["Church Notice"],["Prayer Points"],["Songs En"],["Songs Cn"],["Bible En"],["Bible Cn"],["Preacher En","Preach En"],["Preacher Cn","Preach Cn"],["Translator","Translator"],["Host En","Host En"],["Host Cn","Host Cn"],["Musicians En","Musicians En"],["New role"],["Musicians Cn","Musicians Cn"],["Bible Reader En","Bible Reading En"],["Bible Reader Cn","Bible Reader Cn"],["Prayer En","Prayer En"],["Prayer Cn","Prayer Cn"],["Welcome En"],["Welcome Cn / Collection / Count","Welcome / Collection / Count"],["Meet and Greet"],["Memory Verse / drama"],["Interview (after sermon)"],["AV En","AV En"],["SPCC Hall AV Setup","SPCC Hall AV Setup"],["SPCC Hall Chairs Put Back","SPCC Hall Chairs Put Back"],["Sunday Morning Tea","Sunday Morning Tea"],["SPCC Hall Table Chair Setup","SPCC Hall Table Chair Setup"],["Sunday Cn New Friends Lead","Sunday Cn New Friends Lead"],["Sunday En New Friends Lead","Sunday En New Friends Lead"],["Sunday Cn Sisters Bible Study","Sunday Cn Sisters Bible Study"],["Sunday En Sisters Bible Study","Sunday En Sisters Bible Study"],["KOG Primary","KOG Primary"],["KOG Mini","KOG Mini"],["KOG Youth","KOG Youth"],["G7 Glorify Members","Glorify Members"],["G7 Giftedness Members","Giftedness Members"],["G7 Governance Members","Governance Team Members"],["G7 Gregarious Members","Gregarious Team Members"],["Go Team Members","Go Team Members"],["Glue Team Members","Glue Team Members"],["Grow Team Members","Grow Team Members"]];
+const B44_BOOKS = { "Luke":"路加福音", "John":"约翰福音", "Mark":"马可福音", "Matthew":"马太福音", "Acts":"使徒行传", "Romans":"罗马书", "Galatians":"加拉太书", "Ephesians":"以弗所书", "Philippians":"腓立比书", "Colossians":"歌罗西书", "Hebrews":"希伯来书", "James":"雅各书", "1 Peter":"彼得前书", "2 Peter":"彼得后书", "Revelation":"启示录", "Genesis":"创世记", "Exodus":"出埃及记", "Psalm":"诗篇", "Psalms":"诗篇", "Isaiah":"以赛亚书", "Philemon":"腓利门书", "Ruth":"路得记", "Jonah":"约拿书", "Daniel":"但以理书" };
+function b44Cfg(){ return CFG?.base44 || {}; }
+function b44Name(n){ n = String(n || "").trim(); return (b44Cfg().names || {})[n] || n; }
+function b44Text(v){ v = String(v ?? "").trim(); return !v || /^\(combined\)$|^TBC\b|^music team to fill$|to confirm/i.test(v) ? "" : v; }
+function b44People(v){
+  if (!b44Text(v)) return "";
+  const N = b44Cfg().names || {};
+  return String(v).split(/\s*[,;\n]\s*/).filter(Boolean).map(p => { const a = p.match(/^(.*?) and (.*)$/); return a && N[a[1].trim()] ? b44Name(a[1]) + " and " + a[2] : b44Name(p); }).join(", ");
+}
+function b44Zh(block, miss){
+  const Z = b44Cfg().zh || {}, T = b44Cfg().teams || {};
+  return String(block || "").split("\n").map(s => s.trim()).filter(Boolean).map(line => {
+    const t = line.match(/^5\. Thank God for the (\w+) team/);
+    if (t) { if (T[t[1]]) return "5. " + T[t[1]]; miss.push(line); return ""; }
+    const m = line.match(/^(\d\. |• )?(.*)$/), zh = Z[m[2]] || Z[m[2].replace(/: /, " — ")];
+    if (zh) return (m[1] || "") + zh;
+    miss.push(m[2]); return "";
+  }).filter(Boolean).join("\n");
+}
+function b44Standing(label){ const r = (CFG?.standing || []).find(x => String(x[0] || "").trim().toLowerCase() === label.toLowerCase()); return r ? b44People(r[1]) : ""; }
+function b44Scripture(p){ p = b44Text(p); const m = p.match(/^([1-3] \w+|\w+) (.+)$/); return m ? (B44_BOOKS[m[1]] || m[1]) + " " + m[2] : p; }
+function b44Col(day, miss){
+  const c = k => b44People(day.cells?.[k]);
+  const ann = cellVal(day, "ann"), pray = cellVal(day, "pray"), pr = day.preacher ? b44Name(day.preacher) : "";
+  return {
+    "Label": b44Text(day.type),
+    "Chinese Church Notice": b44Zh(ann, miss), "English Church Notice": ann,
+    "Chinese Prayer Items": b44Zh(pray, miss), "English Prayer Items": pray,
+    "English Scripture": b44Text(day.passage), "Chinese Scripture": b44Scripture(day.passage),
+    "English Songs": b44Text(cellVal(day, "songsEn")), "Chinese Songs": b44Text(cellVal(day, "songsCn")),
+    "Church Notice": ann, "Prayer Points": pray,
+    "Preacher En": day.lang === "Chn" ? "" : pr, "Preacher Cn": day.lang === "Chn" ? pr : "",
+    "Translator": c("trans"), "Host En": c("hostEn"), "Host Cn": c("hostCn"), "Musicians En": c("musEn"),
+    "Bible Reader En": c("bibEn"), "Bible Reader Cn": c("bibCn"), "Prayer En": c("prEn"), "Prayer Cn": c("prCn"),
+    "Welcome Cn / Collection / Count": c("welcome"), "Meet and Greet": c("hostEn"),
+    "Memory Verse / drama": c("memory"), "Interview (after sermon)": c("interview"),
+    "AV En": c("av"), "SPCC Hall AV Setup": c("avChn"), "SPCC Hall Chairs Put Back": c("chairs"), "Sunday Morning Tea": c("tea"),
+    "SPCC Hall Table Chair Setup": b44Standing("SPCC Hall Table Chair Setup"),
+    "Sunday Cn New Friends Lead": b44Standing("Sunday Cn New Friends Lead"),
+    "Sunday En New Friends Lead": b44Standing("Sunday En New Friends Lead"),
+    "Sunday Cn Sisters Bible Study": b44Standing("Sunday Cn Sisters Bible Study"),
+  };
+}
+async function exportBase44(){
+  const days = visibleDays().filter(d => !d.noRoles);
+  if (!days.length) return toast("Nothing to export for these dates.");
+  try { await loadScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js", "XLSX"); } catch (e) { return toast("Couldn't load the Excel tool. Check the connection."); }
+  const miss = [], cols = days.map(d => b44Col(d, miss));
+  const grid = [["Role", ...days.map(d => d.d)], ...B44_ROWS.map(r => [r, ...cols.map(c => c[r] || null)])];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(grid); ws["!cols"] = [{ wch: 30 }, ...days.map(() => ({ wch: 34 }))];
+  XLSX.utils.book_append_sheet(wb, ws, "Roster");
+  const cand = [["Role", "Candidates", "Notes"], ...B44_CAND.map(([b, s]) => { const r = s && (CFG?.standing || []).find(x => String(x[0] || "").trim().toLowerCase() === s.toLowerCase()); return [b, r ? b44People(r[1]) || null : null, r ? (String(r[2] || "").trim() || null) : null]; })];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cand), "Candidates");
+  const a = days[0].d, b = days[days.length - 1].d;
+  XLSX.writeFile(wb, "Base44 roster import " + a + (a === b ? "" : " to " + b) + ".xlsx");
+  const m = [...new Set(miss)];
+  if (m.length) status(`Base44 file saved. ${m.length} notice or prayer line${m.length === 1 ? " has" : "s have"} no Chinese yet, so ${m.length === 1 ? "it was" : "they were"} left out of the Chinese rows: ` + m.slice(0, 3).map(x => "“" + x.slice(0, 60) + "”").join("; ") + (m.length > 3 ? " …" : "") + " Ask Tim for an updated Base44 list, then Import it.", "warn");
+  else toast("Base44 file saved: " + days.length + " date" + (days.length === 1 ? "" : "s") + ".");
+}
+async function importBase44(obj){
+  if (!CFG) return toast("Import or add a roster first.");
+  const n = Object.keys(obj.names || {}).length, z = Object.keys(obj.zh || {}).length;
+  if (!confirm(`Load the Base44 list (${n} name spellings, ${z} Chinese phrases) into the roster settings? It replaces the previous list.`)) return;
+  CFG.base44 = { names: obj.names || {}, teams: obj.teams || {}, zh: obj.zh || {}, at: new Date().toISOString() };
+  if (await saveDoc("_config", CFG)) status(`Base44 list saved: ${n} name spellings and ${z} Chinese phrases.`, "ok");
+}
+
 async function exportDOCX(){
   try { await loadScript("https://cdn.jsdelivr.net/npm/docx@9.8.1/dist/index.iife.js", "docx"); } catch (e) { return toast("Couldn't load the Word tool. Check the connection."); }
   const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType, AlignmentType, PageOrientation, BorderStyle, Footer, PageNumber, LevelFormat } = docx;
@@ -764,6 +841,7 @@ async function importPeople(obj){
 }
 async function importSeed(obj){
   if (obj && obj.kind === "kog-people" && obj.teams) return importPeople(obj);
+  if (obj && obj.kind === "kog-base44") return importBase44(obj);
   if (!obj || obj.kind !== "kogroster-seed" || !obj.config || !Array.isArray(obj.days)) { toast("That isn't a roster file from Tim."); return; }
   const overlap = obj.days.filter(d => dayOf(d.d)).length;
   if (overlap && !confirm(`This file has ${obj.days.length} dates; ${overlap} already exist here and will be replaced. Continue?`)) return;
@@ -859,6 +937,7 @@ function bind(){
   $("#dyDel").onclick = async () => { if (EDIT_DAY && confirm("Remove " + dmy(EDIT_DAY.d) + " from the roster?")) { await deleteDoc(EDIT_DAY.d); readStore(); $("#dDay").close(); render(); } };
   $("#bCsv").onclick = () => DAYS.length ? exportCSV() : toast("Nothing to export yet.");
   $("#bXlsx").onclick = () => DAYS.length ? exportXLSX() : toast("Nothing to export yet.");
+  $("#bB44").onclick = () => DAYS.length ? exportBase44() : toast("Nothing to export yet.");
   $("#bDocx").onclick = () => DAYS.length ? exportDOCX() : toast("Nothing to export yet.");
   $("#bSent").onclick = async () => { if (!DAYS.length) return; if (!confirm("Record this roster as what the Administrator now has? The next Excel export will list only changes from here.")) return; await saveDoc("_sent", { at: new Date().toISOString(), rows: flatRows() }); toast("Marked as sent."); };
   $("#bImport").onclick = () => $("#fileIn").click();
