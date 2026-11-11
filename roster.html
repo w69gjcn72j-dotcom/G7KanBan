@@ -12,6 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="Roster">
 <meta name="theme-color" content="#0E1A2B">
 <meta name="robots" content="noindex, nofollow">
+<script src="https://glorify.kogarah.church/shared/kog-shell.js" data-app="roster" data-z="101"></script>
+<script src="g7-i18n.js"></script>
+<script src="zh/roster.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+SC:wght@400;600&family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -110,7 +113,8 @@ dialog::backdrop{background:rgba(14,26,43,.55)}
 .foot{margin-top:40px;border-top:1px solid var(--line);padding-top:12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--night);color:#F5EAD4;padding:10px 16px;border-radius:8px;font-size:13px;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
-@media print{.nav,.bar,.noprint,.gate{display:none!important}.gridwrap{max-height:none;overflow:visible}}
+html[lang^="zh"] .zh-dup{display:none}
+@media print{#kog-shell,.nav,.bar,.noprint,.gate{display:none!important}.gridwrap{max-height:none;overflow:visible}}
 </style>
 </head>
 <body>
@@ -119,7 +123,7 @@ dialog::backdrop{background:rgba(14,26,43,.55)}
   <div class="gate-card">
     <div class="eyebrow">St Paul's Anglican Church Kogarah</div>
     <h2>Kogarah Roster</h2>
-    <p>For G7 leaders at St Paul's Kogarah. Enter the G7 passcode to open the roster.<br><span class="small">供高嘉華聖保羅堂 G7 領袖使用。請輸入 G7 密碼。</span></p>
+    <p>For G7 leaders at St Paul's Kogarah. Enter the G7 passcode to open the roster.<span class="small zh-dup"><br>供高嘉华圣保罗堂 G7 领袖使用。请输入 G7 通行码。</span></p>
     <input type="password" id="gatePw" placeholder="Passcode" autocomplete="current-password" aria-label="Passcode">
     <label class="small"><input type="checkbox" id="gateRemember"> Remember on this device</label>
     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">

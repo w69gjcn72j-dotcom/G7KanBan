@@ -4,6 +4,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>G7 — Kanban Board — St Paul's Kogarah</title>
 <meta name="robots" content="noindex, nofollow">
+<script src="https://glorify.kogarah.church/shared/kog-shell.js" data-app="kanban" data-z="2001"></script>
+<script src="g7-i18n.js"></script>
+<script src="zh/kanban.js"></script>
 <meta name="theme-color" content="#D9551A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -192,7 +195,7 @@ header .motto{font-size:.68rem;opacity:.82;margin-top:4px;line-height:1.4;}
 footer{text-align:center;font-size:.67rem;color:var(--muted);padding:6px;border-top:1px solid var(--border);font-style:italic;flex-shrink:0;}
 
 /* ── MODAL ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;align-items:center;justify-content:center;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2002;align-items:center;justify-content:center;}
 .overlay.show{display:flex;}
 .modal{background:white;border-radius:12px;padding:20px;width:370px;max-width:95vw;box-shadow:0 12px 40px rgba(0,0,0,.25);border-top:4px solid var(--orange);}
 .modal h3{font-size:.95rem;color:var(--orange);margin-bottom:14px;}
@@ -252,7 +255,7 @@ footer{text-align:center;font-size:.67rem;color:var(--muted);padding:6px;border-
 #print-view .badge{font-size:6pt;font-weight:bold;padding:1px 6px;border-radius:5px;display:inline-block;white-space:nowrap;}
 
 /* ── PDF PREVIEW OVERLAY (screen only) ── */
-#preview-overlay{display:none;position:fixed;inset:0;z-index:1000;flex-direction:column;}
+#preview-overlay{display:none;position:fixed;inset:0;z-index:2003;flex-direction:column;}
 #preview-overlay.show{display:flex;}
 .pv-bar{background:#2C1508;color:#fff;padding:9px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap;}
 .pv-bar-title{font-size:.85rem;font-weight:bold;}
@@ -304,8 +307,8 @@ footer{text-align:center;font-size:.67rem;color:var(--muted);padding:6px;border-
 .sync-ok{background:#E8F6EC;color:#1E8449;}
 .sync-busy{background:var(--orange-pale);color:var(--orange);}
 .sync-off{background:#FBEAEA;color:#C0392B;}
-body.locked > *:not(#g7gate){display:none !important;}
-@media print{#g7gate{display:none !important;}}
+body.locked > *:not(#g7gate):not(#kog-shell){display:none !important;}
+@media print{#g7gate,#kog-shell{display:none !important;}}
 
 /* ── TOUCH DEVICES ──
    Hover never fires on a touchscreen, so the per-card action buttons would
@@ -800,8 +803,8 @@ function cardHTML(c) {
   const tc = TEAM_CONFIG[c.team] || { icon:'⭕', cls:'badge-go' };
   const gTag  = `<span class="badge badge-tag">#${String(c.team||'').toLowerCase()}</span>`;
   const kog   = c.kog   ? `<span class="badge badge-kog">⭕ ${kogShort(c.kog)}</span>` : '';
-  const owner = c.owner ? `<div class="card-owner">👤 <b>${esc(c.owner)}</b></div>` : '';
-  const notes = c.notes ? `<div class="card-notes">${esc(c.notes)}</div>` : '';
+  const owner = c.owner ? `<div class="card-owner">👤 <b data-g7-keep>${esc(c.owner)}</b></div>` : '';
+  const notes = c.notes ? `<div class="card-notes" data-g7-keep>${esc(c.notes)}</div>` : '';
   const dueChip = c.due ? `<div class="card-due${dueDays(c.due) < 0 ? ' overdue' : ''}">📅 ${dueLabelEn(c.due)}</div>` : '';
   const archBtn = c.col === 'done'
     ? `<button class="cab" data-archive="${c.id}" title="Move to Archive">📦</button>`
@@ -821,7 +824,7 @@ function cardHTML(c) {
       <button class="cab" data-del="${c.id}" title="Delete">✕</button>
       ${archBtn}
     </div>
-    <div class="card-title">${esc(c.title)}</div>
+    <div class="card-title" data-g7-keep>${esc(c.title)}</div>
     <div class="card-badges"><span class="badge ${tc.cls}">${tc.icon} ${esc(c.team)}</span>${gTag}${kog}</div>
     ${owner}${dueChip}${notes}
   </div>`;

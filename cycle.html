@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The KOGCycle — G7 Projects — St Paul's Kogarah</title>
 <meta name="robots" content="noindex, nofollow">
+<script src="https://glorify.kogarah.church/shared/kog-shell.js" data-app="cycle" data-z="2001"></script>
+<script src="g7-i18n.js"></script>
+<script src="zh/cycle.js"></script>
 <meta name="theme-color" content="#123A63">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -118,7 +121,7 @@ body{font-family:Georgia,'Times New Roman',serif;background:var(--cream);color:v
      font-family:Georgia,serif;font-size:.88rem;font-weight:bold;cursor:pointer;}
 .gate-card button:hover{background:var(--navy-soft);}
 .gate-err{color:#C0392B;font-size:.75rem;margin-top:10px;min-height:1.1em;}
-body.locked > *:not(#g7gate){display:none !important;}
+body.locked > *:not(#g7gate):not(#kog-shell){display:none !important;}
 
 .topbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:-6px;}
 .tb{padding:4px 12px;border-radius:8px;border:1.5px solid var(--gold-soft);background:#fff;color:var(--navy);
@@ -131,7 +134,7 @@ body.locked > *:not(#g7gate){display:none !important;}
   .hub-cross{width:42px;height:42px;font-size:22px;}
 }
 @media print{
-  body{padding:0;background:#fff;} .topbar,#g7gate{display:none !important;}
+  body{padding:0;background:#fff;} .topbar,#g7gate,#kog-shell{display:none !important;}
   .frame{border:none;box-shadow:none;max-width:none;}
   .card,.side{break-inside:avoid;}
   @page{size:A3 portrait;margin:10mm;}
@@ -313,7 +316,7 @@ function itemHTML(c, done) {
   const col = COLS[c.col] || { n:c.col, c:"#888" };
   const teamC = TEAM[c.team] || "#888";
   return `<div class="item${done ? " done" : ""}" style="border-left-color:${teamC}">
-    <div class="item-t">${esc(c.title)}</div>
+    <div class="item-t" data-g7-keep>${esc(c.title)}</div>
     <div class="item-m">
       <span class="chip" style="background:${col.c}22;color:${col.c}">${col.n}</span>
       <span class="tag">#${esc(String(c.team||"").toLowerCase())}</span>
